@@ -342,6 +342,12 @@
   <button class="tab" onclick="showTab('apps')" data-tab="apps">
     <span class="icon">📲</span>Apps
   </button>
+  <button class="tab" onclick="showTab('meteo')" data-tab="meteo">
+    <span class="icon">🌡️</span>Météo
+  </button>
+  <button class="tab" onclick="showTab('nav')" data-tab="nav">
+    <span class="icon">🗺️</span>Nav
+  </button>
   <button class="tab" onclick="showTab('utils')" data-tab="utils">
     <span class="icon">🗾</span>Pratique
   </button>
@@ -542,6 +548,103 @@
   </div>
 </div>
 
+<!-- ═══════ PAGE MÉTÉO ═══════ -->
+<div class="page" id="page-meteo">
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">🌡️ Météo en direct · Juillet au Japon</div>
+    <div id="meteo-cities"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">☀️ Indice chaleur · Juillet</div>
+    <div id="heat-index-display"></div>
+    <div style="margin-top:14px;">
+      <div style="font-size:12px;color:var(--ink-3);margin-bottom:8px;">Entrez la température actuelle :</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input type="number" id="heat-temp" value="35" min="20" max="45"
+          style="width:70px;font-size:22px;font-weight:700;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--ink);"
+          oninput="calcHeatIndex()">
+        <span style="font-size:16px;color:var(--ink-2);">°C</span>
+        <input type="number" id="heat-hum" value="80" min="40" max="100"
+          style="width:70px;font-size:22px;font-weight:700;border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--ink);"
+          oninput="calcHeatIndex()">
+        <span style="font-size:16px;color:var(--ink-2);">% hum.</span>
+      </div>
+    </div>
+    <div id="heat-result" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">📅 Juillet au Japon — à savoir</div>
+    <div style="font-size:13px;color:var(--ink-2);line-height:1.8;">
+      <div style="padding:6px 0;border-bottom:1px solid var(--border);">🌧️ <strong>Fin tsuyu</strong> (saison pluies) vers mi-juillet</div>
+      <div style="padding:6px 0;border-bottom:1px solid var(--border);">🌡️ <strong>33–38°C</strong> avec forte humidité (feels like 40°C+)</div>
+      <div style="padding:6px 0;border-bottom:1px solid var(--border);">🌀 <strong>Typhons possibles</strong> — surveiller Japan Meteorological Agency</div>
+      <div style="padding:6px 0;border-bottom:1px solid var(--border);">🥤 <strong>Hydrater toutes les heures</strong> — konbinis partout</div>
+      <div style="padding:6px 0;border-bottom:1px solid var(--border);">🧴 <strong>SPF 50+ indispensable</strong> — pour Patrick et Inoue</div>
+      <div style="padding:6px 0;">❄️ <strong>Climatisation partout</strong> — prévoir un gilet léger pour l'intérieur</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE NAVIGATION ═══════ -->
+<div class="page" id="page-nav">
+  <div style="margin:12px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Votre itinéraire · 10–28 juillet</div>
+
+  <div id="trip-timeline"></div>
+
+  <div style="margin:14px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Cartes & Navigation</div>
+  <div class="app-grid">
+    <div class="app-tile" onclick="openNavApp('gmaps-tokyo')">
+      <span class="app-icon">🗼</span>
+      <span class="app-name">Tokyo</span>
+      <span class="app-desc">Ouvrir dans Google Maps</span>
+      <span class="app-badge badge-ext">Maps</span>
+    </div>
+    <div class="app-tile" onclick="openNavApp('gmaps-kyoto')">
+      <span class="app-icon">⛩️</span>
+      <span class="app-name">Kyoto</span>
+      <span class="app-desc">Ouvrir dans Google Maps</span>
+      <span class="app-badge badge-ext">Maps</span>
+    </div>
+    <div class="app-tile" onclick="openNavApp('gmaps-takanawa')">
+      <span class="app-icon">🏯</span>
+      <span class="app-name">Takanawa</span>
+      <span class="app-desc">Quartier de Tokyo sud</span>
+      <span class="app-badge badge-ext">Maps</span>
+    </div>
+    <div class="app-tile" onclick="openNavApp('hyperdia')">
+      <span class="app-icon">🚄</span>
+      <span class="app-name">Trains JP</span>
+      <span class="app-desc">Horaires & itinéraires</span>
+      <span class="app-badge badge-jp">Hyperdia</span>
+    </div>
+    <div class="app-tile" onclick="openNavApp('navitime')">
+      <span class="app-icon">🚇</span>
+      <span class="app-name">Métro</span>
+      <span class="app-desc">Métros Tokyo & Kyoto</span>
+      <span class="app-badge badge-jp">Navitime</span>
+    </div>
+    <div class="app-tile" onclick="openNavApp('jma')">
+      <span class="app-icon">🌀</span>
+      <span class="app-name">Typhons</span>
+      <span class="app-desc">Japan Meteorological Agency</span>
+      <span class="app-badge badge-jp">JMA</span>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px;">
+    <div class="card-label">🚇 Transports essentiels</div>
+    <div style="font-size:13px;color:var(--ink-2);line-height:1.9;">
+      <div style="padding:5px 0;border-bottom:1px solid var(--border);">🚄 <strong>Tokyo→Kyoto Shinkansen</strong> · Nozomi 2h15 · ~13 500¥</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border);">🚇 <strong>Tokyo</strong> · Suica sur toutes les lignes · JR + Tokyo Metro</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border);">🚌 <strong>Kyoto</strong> · Bus 1 jour = 700¥ · IC Card acceptée</div>
+      <div style="padding:5px 0;border-bottom:1px solid var(--border);">🛬 <strong>Narita→Tokyo</strong> · Narita Express ~3 000¥ · 60min</div>
+      <div style="padding:5px 0;">🏨 <strong>Takanawa</strong> · Quartier Minato, ligne Keikyu ou JR Yamanote</div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /pages -->
 </div><!-- /main -->
 
@@ -579,14 +682,22 @@ const COMPARISONS = [
 ];
 const QUICK_AMOUNTS_EUR = [5, 10, 20, 50, 100, 500, 1000, 5000];
 const PHRASES = [
-  { fr: 'Merci', jp: 'ありがとう', kana: 'Arigatou gozaimasu' },
+  { fr: 'Merci beaucoup', jp: 'ありがとうございます', kana: 'Arigatou gozaimasu' },
   { fr: 'Où sont les toilettes ?', jp: 'トイレはどこですか？', kana: 'Toire wa doko desu ka?' },
   { fr: 'Combien ça coûte ?', jp: 'いくらですか？', kana: 'Ikura desu ka?' },
   { fr: 'Je ne comprends pas', jp: 'わかりません', kana: 'Wakarimasen' },
   { fr: 'Parlez-vous anglais ?', jp: '英語を話せますか？', kana: 'Eigo o hanasemasu ka?' },
   { fr: 'Aidez-moi !', jp: '助けてください！', kana: 'Tasukete kudasai!' },
-  { fr: 'Un billet pour…', jp: '〜まで一枚', kana: '... made ichimai' },
   { fr: 'Délicieux !', jp: '美味しい！', kana: 'Oishii!' },
+  { fr: 'Je m\'appelle Patrick', jp: '私の名前はパトリックです', kana: 'Watashi no namae wa Patorikku desu' },
+  { fr: 'Elle s\'appelle Inoue', jp: '彼女の名前はイノウエです', kana: 'Kanojo no namae wa Inoue desu' },
+  { fr: 'Nous sommes français', jp: '私たちはフランス人です', kana: 'Watashitachi wa Furansujin desu' },
+  { fr: 'C\'est trop chaud !', jp: '暑すぎます！', kana: 'Atsusugimasu!' },
+  { fr: 'De l\'eau froide s\'il vous plaît', jp: '冷たい水をください', kana: 'Tsumetai mizu wo kudasai' },
+  { fr: 'Où est la station de métro ?', jp: '地下鉄の駅はどこですか？', kana: 'Chikatetsu no eki wa doko desu ka?' },
+  { fr: 'Un billet pour Kyoto', jp: '京都まで一枚ください', kana: 'Kyoto made ichimai kudasai' },
+  { fr: 'Pouvez-vous prendre une photo ?', jp: '写真を撮っていただけますか？', kana: 'Shashin wo totte itadakemasu ka?' },
+  { fr: 'Je suis allergique à…', jp: '〜アレルギーがあります', kana: '... arerugi ga arimasu' },
 ];
 
 let rateEURJPY = null;
@@ -858,8 +969,127 @@ function suggestFeature() {
 }
 
 // ═══════════════════════════════════════════
-// TOAST
+// MÉTÉO
 // ═══════════════════════════════════════════
+const METEO_CITIES = [
+  { name: 'Tokyo 🗼', lat: 35.6762, lon: 139.6503 },
+  { name: 'Kyoto ⛩️', lat: 35.0116, lon: 135.7681 },
+  { name: 'Paris 🗼', lat: 48.8566, lon: 2.3522 },
+];
+
+async function fetchMeteo() {
+  const container = document.getElementById('meteo-cities');
+  container.innerHTML = '<div style="color:var(--ink-3);font-size:13px;padding:8px 0;">Chargement…</div>';
+  try {
+    const results = await Promise.all(METEO_CITIES.map(async c => {
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,relative_humidity_2m,weather_code,apparent_temperature&timezone=auto`);
+      const d = await r.json();
+      return { ...c, data: d.current };
+    }));
+    container.innerHTML = results.map(c => {
+      const t = c.data.temperature_2m;
+      const feels = c.data.apparent_temperature;
+      const hum = c.data.relative_humidity_2m;
+      const wc = c.data.weather_code;
+      const emoji = weatherEmoji(wc);
+      const tempColor = t >= 35 ? '#C8102E' : t >= 28 ? '#E07000' : '#2E7D32';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-size:14px;font-weight:600;">${c.name}</div>
+          <div style="font-size:11px;color:var(--ink-3);">Ressenti ${feels.toFixed(0)}°C · Humidité ${hum}%</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:26px;font-weight:800;color:${tempColor};">${t.toFixed(0)}°C</div>
+          <div style="font-size:18px;">${emoji}</div>
+        </div>
+      </div>`;
+    }).join('');
+    // auto-calc heat index with Tokyo data
+    const tokyo = results[0].data;
+    document.getElementById('heat-temp').value = Math.round(tokyo.temperature_2m);
+    document.getElementById('heat-hum').value = Math.round(tokyo.relative_humidity_2m);
+    calcHeatIndex();
+  } catch(e) {
+    container.innerHTML = '<div style="color:var(--ink-3);font-size:13px;padding:8px 0;">⚠️ Météo non disponible hors ligne</div>';
+  }
+}
+
+function weatherEmoji(code) {
+  if (code === 0) return '☀️';
+  if (code <= 3) return '⛅';
+  if (code <= 48) return '🌫️';
+  if (code <= 57) return '🌦️';
+  if (code <= 67) return '🌧️';
+  if (code <= 77) return '🌨️';
+  if (code <= 82) return '🌧️';
+  if (code <= 99) return '⛈️';
+  return '🌡️';
+}
+
+function calcHeatIndex() {
+  const T = parseFloat(document.getElementById('heat-temp').value) || 35;
+  const H = parseFloat(document.getElementById('heat-hum').value) || 80;
+  // Formule Steadman simplifiée (°C)
+  const hi = -8.78469475556 + 1.61139411*T + 2.33854883889*H
+    - 0.14611605*T*H - 0.012308094*T*T - 0.0164248277778*H*H
+    + 0.002211732*T*T*H + 0.00072546*T*H*H - 0.000003582*T*T*H*H;
+  const feels = Math.round(hi);
+  let level, color, advice;
+  if (feels < 27)      { level='Confortable'; color='#2E7D32'; advice='Conditions agréables pour visiter.'; }
+  else if (feels < 32) { level='Attention'; color='#E07000'; advice='Hydratation régulière recommandée.'; }
+  else if (feels < 39) { level='Danger'; color='#C8102E'; advice='Évitez les activités intenses entre 11h et 16h. Buvez souvent.'; }
+  else                 { level='Danger extrême'; color='#8B0000'; advice='Restez à l\'ombre ou en intérieur climatisé. Danger de coup de chaleur.'; }
+  document.getElementById('heat-result').innerHTML = `
+    <div style="background:${color}18;border:1px solid ${color}40;border-radius:10px;padding:14px;">
+      <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.8px;">${level}</div>
+      <div style="font-size:36px;font-weight:800;color:${color};margin:4px 0;">${feels}°C ressenti</div>
+      <div style="font-size:13px;color:var(--ink-2);">${advice}</div>
+      <div style="font-size:12px;color:var(--ink-3);margin-top:8px;">💧 Patrick & Inoue : minimum 500ml/h par forte chaleur</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+const TRIP = [
+  { date: '10 juil.', city: 'Arrivée Tokyo 🛬', icon: '✈️', note: 'Narita ou Haneda → Takanawa', color: '#1565C0' },
+  { date: '10–?? juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Shinjuku, Shibuya, Asakusa…', color: '#C8102E' },
+  { date: 'Mi-juillet', city: 'Kyoto ⛩️', icon: '🚄', note: 'Shinkansen depuis Tokyo · 2h15', color: '#6A1B9A' },
+  { date: 'Retour', city: 'Tokyo 🗼', icon: '🚄', note: 'Shinkansen retour', color: '#C8102E' },
+  { date: 'Fin juillet', city: 'Takanawa 🏨', icon: '🏯', note: 'Quartier sud de Tokyo · Minato-ku', color: '#2E7D32' },
+  { date: '28 juil.', city: 'Départ 🛫', icon: '✈️', note: 'Bon retour Patrick & Inoue !', color: '#888' },
+];
+
+const NAV_LINKS = {
+  'gmaps-tokyo': 'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
+  'gmaps-kyoto': 'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
+  'gmaps-takanawa': 'https://www.google.com/maps/search/Takanawa,+Minato,+Tokyo/@35.6380,139.7314,15z',
+  'hyperdia': 'https://www.hyperdia.com/en/',
+  'navitime': 'https://www.navitime.co.jp/map/en/',
+  'jma': 'https://www.jma.go.jp/bosai/map.html#5/35.6/138.5/&elem=root&typhoon=all',
+};
+
+function openNavApp(key) {
+  const url = NAV_LINKS[key];
+  if (url) window.open(url, '_blank');
+}
+
+function buildTimeline() {
+  document.getElementById('trip-timeline').innerHTML = TRIP.map((s, i) => `
+    <div style="display:flex;gap:14px;padding:0 16px;margin-bottom:4px;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+        <div style="width:36px;height:36px;border-radius:50%;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${s.icon}</div>
+        ${i < TRIP.length-1 ? `<div style="width:2px;flex:1;min-height:24px;background:var(--border);margin:4px 0;"></div>` : ''}
+      </div>
+      <div style="padding-top:6px;padding-bottom:${i < TRIP.length-1 ? '0' : '4px'};">
+        <div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${s.date}</div>
+        <div style="font-size:15px;font-weight:700;color:var(--ink);margin:2px 0;">${s.city}</div>
+        <div style="font-size:12px;color:var(--ink-2);">${s.note}</div>
+      </div>
+    </div>`).join('');
+}
+
+
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -886,7 +1116,15 @@ setTimeout(dismissSplash, 1000);
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
+try { buildTimeline(); } catch(e) {}
+try { calcHeatIndex(); } catch(e) {}
 setInterval(() => { try { updateTimes(); } catch(e) {} }, 10000);
+
+// Charger météo quand on arrive sur l'onglet
+document.querySelector('[data-tab="meteo"]').addEventListener('click', () => {
+  if (!document.getElementById('meteo-cities').querySelector('div[style*="border-bottom"]')) fetchMeteo();
+});
+
 
 // Service worker for PWA
 if ('serviceWorker' in navigator) {
