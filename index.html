@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#C8102E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nihon">
+<meta name="description" content="Compagnon de voyage au Japon">
+<title>日本 Nihon</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.svg">
+<link rel="apple-touch-icon" href="icon-192.svg">
+<style>
+  :root {
+    --red: #C8102E;
+    --red-dark: #9B0C22;
+    --red-pale: #FFF0F2;
+    --ink: #1A1A1A;
+    --ink-2: #4A4A4A;
+    --ink-3: #888;
+    --bg: #FAF9F7;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.08);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--ink); }
+
+  /* HEADER */
+  #header {
+    background: var(--red);
+    padding: 14px 20px 12px;
+    display: flex; align-items: center; gap: 12px;
+    position: relative;
+  }
+  #header h1 { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; flex: 1; }
+  #header .jp { font-size: 13px; opacity: 0.7; font-weight: 400; }
+  #header .rate-pill {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* TABS */
+  #tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  #tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    flex: 1;
+    min-width: 72px;
+    padding: 12px 8px 10px;
+    border: none; background: none;
+    font-size: 11px; font-weight: 500;
+    color: var(--ink-3);
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .tab .icon { font-size: 22px; }
+  .tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+  /* PAGES */
+  #pages { flex: 1; overflow: hidden; position: relative; }
+  .page { position: absolute; inset: 0; overflow-y: auto; padding: 0 0 calc(16px + var(--safe-bottom)); display: none; }
+  .page.active { display: block; }
+
+  /* LAYOUT */
+  body { display: flex; flex-direction: column; }
+  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 20px;
+    margin: 12px 16px 0;
+  }
+  .card-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+
+  /* ═══════════ PAGE 1 — TAUX DE CHANGE ═══════════ */
+  .exchange-big {
+    text-align: center;
+    padding: 28px 20px 24px;
+  }
+  .exchange-big .amount-row {
+    display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
+  }
+  .exchange-big input[type=text] {
+    font-size: 44px; font-weight: 700;
+    border: none; outline: none; background: none;
+    color: var(--ink); text-align: center;
+    width: 180px;
+    -webkit-appearance: none;
+  }
+  .exchange-big .currency-badge {
+    font-size: 16px; font-weight: 700; color: var(--red);
+    background: var(--red-pale);
+    padding: 6px 12px; border-radius: 8px;
+  }
+  .exchange-arrow {
+    font-size: 28px; color: var(--ink-3); margin: 4px 0;
+  }
+  .result-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+  .result-amount { font-size: 52px; font-weight: 800; color: var(--red); line-height: 1; }
+  .result-currency { font-size: 18px; color: var(--ink-2); font-weight: 600; }
+  .rate-info { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
+
+  .quick-amounts {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    margin: 0 16px 0;
+  }
+  .quick-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 4px;
+    font-size: 13px; font-weight: 600; color: var(--ink);
+    cursor: pointer; text-align: center;
+    transition: background 0.1s;
+  }
+  .quick-btn:active { background: var(--red-pale); color: var(--red); }
+  .quick-btn .eur-sub { font-size: 10px; color: var(--ink-3); font-weight: 400; display: block; }
+
+  .swap-btn {
+    display: block; margin: 14px auto 0;
+    background: none; border: 1px solid var(--border);
+    border-radius: 20px; padding: 8px 20px;
+    font-size: 13px; color: var(--ink-2); cursor: pointer;
+  }
+
+  /* ═══════════ PAGE 2 — HEURES ═══════════ */
+  .time-hero {
+    text-align: center;
+    padding: 28px 20px 20px;
+  }
+  .time-hero .city-name { font-size: 13px; color: var(--ink-3); font-weight: 500; margin-bottom: 6px; }
+  .time-hero .time-big { font-size: 64px; font-weight: 800; letter-spacing: -2px; line-height: 1; color: var(--ink); }
+  .time-hero .date-str { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
+  .time-hero .day-night { font-size: 28px; margin-top: 6px; }
+
+  .time-compare { margin: 0 16px; }
+  .time-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .time-row:last-child { border-bottom: none; }
+  .time-row .city { font-size: 14px; font-weight: 600; }
+  .time-row .tz-name { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+  .time-row .t { font-size: 28px; font-weight: 700; color: var(--ink); }
+  .time-row .diff { font-size: 12px; color: var(--ink-3); text-align: right; }
+  .time-row.japan .t { color: var(--red); }
+  .time-row.japan .city { color: var(--red); }
+
+  .sleep-hint {
+    margin: 14px 16px 0;
+    background: #FFF8E6;
+    border: 1px solid #F0D870;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 13px; color: #7A6000;
+  }
+  .sleep-hint strong { font-weight: 600; }
+
+  /* ═══════════ PAGE 3 — APPS / SCANNER ═══════════ */
+  .app-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin: 12px 16px 0;
+  }
+  .app-tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex; flex-direction: column; gap: 10px;
+    transition: transform 0.1s, box-shadow 0.1s;
+    -webkit-user-select: none;
+  }
+  .app-tile:active { transform: scale(0.97); }
+  .app-tile .app-icon { font-size: 36px; line-height: 1; }
+  .app-tile .app-name { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .app-tile .app-desc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+  .app-tile .app-badge {
+    font-size: 10px; font-weight: 600;
+    padding: 3px 8px; border-radius: 6px;
+    width: fit-content;
+  }
+  .badge-built { background: #E8F5E9; color: #2E7D32; }
+  .badge-ext { background: #E3F2FD; color: #1565C0; }
+  .badge-jp { background: var(--red-pale); color: var(--red); }
+
+  /* SCANNER INTÉGRÉ */
+  #scanner-view {
+    position: fixed; inset: 0; background: #000; z-index: 100;
+    display: none; flex-direction: column;
+  }
+  #scanner-view.open { display: flex; }
+  #scanner-video { flex: 1; object-fit: cover; width: 100%; }
+  #scanner-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  #scanner-frame {
+    width: 240px; height: 240px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  }
+  #scanner-label { color: #fff; font-size: 14px; margin-top: 20px; opacity: 0.85; }
+  #scanner-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 20px calc(24px + var(--safe-bottom)); background: linear-gradient(transparent, rgba(0,0,0,0.7)); display: flex; gap: 12px; justify-content: center; pointer-events: all; }
+  #scanner-bar button {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; border-radius: 40px; padding: 12px 24px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  #scanner-result {
+    position: absolute; bottom: 100px; left: 20px; right: 20px;
+    background: #fff; border-radius: 12px; padding: 16px;
+    display: none;
+  }
+  #scanner-result.show { display: block; }
+  #scanner-result .scan-title { font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
+  #scanner-result .scan-text { font-size: 15px; font-weight: 600; color: var(--ink); word-break: break-all; }
+
+  /* ═══════════ PAGE 4 — UTILITAIRES ═══════════ */
+  .util-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin: 12px 16px 0;
+  }
+  .util-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+  .util-card h3 { font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .util-item { font-size: 13px; color: var(--ink-2); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .util-item:last-child { border-bottom: none; }
+  .util-item strong { color: var(--ink); }
+
+  .phrase-card { margin: 10px 16px 0; }
+  .phrase-row {
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+  }
+  .phrase-row:last-child { border-bottom: none; }
+  .phrase-fr { font-size: 13px; color: var(--ink-2); flex: 1; }
+  .phrase-jp { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .phrase-kana { font-size: 11px; color: var(--ink-3); }
+  .phrase-speak { font-size: 20px; }
+
+  /* ═══════════ PAGE 5 — PARAMÈTRES ═══════════ */
+  .settings-section { margin: 12px 16px 0; }
+  .settings-section h3 { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px; }
+  .setting-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); margin-bottom: 8px;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .setting-row .icon { font-size: 22px; }
+  .setting-row .label { flex: 1; }
+  .setting-row .label strong { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
+  .setting-row .label span { font-size: 12px; color: var(--ink-3); }
+  .setting-row .action { color: var(--red); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .add-feature-btn {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--red-pale); border: 1.5px dashed rgba(200,16,46,0.3);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    cursor: pointer; color: var(--red); font-size: 14px; font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: #fff;
+    padding: 10px 20px; border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; white-space: nowrap; z-index: 200;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* SPLASH */
+  #splash {
+    position: fixed; inset: 0; background: var(--red);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+    z-index: 999; transition: opacity 0.4s 0.3s;
+  }
+  #splash.hide { opacity: 0; pointer-events: none; }
+  #splash .jp-big { font-size: 72px; color: rgba(255,255,255,0.15); font-weight: 900; }
+  #splash h2 { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+  #splash p { color: rgba(255,255,255,0.7); font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="jp-big">日本</div>
+  <h2>Nihon</h2>
+  <p>Compagnon de voyage · Japon</p>
+</div>
+
+<!-- HEADER -->
+<div id="header">
+  <h1>日本 <span class="jp">Nihon</span></h1>
+  <div class="rate-pill" onclick="showTab('change')">
+    <span id="header-rate">⟳ Taux…</span>
+  </div>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <button class="tab active" onclick="showTab('change')" data-tab="change">
+    <span class="icon">💴</span>Taux
+  </button>
+  <button class="tab" onclick="showTab('time')" data-tab="time">
+    <span class="icon">🕐</span>Heures
+  </button>
+  <button class="tab" onclick="showTab('apps')" data-tab="apps">
+    <span class="icon">📲</span>Apps
+  </button>
+  <button class="tab" onclick="showTab('utils')" data-tab="utils">
+    <span class="icon">🗾</span>Pratique
+  </button>
+  <button class="tab" onclick="showTab('settings')" data-tab="settings">
+    <span class="icon">⚙️</span>Réglages
+  </button>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+<div id="pages">
+
+<!-- ═══════ PAGE CHANGE ═══════ -->
+<div class="page active" id="page-change">
+  <div class="card exchange-big">
+    <div class="amount-row">
+      <input type="text" inputmode="decimal" id="from-amount" value="100" oninput="calcExchange()" />
+      <span class="currency-badge" id="from-label">EUR</span>
+    </div>
+    <div class="exchange-arrow">↕</div>
+    <div class="result-row">
+      <span class="result-amount" id="to-amount">—</span>
+      <span class="result-currency" id="to-label">JPY</span>
+    </div>
+    <div class="rate-info" id="rate-info">Chargement du taux…</div>
+    <button class="swap-btn" onclick="swapCurrencies()">⇅ Inverser EUR / JPY</button>
+  </div>
+
+  <div style="margin: 14px 16px 8px; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px;">Montants rapides</div>
+  <div class="quick-amounts" id="quick-grid"></div>
+
+  <!-- Autres devises -->
+  <div class="card" style="margin-top: 14px;">
+    <div class="card-label">Autres devises</div>
+    <div id="other-rates"></div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE HEURES ═══════ -->
+<div class="page" id="page-time">
+  <div class="card time-hero">
+    <div class="city-name">🗼 Tokyo · Japon</div>
+    <div class="time-big" id="tokyo-time">—</div>
+    <div class="date-str" id="tokyo-date">—</div>
+    <div class="day-night" id="tokyo-daynight">🌞</div>
+  </div>
+
+  <div class="card time-compare" style="margin-top: 12px;">
+    <div class="card-label">Comparaison</div>
+    <div id="time-rows"></div>
+  </div>
+
+  <div id="sleep-block"></div>
+</div>
+
+<!-- ═══════ PAGE APPS ═══════ -->
+<div class="page" id="page-apps">
+  <div style="margin: 16px 16px 4px; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px;">Outils intégrés</div>
+  <div class="app-grid">
+    <div class="app-tile" onclick="openScanner()">
+      <span class="app-icon">📷</span>
+      <span class="app-name">Scanner</span>
+      <span class="app-desc">QR codes, menus, panneaux</span>
+      <span class="app-badge badge-built">Intégré</span>
+    </div>
+    <div class="app-tile" onclick="openTranslator()">
+      <span class="app-icon">🔤</span>
+      <span class="app-name">Traducteur</span>
+      <span class="app-desc">Photo → traduction rapide</span>
+      <span class="app-badge badge-ext">Google Lens</span>
+    </div>
+  </div>
+
+  <div style="margin: 16px 16px 4px; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px;">Japon — Apps essentielles</div>
+  <div class="app-grid">
+    <div class="app-tile" onclick="openApp('payke')">
+      <span class="app-icon">🏷️</span>
+      <span class="app-name">PAYKE</span>
+      <span class="app-desc">Scanner codes-barres produits japonais</span>
+      <span class="app-badge badge-jp">Japon</span>
+    </div>
+    <div class="app-tile" onclick="openApp('suica')">
+      <span class="app-icon">🚃</span>
+      <span class="app-name">Suica</span>
+      <span class="app-desc">Carte de transport IC sans contact</span>
+      <span class="app-badge badge-jp">Japon</span>
+    </div>
+    <div class="app-tile" onclick="openApp('google-maps-transit')">
+      <span class="app-icon">🗺️</span>
+      <span class="app-name">Transports</span>
+      <span class="app-desc">Itinéraires trains, métros, bus</span>
+      <span class="app-badge badge-ext">Google Maps</span>
+    </div>
+    <div class="app-tile" onclick="openApp('google-translate')">
+      <span class="app-icon">🗣️</span>
+      <span class="app-name">Voix JP</span>
+      <span class="app-desc">Prononcer des phrases en japonais</span>
+      <span class="app-badge badge-ext">Translate</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE PRATIQUE ═══════ -->
+<div class="page" id="page-utils">
+  <div class="util-grid">
+    <div class="util-card">
+      <h3>🔌 Électricité</h3>
+      <div class="util-item"><span>Prise</span><strong>Type A</strong></div>
+      <div class="util-item"><span>Voltage</span><strong>100V</strong></div>
+      <div class="util-item"><span>Fréquence</span><strong>50/60Hz</strong></div>
+      <div class="util-item"><span>Adaptateur</span><strong>Non requis*</strong></div>
+    </div>
+    <div class="util-card">
+      <h3>📡 Urgences</h3>
+      <div class="util-item"><span>Police</span><strong>110</strong></div>
+      <div class="util-item"><span>Pompiers</span><strong>119</strong></div>
+      <div class="util-item"><span>Ambulance</span><strong>119</strong></div>
+      <div class="util-item"><span>Touristes</span><strong>03-3501-0110</strong></div>
+    </div>
+  </div>
+
+  <div class="card phrase-card">
+    <div class="card-label">Phrases essentielles · 必須フレーズ</div>
+    <div id="phrases"></div>
+  </div>
+
+  <div class="util-grid" style="margin-top: 10px;">
+    <div class="util-card">
+      <h3>💳 Paiement</h3>
+      <div class="util-item"><span>Espèces</span><strong>Indispensable</strong></div>
+      <div class="util-item"><span>Suica</span><strong>Transport + konbini</strong></div>
+      <div class="util-item"><span>CB Visa</span><strong>Acceptée (villes)</strong></div>
+      <div class="util-item"><span>IC Cards</span><strong>7-Eleven, etc.</strong></div>
+    </div>
+    <div class="util-card">
+      <h3>🕐 Décalage</h3>
+      <div id="offset-card" style="font-size:13px;color:var(--ink-2);line-height:1.8;">Calcul…</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ PAGE RÉGLAGES ═══════ -->
+<div class="page" id="page-settings">
+  <div class="settings-section">
+    <h3>Application</h3>
+    <div class="setting-row">
+      <span class="icon">📲</span>
+      <div class="label">
+        <strong>Installer sur l'écran d'accueil</strong>
+        <span>Android : Menu Chrome → "Ajouter à l'écran d'accueil"</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <span class="icon">🔄</span>
+      <div class="label">
+        <strong>Taux de change</strong>
+        <span id="last-rate-update">Dernière mise à jour : —</span>
+      </div>
+      <span class="action" onclick="fetchRate(true)">Actualiser</span>
+    </div>
+    <div class="setting-row">
+      <span class="icon">🌐</span>
+      <div class="label">
+        <strong>Ville de référence</strong>
+        <span id="home-city-label">Paris, France</span>
+      </div>
+      <span class="action" onclick="changeHomeCity()">Changer</span>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3>Fonctionnalités supplémentaires</h3>
+    <div class="add-feature-btn" onclick="suggestFeature()">
+      <span style="font-size:22px;">＋</span>
+      Demander une nouvelle fonctionnalité
+    </div>
+    <div class="setting-row">
+      <span class="icon">☔</span>
+      <div class="label"><strong>Météo Japan</strong><span>À venir</span></div>
+      <span class="action" style="color:var(--ink-3)">Bientôt</span>
+    </div>
+    <div class="setting-row">
+      <span class="icon">🍣</span>
+      <div class="label"><strong>Allergènes aliments</strong><span>Décodeur menus japonais</span></div>
+      <span class="action" style="color:var(--ink-3)">Bientôt</span>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3>À propos</h3>
+    <div class="setting-row">
+      <span class="icon">ℹ️</span>
+      <div class="label">
+        <strong>Nihon v1.0</strong>
+        <span>PWA · Fonctionne hors ligne (partiellement)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /pages -->
+</div><!-- /main -->
+
+<!-- SCANNER VIEW -->
+<div id="scanner-view">
+  <video id="scanner-video" autoplay playsinline muted></video>
+  <div id="scanner-overlay">
+    <div id="scanner-frame"></div>
+    <div id="scanner-label">Pointez vers un QR code ou du texte</div>
+  </div>
+  <div id="scanner-result">
+    <div class="scan-title">Résultat</div>
+    <div class="scan-text" id="scan-text-out">—</div>
+  </div>
+  <div id="scanner-bar">
+    <button onclick="closeScanner()">✕ Fermer</button>
+    <button onclick="openGoogleLens()">🔍 Google Lens</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const HOME_CITY = { name: 'Paris', tz: 'Europe/Paris' };
+const JAPAN_TZ = 'Asia/Tokyo';
+const COMPARISONS = [
+  { name: 'Tokyo 🗼', tz: JAPAN_TZ, highlight: true },
+  { name: 'Paris 🗼', tz: HOME_CITY.tz },
+  { name: 'Genève 🇨🇭', tz: 'Europe/Zurich' },
+  { name: 'New York', tz: 'America/New_York' },
+];
+const QUICK_AMOUNTS_EUR = [5, 10, 20, 50, 100, 500, 1000, 5000];
+const PHRASES = [
+  { fr: 'Merci', jp: 'ありがとう', kana: 'Arigatou gozaimasu' },
+  { fr: 'Où sont les toilettes ?', jp: 'トイレはどこですか？', kana: 'Toire wa doko desu ka?' },
+  { fr: 'Combien ça coûte ?', jp: 'いくらですか？', kana: 'Ikura desu ka?' },
+  { fr: 'Je ne comprends pas', jp: 'わかりません', kana: 'Wakarimasen' },
+  { fr: 'Parlez-vous anglais ?', jp: '英語を話せますか？', kana: 'Eigo o hanasemasu ka?' },
+  { fr: 'Aidez-moi !', jp: '助けてください！', kana: 'Tasukete kudasai!' },
+  { fr: 'Un billet pour…', jp: '〜まで一枚', kana: '... made ichimai' },
+  { fr: 'Délicieux !', jp: '美味しい！', kana: 'Oishii!' },
+];
+
+let rateEURJPY = null;
+let fromEUR = true;
+let rateTimestamp = null;
+
+// ═══════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
+}
+
+// ═══════════════════════════════════════════
+// EXCHANGE
+// ═══════════════════════════════════════════
+async function fetchRate(force = false) {
+  // Try cache first
+  const cached = JSON.parse(localStorage.getItem('rate_eur_jpy') || 'null');
+  if (!force && cached && (Date.now() - cached.ts < 3600000)) {
+    rateEURJPY = cached.rate;
+    rateTimestamp = cached.ts;
+    onRateReady();
+    return;
+  }
+  try {
+    // Free open exchange rate API (no key required for EUR/JPY)
+    const r = await fetch('https://open.er-api.com/v6/latest/EUR');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    rateEURJPY = data.rates.JPY;
+    rateTimestamp = Date.now();
+    localStorage.setItem('rate_eur_jpy', JSON.stringify({ rate: rateEURJPY, ts: rateTimestamp, allRates: data.rates }));
+    localStorage.setItem('all_rates', JSON.stringify(data.rates));
+    onRateReady();
+    showToast('Taux actualisé ✓');
+  } catch(e) {
+    // Fallback hardcoded approximate
+    if (cached) { rateEURJPY = cached.rate; rateTimestamp = cached.ts; onRateReady(); return; }
+    rateEURJPY = 163.5;
+    document.getElementById('rate-info').textContent = '⚠️ Taux approximatif (hors ligne)';
+    onRateReady();
+  }
+}
+
+function onRateReady() {
+  calcExchange();
+  buildQuickGrid();
+  buildOtherRates();
+  document.getElementById('header-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
+  if (rateTimestamp) {
+    document.getElementById('last-rate-update').textContent =
+      'Dernière mise à jour : ' + new Date(rateTimestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+  }
+}
+
+function calcExchange() {
+  const input = parseFloat(document.getElementById('from-amount').value.replace(',', '.')) || 0;
+  if (!rateEURJPY) return;
+  let result;
+  if (fromEUR) {
+    result = input * rateEURJPY;
+    document.getElementById('to-amount').textContent = Math.round(result).toLocaleString('fr-FR');
+    document.getElementById('rate-info').textContent = `1 EUR = ${rateEURJPY.toFixed(2)} JPY`;
+  } else {
+    result = input / rateEURJPY;
+    document.getElementById('to-amount').textContent = result.toLocaleFixed ? result.toFixed(2) : result.toFixed(2);
+    document.getElementById('rate-info').textContent = `1 JPY = ${(1/rateEURJPY).toFixed(5)} EUR`;
+  }
+}
+
+function swapCurrencies() {
+  fromEUR = !fromEUR;
+  document.getElementById('from-label').textContent = fromEUR ? 'EUR' : 'JPY';
+  document.getElementById('to-label').textContent = fromEUR ? 'JPY' : 'EUR';
+  document.getElementById('from-amount').value = fromEUR ? '100' : '10000';
+  calcExchange();
+}
+
+function buildQuickGrid() {
+  const grid = document.getElementById('quick-grid');
+  const amounts = fromEUR ? QUICK_AMOUNTS_EUR : [500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
+  grid.innerHTML = amounts.map(a => {
+    const conv = fromEUR ? Math.round(a * rateEURJPY).toLocaleString('ja-JP') + '¥' : (a / rateEURJPY).toFixed(2) + '€';
+    return `<button class="quick-btn" onclick="setAmount(${a})">
+      ${fromEUR ? a + '€' : a.toLocaleString('ja-JP') + '¥'}
+      <span class="eur-sub">${conv}</span>
+    </button>`;
+  }).join('');
+}
+
+function setAmount(v) {
+  document.getElementById('from-amount').value = v;
+  calcExchange();
+}
+
+function buildOtherRates() {
+  const stored = JSON.parse(localStorage.getItem('all_rates') || 'null');
+  if (!stored) return;
+  const pairs = [
+    { from: 'CHF', name: 'Franc suisse' },
+    { from: 'USD', name: 'Dollar US' },
+    { from: 'GBP', name: 'Livre sterling' },
+  ];
+  document.getElementById('other-rates').innerHTML = pairs.map(p => {
+    if (!stored[p.from]) return '';
+    const jpy = (stored.JPY / stored[p.from]);
+    return `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">
+      <span style="color:var(--ink-2)">${p.name}</span>
+      <strong>1 ${p.from} = ${jpy.toFixed(2)} JPY</strong>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// TIME
+// ═══════════════════════════════════════════
+function updateTimes() {
+  const now = new Date();
+  // Tokyo
+  const tokyoStr = now.toLocaleString('fr-FR', { timeZone: JAPAN_TZ, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const tokyoH = parseInt(now.toLocaleString('en-US', { timeZone: JAPAN_TZ, hour: 'numeric', hour12: false }));
+  const tokyoDate = now.toLocaleDateString('fr-FR', { timeZone: JAPAN_TZ, weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('tokyo-time').textContent = tokyoStr.slice(0,5);
+  document.getElementById('tokyo-date').textContent = tokyoDate;
+  document.getElementById('tokyo-daynight').textContent = tokyoH >= 7 && tokyoH < 21 ? '🌞' : '🌙';
+
+  // Comparison rows
+  const rows = COMPARISONS.map(c => {
+    const t = now.toLocaleString('fr-FR', { timeZone: c.tz, hour: '2-digit', minute: '2-digit' });
+    const h = parseInt(now.toLocaleString('en-US', { timeZone: c.tz, hour: 'numeric', hour12: false }));
+    const emoji = h >= 22 || h < 6 ? '🌙' : h >= 7 ? '☀️' : '🌅';
+    return `<div class="time-row ${c.highlight ? 'japan' : ''}">
+      <div><div class="city">${c.name}</div><div class="tz-name">${c.tz.split('/')[1]?.replace('_',' ') || ''}</div></div>
+      <div class="t">${emoji} ${t}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('time-rows').innerHTML = rows;
+
+  // Sleep hint
+  const parisH = parseInt(now.toLocaleString('en-US', { timeZone: HOME_CITY.tz, hour: 'numeric', hour12: false }));
+  const offset = getOffset(JAPAN_TZ, HOME_CITY.tz);
+  let hint = '';
+  if (parisH >= 22 || parisH < 6) hint = `🌙 Il est ${tokyoStr.slice(0,5)} au Japon — c'est le moment d'appeler !`;
+  else if (parisH >= 6 && parisH < 9) hint = `☀️ Tokyo est déjà en plein après-midi.`;
+  document.getElementById('sleep-block').innerHTML = hint ? `<div class="sleep-hint">${hint}</div>` : '';
+
+  // Offset card
+  document.getElementById('offset-card').innerHTML =
+    `Tokyo<br><strong>+${offset}h</strong> / Paris<br><small style="color:var(--ink-3)">Ex: 9h Paris = ${9+offset}h Tokyo</small>`;
+}
+
+function getOffset(tz1, tz2) {
+  const now = new Date();
+  const t1 = parseInt(now.toLocaleString('en-US', { timeZone: tz1, hour: 'numeric', hour12: false }));
+  const t2 = parseInt(now.toLocaleString('en-US', { timeZone: tz2, hour: 'numeric', hour12: false }));
+  let diff = t1 - t2;
+  if (diff < -12) diff += 24;
+  if (diff > 12) diff -= 24;
+  return diff;
+}
+
+// ═══════════════════════════════════════════
+// SCANNER
+// ═══════════════════════════════════════════
+let videoStream = null;
+let barcodeDetector = null;
+let scanInterval = null;
+
+async function openScanner() {
+  document.getElementById('scanner-view').classList.add('open');
+  try {
+    videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    document.getElementById('scanner-video').srcObject = videoStream;
+
+    if ('BarcodeDetector' in window) {
+      barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128'] });
+      scanInterval = setInterval(scanFrame, 500);
+    } else {
+      document.getElementById('scanner-label').textContent = 'Caméra active — utilisez Google Lens pour l'analyse';
+    }
+  } catch(e) {
+    closeScanner();
+    showToast('Accès caméra refusé');
+  }
+}
+
+async function scanFrame() {
+  const video = document.getElementById('scanner-video');
+  if (!barcodeDetector || video.readyState < 2) return;
+  try {
+    const codes = await barcodeDetector.detect(video);
+    if (codes.length > 0) {
+      const result = document.getElementById('scanner-result');
+      document.getElementById('scan-text-out').textContent = codes[0].rawValue;
+      result.classList.add('show');
+      clearInterval(scanInterval);
+    }
+  } catch(e) {}
+}
+
+function closeScanner() {
+  if (videoStream) { videoStream.getTracks().forEach(t => t.stop()); videoStream = null; }
+  if (scanInterval) { clearInterval(scanInterval); scanInterval = null; }
+  document.getElementById('scanner-view').classList.remove('open');
+  document.getElementById('scanner-result').classList.remove('show');
+}
+
+function openGoogleLens() {
+  window.open('https://lens.google.com', '_blank');
+}
+
+// ═══════════════════════════════════════════
+// APP LINKS
+// ═══════════════════════════════════════════
+const APP_LINKS = {
+  payke: 'https://payke.co.jp',
+  suica: 'https://www.jreast.co.jp/mobilesuica/index.html/',
+  'google-maps-transit': 'https://www.google.com/maps/@35.6762,139.6503,12z',
+  'google-translate': 'https://translate.google.com/?sl=ja&tl=fr&op=translate',
+};
+
+function openApp(key) {
+  const url = APP_LINKS[key];
+  if (url) window.open(url, '_blank');
+}
+
+function openTranslator() {
+  window.open('https://lens.google.com', '_blank');
+}
+
+// ═══════════════════════════════════════════
+// PHRASES
+// ═══════════════════════════════════════════
+function buildPhrases() {
+  document.getElementById('phrases').innerHTML = PHRASES.map(p =>
+    `<div class="phrase-row" onclick="speakJapanese('${p.jp}')">
+      <div style="flex:1">
+        <div class="phrase-fr">${p.fr}</div>
+        <div class="phrase-jp">${p.jp}</div>
+        <div class="phrase-kana">${p.kana}</div>
+      </div>
+      <span class="phrase-speak">🔊</span>
+    </div>`
+  ).join('');
+}
+
+function speakJapanese(text) {
+  if (!('speechSynthesis' in window)) { showToast('Synthèse vocale non disponible'); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 0.85;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  showToast('🔊 ' + text);
+}
+
+// ═══════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════
+function changeHomeCity() {
+  showToast('Fonctionnalité à venir');
+}
+
+function suggestFeature() {
+  const feat = prompt('Quelle fonctionnalité souhaiteriez-vous ajouter ?');
+  if (feat) showToast('Merci ! Idée notée : ' + feat.slice(0,30));
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+fetchRate();
+buildPhrases();
+updateTimes();
+setInterval(updateTimes, 10000);
+
+// Dismiss splash
+setTimeout(() => document.getElementById('splash').classList.add('hide'), 1200);
+
+// Service worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
