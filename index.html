@@ -291,7 +291,75 @@
     margin-bottom: 8px;
   }
 
-  /* TOAST */
+  /* ═══════════ CARTES HÉBERGEMENT ═══════════ */
+  .hotel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin: 12px 16px 0;
+    overflow: hidden;
+  }
+  .hotel-card-header {
+    padding: 14px 16px 12px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hotel-flag { font-size: 32px; }
+  .hotel-card-title { flex: 1; }
+  .hotel-card-title h3 { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .hotel-card-title span { font-size: 12px; color: var(--ink-3); }
+  .hotel-stars { color: #F5A623; font-size: 13px; }
+
+  .hotel-address-box {
+    margin: 0 16px 14px;
+    background: #F7F5F2;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    cursor: pointer;
+    position: relative;
+  }
+  .hotel-address-box:active { background: #EEE; }
+  .hotel-address-label { font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .hotel-jp-address { font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.5; }
+  .hotel-copy-hint { font-size: 11px; color: var(--ink-3); margin-top: 8px; }
+
+  .hotel-actions {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px; padding: 0 16px 16px;
+  }
+  .hotel-btn {
+    padding: 12px 8px;
+    border-radius: var(--radius-sm);
+    border: none; font-size: 13px; font-weight: 600;
+    cursor: pointer; text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    text-decoration: none;
+  }
+  .hotel-btn-primary { background: var(--red); color: #fff; }
+  .hotel-btn-secondary { background: var(--red-pale); color: var(--red); border: 1px solid rgba(200,16,46,0.2); }
+  .hotel-btn-phone { background: #E8F5E9; color: #2E7D32; }
+  .hotel-btn-web { background: #E3F2FD; color: #1565C0; }
+
+  .hotel-divider { height: 1px; background: var(--border); margin: 0 16px 14px; }
+  .hotel-info-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px; font-size: 13px;
+  }
+  .hotel-info-row span { color: var(--ink-3); }
+  .hotel-info-row strong { color: var(--ink); }
+
+  .taxi-phrase {
+    margin: 0 16px 16px;
+    background: #FFFBEA;
+    border: 1px solid #F0D870;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .taxi-phrase-label { font-size: 10px; font-weight: 600; color: #7A6000; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .taxi-phrase-jp { font-size: 17px; font-weight: 700; color: var(--ink); line-height: 1.6; }
+  .taxi-phrase-fr { font-size: 12px; color: #7A6000; margin-top: 4px; }
+
+
   #toast {
     position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
     background: var(--ink); color: #fff;
@@ -347,6 +415,9 @@
   </button>
   <button class="tab" onclick="showTab('nav')" data-tab="nav">
     <span class="icon">🗺️</span>Nav
+  </button>
+  <button class="tab" onclick="showTab('hotels')" data-tab="hotels">
+    <span class="icon">🏨</span>Hôtels
   </button>
   <button class="tab" onclick="showTab('utils')" data-tab="utils">
     <span class="icon">🗾</span>Pratique
@@ -509,7 +580,13 @@
       <span class="action" onclick="fetchRate(true)">Actualiser</span>
     </div>
     <div class="setting-row">
-      <span class="icon">🌐</span>
+      <span class="icon">🔊</span>
+      <div class="label">
+        <strong>Voix japonaise</strong>
+        <span id="voice-status">Détection en cours…</span>
+      </div>
+      <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
+    </div>
       <div class="label">
         <strong>Ville de référence</strong>
         <span id="home-city-label">Paris, France</span>
@@ -585,6 +662,110 @@
       <div style="padding:6px 0;">❄️ <strong>Climatisation partout</strong> — prévoir un gilet léger pour l'intérieur</div>
     </div>
   </div>
+</div>
+
+<!-- ═══════ PAGE HÉBERGEMENTS ═══════ -->
+<div class="page" id="page-hotels">
+
+  <div style="margin:14px 16px 4px;font-size:12px;color:var(--ink-3);line-height:1.6;">
+    Appuyez sur l'adresse japonaise pour la copier, puis montrez-la au taxi ou à votre interlocuteur.
+  </div>
+
+  <!-- ── TOKYO ── -->
+  <div class="hotel-card">
+    <div class="hotel-card-header">
+      <span class="hotel-flag">🗼</span>
+      <div class="hotel-card-title">
+        <h3>Hirai Ayaka House</h3>
+        <span>Tokyo · Edogawa-ku</span>
+      </div>
+    </div>
+    <div class="hotel-address-box" onclick="copyAddress('tokyo-addr', this)">
+      <div class="hotel-address-label">📋 Adresse en japonais — appuyer pour copier</div>
+      <div class="hotel-jp-address" id="tokyo-addr">東京都江戸川区平井５丁目４５−１<br>ひらいアヤカハウス</div>
+      <div class="hotel-copy-hint">Montrez cet écran au chauffeur de taxi ↑</div>
+    </div>
+    <div class="taxi-phrase">
+      <div class="taxi-phrase-label">🚕 Phrase taxi</div>
+      <div class="taxi-phrase-jp" onclick="speakJapanese('江戸川区平井五丁目四十五番一号、アヤカハウスまでお願いします')">
+        江戸川区平井五丁目四十五番一号、<br>アヤカハウスまでお願いします 🔊
+      </div>
+      <div class="taxi-phrase-fr">Edogawa-ku Hirai 5-chome 45-1, Ayaka House, s'il vous plaît</div>
+    </div>
+    <div class="hotel-actions">
+      <a class="hotel-btn hotel-btn-primary" href="https://www.google.com/maps/search/5+Chome-45-1+Hirai,+Edogawa+City,+Tokyo" target="_blank">🗺️ Google Maps</a>
+      <button class="hotel-btn hotel-btn-secondary" onclick="copyAddress('tokyo-addr', null)">📋 Copier l'adresse</button>
+    </div>
+  </div>
+
+  <!-- ── KYOTO ── -->
+  <div class="hotel-card">
+    <div class="hotel-card-header">
+      <span class="hotel-flag">⛩️</span>
+      <div class="hotel-card-title">
+        <h3>Good Nature Hotel Kyoto</h3>
+        <span>Kyoto · Shimogyo-ku <span class="hotel-stars">★★★★★</span></span>
+      </div>
+    </div>
+    <div class="hotel-address-box" onclick="copyAddress('kyoto-addr', this)">
+      <div class="hotel-address-label">📋 Adresse en japonais — appuyer pour copier</div>
+      <div class="hotel-jp-address" id="kyoto-addr">〒600-8022<br>京都市下京区河原町通四条下ル<br>２丁目稲荷町３１８−６<br>グッドネイチャーホテル京都</div>
+      <div class="hotel-copy-hint">Montrez cet écran au chauffeur de taxi ↑</div>
+    </div>
+    <div class="taxi-phrase">
+      <div class="taxi-phrase-label">🚕 Phrase taxi</div>
+      <div class="taxi-phrase-jp" onclick="speakJapanese('下京区河原町通四条下る二丁目稲荷町、グッドネイチャーホテル京都までお願いします')">
+        下京区河原町通四条下る二丁目稲荷町、<br>グッドネイチャーホテル京都まで<br>お願いします 🔊
+      </div>
+      <div class="taxi-phrase-fr">Shimogyo-ku Kawaramachi-dori Shijo-sagaru, Good Nature Hotel Kyoto, s'il vous plaît</div>
+    </div>
+    <div class="hotel-divider"></div>
+    <div class="hotel-info-row"><span>📞 Téléphone</span><strong><a href="tel:+81753526730" style="color:var(--ink);text-decoration:none;">075-352-6730</a></strong></div>
+    <div class="hotel-info-row"><span>🚇 Accès</span><strong>2 min · Kawaramachi St.</strong></div>
+    <div class="hotel-info-row"><span>🕐 Check-in</span><strong>15h00</strong></div>
+    <div class="hotel-info-row"><span>🕙 Check-out</span><strong>11h00</strong></div>
+    <div class="hotel-actions" style="margin-top:8px;">
+      <a class="hotel-btn hotel-btn-primary" href="https://www.google.com/maps/search/Good+Nature+Hotel+Kyoto+318-6+Inaricho" target="_blank">🗺️ Google Maps</a>
+      <a class="hotel-btn hotel-btn-phone" href="tel:+81753526730">📞 Appeler</a>
+      <button class="hotel-btn hotel-btn-secondary" onclick="copyAddress('kyoto-addr', null)">📋 Copier</button>
+      <a class="hotel-btn hotel-btn-web" href="https://goodnaturehotels.com" target="_blank">🌐 Site web</a>
+    </div>
+  </div>
+
+  <!-- ── TAKAYAMA ── -->
+  <div class="hotel-card" style="margin-bottom:16px;">
+    <div class="hotel-card-header">
+      <span class="hotel-flag">🏔️</span>
+      <div class="hotel-card-title">
+        <h3>Wanosato Ryokan</h3>
+        <span>Takayama · Gifu <span class="hotel-stars">★★★★★</span></span>
+      </div>
+    </div>
+    <div class="hotel-address-box" onclick="copyAddress('takayama-addr', this)">
+      <div class="hotel-address-label">📋 Adresse en japonais — appuyer pour copier</div>
+      <div class="hotel-jp-address" id="takayama-addr">〒509-3505<br>岐阜県高山市一之宮町１６８２<br>旅館 わのさと</div>
+      <div class="hotel-copy-hint">Montrez cet écran au chauffeur de taxi ↑</div>
+    </div>
+    <div class="taxi-phrase">
+      <div class="taxi-phrase-label">🚕 Phrase taxi</div>
+      <div class="taxi-phrase-jp" onclick="speakJapanese('高山市一之宮町千六百八十二番地、旅館わのさとまでお願いします')">
+        高山市一之宮町千六百八十二番地、<br>旅館わのさとまでお願いします 🔊
+      </div>
+      <div class="taxi-phrase-fr">Takayama-shi Ichinomiyamachi 1682, Ryokan Wanosato, s'il vous plaît</div>
+    </div>
+    <div class="hotel-divider"></div>
+    <div class="hotel-info-row"><span>📞 Téléphone</span><strong><a href="tel:+81577532321" style="color:var(--ink);text-decoration:none;">0577-53-2321</a></strong></div>
+    <div class="hotel-info-row"><span>📍 Distance centre</span><strong>9.8 km de Takayama</strong></div>
+    <div class="hotel-info-row"><span>♨️ Onsen</span><strong>Bains chauds privatifs</strong></div>
+    <div class="hotel-info-row"><span>🌿 Style</span><strong>Ryokan traditionnel</strong></div>
+    <div class="hotel-actions" style="margin-top:8px;">
+      <a class="hotel-btn hotel-btn-primary" href="https://www.google.com/maps/search/Wanosato+Ryokan+1682+Ichinomiyamachi+Takayama" target="_blank">🗺️ Google Maps</a>
+      <a class="hotel-btn hotel-btn-phone" href="tel:+81577532321">📞 Appeler</a>
+      <button class="hotel-btn hotel-btn-secondary" onclick="copyAddress('takayama-addr', null)">📋 Copier</button>
+      <a class="hotel-btn hotel-btn-web" href="http://www.wanosato.com" target="_blank">🌐 Site web</a>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══════ PAGE NAVIGATION ═══════ -->
@@ -673,6 +854,23 @@
 // CONFIG
 // ═══════════════════════════════════════════
 const HOME_CITY = { name: 'Paris', tz: 'Europe/Paris' };
+
+// ═══════════════════════════════════════════
+// HÉBERGEMENTS
+// ═══════════════════════════════════════════
+function copyAddress(id, el) {
+  const text = document.getElementById(id).innerText;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast('📋 Adresse copiée !');
+      if (el) { el.style.background = '#E8F5E9'; setTimeout(() => el.style.background = '', 1200); }
+    }).catch(() => showToast('Montrez l\'écran directement au taxi'));
+  } else {
+    showToast('Montrez l\'écran directement au taxi');
+  }
+}
+
+
 const JAPAN_TZ = 'Asia/Tokyo';
 const COMPARISONS = [
   { name: 'Tokyo 🗼', tz: JAPAN_TZ, highlight: true },
@@ -946,14 +1144,56 @@ function buildPhrases() {
   ).join('');
 }
 
+// Voix japonaise chargée au démarrage
+let jpVoice = null;
+let voicesLoaded = false;
+
+function loadJpVoice() {
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  voicesLoaded = true;
+  // Cherche voix japonaise dans l'ordre de préférence
+  jpVoice = voices.find(v => v.lang === 'ja-JP' && v.localService)
+    || voices.find(v => v.lang === 'ja-JP')
+    || voices.find(v => v.lang.startsWith('ja'))
+    || null;
+  console.log('Voix JP trouvée:', jpVoice ? jpVoice.name : 'aucune');
+  // Met à jour l'indicateur dans réglages
+  const el = document.getElementById('voice-status');
+  if (el) el.textContent = jpVoice ? '✅ ' + jpVoice.name : '⚠️ Non disponible — utilise Google Translate';
+}
+
+// Sur Android les voix se chargent de manière asynchrone
+speechSynthesis.onvoiceschanged = loadJpVoice;
+setTimeout(loadJpVoice, 500);
+
 function speakJapanese(text) {
-  if (!('speechSynthesis' in window)) { showToast('Synthèse vocale non disponible'); return; }
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'ja-JP';
-  u.rate = 0.85;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-  showToast('🔊 ' + text);
+  if (!('speechSynthesis' in window)) {
+    openGoogleTranslateVoice(text); return;
+  }
+  // Forcer le rechargement des voix si pas encore fait
+  if (!voicesLoaded) loadJpVoice();
+
+  if (jpVoice) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = jpVoice;
+    u.lang = 'ja-JP';
+    u.rate = 0.8;
+    u.pitch = 1.0;
+    u.volume = 1.0;
+    // Sur Android, un petit délai après cancel() est nécessaire
+    setTimeout(() => speechSynthesis.speak(u), 100);
+    showToast('🔊 Lecture…');
+  } else {
+    // Fallback : ouvre Google Translate avec le texte et la voix JP
+    openGoogleTranslateVoice(text);
+  }
+}
+
+function openGoogleTranslateVoice(text) {
+  showToast('🔗 Ouverture Google Translate…');
+  window.open(`https://translate.google.com/?sl=ja&tl=fr&text=${encodeURIComponent(text)}&op=translate`, '_blank');
 }
 
 // ═══════════════════════════════════════════
