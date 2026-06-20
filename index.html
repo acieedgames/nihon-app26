@@ -306,9 +306,9 @@
   #splash {
     position: fixed; inset: 0; background: var(--red);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-    z-index: 999; transition: opacity 0.4s 0.3s;
+    z-index: 999; transition: opacity 0.4s;
   }
-  #splash.hide { opacity: 0; pointer-events: none; }
+  #splash.hide { opacity: 0; pointer-events: none; display: none; }
   #splash .jp-big { font-size: 72px; color: rgba(255,255,255,0.15); font-weight: 900; }
   #splash h2 { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
   #splash p { color: rgba(255,255,255,0.7); font-size: 14px; }
@@ -654,7 +654,7 @@ function calcExchange() {
     document.getElementById('rate-info').textContent = `1 EUR = ${rateEURJPY.toFixed(2)} JPY`;
   } else {
     result = input / rateEURJPY;
-    document.getElementById('to-amount').textContent = result.toLocaleFixed ? result.toFixed(2) : result.toFixed(2);
+    document.getElementById('to-amount').textContent = result.toFixed(2);
     document.getElementById('rate-info').textContent = `1 JPY = ${(1/rateEURJPY).toFixed(5)} EUR`;
   }
 }
@@ -767,7 +767,7 @@ async function openScanner() {
       barcodeDetector = new BarcodeDetector({ formats: ['qr_code', 'ean_13', 'code_128'] });
       scanInterval = setInterval(scanFrame, 500);
     } else {
-      document.getElementById('scanner-label').textContent = 'Caméra active — utilisez Google Lens pour l'analyse';
+      document.getElementById('scanner-label').textContent = 'Caméra active — utilisez Google Lens pour l\u2019analyse';
     }
   } catch(e) {
     closeScanner();
@@ -872,13 +872,21 @@ function showToast(msg) {
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
-fetchRate();
-buildPhrases();
-updateTimes();
-setInterval(updateTimes, 10000);
 
-// Dismiss splash
-setTimeout(() => document.getElementById('splash').classList.add('hide'), 1200);
+// Dismiss splash IMMÉDIATEMENT — ne jamais bloquer l'UI
+function dismissSplash() {
+  const s = document.getElementById('splash');
+  s.style.opacity = '0';
+  setTimeout(() => { s.style.display = 'none'; }, 400);
+}
+// Double sécurité : au chargement ET avec délai court
+window.addEventListener('DOMContentLoaded', () => setTimeout(dismissSplash, 800));
+setTimeout(dismissSplash, 1000);
+
+try { fetchRate(); } catch(e) {}
+try { buildPhrases(); } catch(e) {}
+try { updateTimes(); } catch(e) {}
+setInterval(() => { try { updateTimes(); } catch(e) {} }, 10000);
 
 // Service worker for PWA
 if ('serviceWorker' in navigator) {
