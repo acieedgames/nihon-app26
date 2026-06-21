@@ -242,12 +242,22 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .ag-hdr:active { background: var(--red-pale); }
 .ag-badge { background: var(--red); color: #fff; border-radius: 7px; padding: 3px 8px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; text-align: center; line-height: 1.4; }
 .ag-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 5px; margin-bottom: 2px; }
-.tag-tokyo { background: #E3F2FD; color: #1565C0; }
-.tag-kyoto { background: #F3E5F5; color: #6A1B9A; }
+.tag-tokyo    { background: #E3F2FD; color: #1565C0; }
+.tag-kyoto    { background: #F3E5F5; color: #6A1B9A; }
 .tag-takayama { background: #E8F5E9; color: #2E7D32; }
-.tag-travel { background: #FFF8E1; color: #F57F17; }
+.tag-travel   { background: #FFF8E1; color: #F57F17; }
+.tag-custom   { background: #F0F0F0; color: #444; } /* couleur neutre, sera surchargée inline */
 .ag-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
 .ag-chev { color: var(--ink-3); font-size: 14px; transition: transform 0.2s; }
+/* Bouton édition titre */
+.ag-edit-title-btn { margin-top: 10px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; width: 100%; text-align: left; }
+.ag-title-edit-area { display: none; margin-top: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.ag-day.title-editing .ag-title-edit-area { display: block; }
+.ag-day.title-editing .ag-edit-title-btn { display: none; }
+.ag-title-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 600; color: var(--ink); background: var(--surface); margin-bottom: 8px; box-sizing: border-box; }
+.ag-city-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--ink); background: var(--surface); margin-bottom: 10px; box-sizing: border-box; }
+.ag-title-save-btn { width: 100%; background: var(--ink); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+
 .ag-day.open .ag-chev { transform: rotate(90deg); }
 .ag-body { display: none; border-top: 1px solid var(--border); padding: 12px 14px; }
 .ag-day.open .ag-body { display: block; }
@@ -257,6 +267,34 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .ag-day.editing .ag-edit-area { display: block; }
 .ag-day.editing .ag-edit-btn { display: none; }
 .ag-save-btn { margin-top: 8px; width: 100%; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
+
+/* ── DOCUMENTS AGENDA ── */
+.ag-docs { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+.ag-docs-title { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.ag-doc-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+}
+.ag-doc-icon { font-size: 22px; flex-shrink: 0; }
+.ag-doc-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ag-doc-open { background: var(--red); color: #fff; border: none; border-radius: 7px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+.ag-doc-delete { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--ink-3); padding: 4px; flex-shrink: 0; }
+.ag-doc-pending {
+  display: flex; align-items: center; gap: 10px;
+  background: #FFF8E1; border: 1px dashed #F0D870;
+  border-radius: 10px; padding: 10px 12px; margin-bottom: 7px;
+  cursor: pointer;
+}
+.ag-doc-pending-text { flex: 1; font-size: 12px; color: #7A6000; line-height: 1.4; }
+.ag-doc-pending-text strong { display: block; font-size: 13px; color: var(--ink); margin-bottom: 2px; }
+.ag-add-doc {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: 1.5px dashed rgba(200,16,46,0.3);
+  border-radius: 10px; padding: 10px 14px;
+  cursor: pointer; color: var(--red); font-size: 13px; font-weight: 600; width: 100%;
+}
+
 
 /* ── SETTINGS ── */
 .s-section { margin: 12px 16px 0; }
@@ -824,6 +862,93 @@ function closeMore() {
 function openSection(id) { go(id); }
 function showTab(id) { showPage(id); }
 function openNavApp(key) { var u = NAV_LINKS[key]; if (u) window.open(u, '_blank'); }
+// ═══════════════════════════════════════════
+// ÉDITION TITRE & VILLE
+// ═══════════════════════════════════════════
+const CITY_COLORS = {
+  'tokyo':     { bg: '#E3F2FD', color: '#1565C0' },
+  'kyoto':     { bg: '#F3E5F5', color: '#6A1B9A' },
+  'takayama':  { bg: '#E8F5E9', color: '#2E7D32' },
+  'osaka':     { bg: '#FFF3E0', color: '#E65100' },
+  'nara':      { bg: '#E8F5E9', color: '#2E7D32' },
+  'hiroshima': { bg: '#FCE4EC', color: '#880E4F' },
+  'nikko':     { bg: '#E0F7FA', color: '#006064' },
+  'kamakura':  { bg: '#F9FBE7', color: '#558B2F' },
+  'hakone':    { bg: '#E8EAF6', color: '#283593' },
+};
+const AUTO_PALETTE = [
+  { bg: '#E8EAF6', color: '#3949AB' }, { bg: '#E0F2F1', color: '#00695C' },
+  { bg: '#FBE9E7', color: '#BF360C' }, { bg: '#F3E5F5', color: '#7B1FA2' },
+  { bg: '#E1F5FE', color: '#0277BD' }, { bg: '#F1F8E9', color: '#558B2F' },
+];
+var autoPaletteIdx = 0;
+var cityColorCache = {};
+
+function getCityStyle(cityName) {
+  var key = (cityName || '').toLowerCase().trim();
+  if (CITY_COLORS[key]) return CITY_COLORS[key];
+  if (cityColorCache[key]) return cityColorCache[key];
+  var c = AUTO_PALETTE[autoPaletteIdx % AUTO_PALETTE.length];
+  autoPaletteIdx++;
+  cityColorCache[key] = c;
+  return c;
+}
+
+function getCustomTitle(date) {
+  try { return JSON.parse(localStorage.getItem('title_' + date) || 'null'); }
+  catch(e) { return null; }
+}
+
+function startTitleEdit(date) {
+  var el = document.getElementById('aday-' + date);
+  if (!el) return;
+  el.classList.add('title-editing', 'open');
+  var custom = getCustomTitle(date);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === date; });
+  document.getElementById('title-input-' + date).value = custom ? custom.title : (day ? day.title : '');
+  document.getElementById('city-input-' + date).value  = custom ? custom.city  : (day ? day.city  : '');
+  document.getElementById('title-input-' + date).focus();
+}
+
+function saveTitleEdit(date) {
+  var titleVal = document.getElementById('title-input-' + date).value.trim();
+  var cityVal  = document.getElementById('city-input-' + date).value.trim();
+  var day = AGENDA_DAYS.find(function(d){ return d.date === date; });
+  var custom = {
+    title: titleVal || (day ? day.title : ''),
+    city:  cityVal  || (day ? day.city  : ''),
+  };
+  localStorage.setItem('title_' + date, JSON.stringify(custom));
+  updateDayHeader(date, custom);
+  cancelTitleEdit(date);
+  showToast('✓ Programme mis à jour');
+}
+
+function cancelTitleEdit(date) {
+  var el = document.getElementById('aday-' + date);
+  if (el) el.classList.remove('title-editing');
+}
+
+function updateDayHeader(date, custom) {
+  var tagEl   = document.getElementById('tag-' + date);
+  var titleEl = document.getElementById('title-' + date);
+  if (!tagEl || !titleEl) return;
+  var style = getCityStyle(custom.city);
+  tagEl.textContent = custom.city;
+  tagEl.className = 'ag-tag';
+  tagEl.style.background = style.bg;
+  tagEl.style.color = style.color;
+  titleEl.textContent = custom.title;
+}
+
+function resetTitleEdit(date) {
+  localStorage.removeItem('title_' + date);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === date; });
+  if (day) updateDayHeader(date, { title: day.title, city: day.city });
+  cancelTitleEdit(date);
+  showToast('↩ Programme réinitialisé');
+}
+
 function buildHomeAnimations() {}
 
 
@@ -858,32 +983,59 @@ function buildAgenda() {
   let html = '';
   let lastCity = '';
 
-  AGENDA_DAYS.forEach((day) => {
+  AGENDA_DAYS.forEach(function(day) {
+    // Charger titre/ville custom si existant
+    const custom = getCustomTitle(day.date);
+    const displayCity  = custom ? custom.city  : day.city;
+    const displayTitle = custom ? custom.title : day.title;
+
     if (day.city !== lastCity) {
       const cityEmoji = { Tokyo:'🗼', Kyoto:'⛩️', Takayama:'🏔️' }[day.city] || '📍';
       html += '<div class="ag-section">' + cityEmoji + ' ' + day.city + '</div>';
       lastCity = day.city;
     }
+
     const saved = localStorage.getItem('agenda_' + day.date) || '';
     const note = (saved || day.preset).replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const parts = day.label.split(' ');
     const dateBadge = parts[0] + '<br>' + parts.slice(1).join(' ');
+
+    // Couleur du tag selon la ville affichée
+    const style = getCityStyle(displayCity);
+    const tagStyle = 'background:' + style.bg + ';color:' + style.color + ';';
+
     html += '<div class="ag-day" id="aday-' + day.date + '">'
+      // Header cliquable
       + '<div class="ag-hdr" onclick="toggleAgendaDay(\'' + day.date + '\')">'
       + '<div class="ag-badge">' + dateBadge + '</div>'
       + '<div style="flex:1;min-width:0;">'
-      + '<span class="ag-tag ' + day.tag + '">' + day.city + '</span>'
-      + '<div class="ag-title">' + day.title + '</div>'
+      + '<span class="ag-tag" id="tag-' + day.date + '" style="' + tagStyle + '">' + displayCity + '</span>'
+      + '<div class="ag-title" id="title-' + day.date + '">' + displayTitle + '</div>'
       + '</div>'
       + '<span class="ag-chev">›</span>'
       + '</div>'
+      // Body
       + '<div class="ag-body">'
+      // Note
       + '<div class="ag-note" id="note-' + day.date + '">' + (note || '') + '</div>'
-      + '<button class="ag-edit-btn" onclick="startEdit(\'' + day.date + '\')">✏️ Modifier</button>'
+      + '<button class="ag-edit-btn" onclick="startEdit(\'' + day.date + '\')">✏️ Modifier la note</button>'
       + '<div class="ag-edit-area">'
       + '<textarea class="ag-textarea" id="ta-' + day.date + '" placeholder="Visites prévues, réservations, idées…">' + (note || '') + '</textarea>'
       + '<button class="ag-save-btn" onclick="saveNote(\'' + day.date + '\')">💾 Enregistrer</button>'
       + '</div>'
+      // Édition titre/ville
+      + '<button class="ag-edit-title-btn" onclick="startTitleEdit(\'' + day.date + '\')">📍 Changer la destination</button>'
+      + '<div class="ag-title-edit-area">'
+      + '<div style="font-size:11px;color:var(--ink-3);margin-bottom:6px;font-weight:600;">DESTINATION</div>'
+      + '<input class="ag-city-input" id="city-input-' + day.date + '" placeholder="Ex: Osaka, Nara, Hiroshima…" type="text">'
+      + '<div style="font-size:11px;color:var(--ink-3);margin-bottom:6px;font-weight:600;">PROGRAMME DU JOUR</div>'
+      + '<input class="ag-title-input" id="title-input-' + day.date + '" placeholder="Ex: 🏯 Château d\'Osaka" type="text">'
+      + '<button class="ag-title-save-btn" onclick="saveTitleEdit(\'' + day.date + '\')">✓ Confirmer</button>'
+      + '<button onclick="cancelTitleEdit(\'' + day.date + '\')" style="width:100%;margin-top:6px;background:none;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;color:var(--ink-3);">Annuler</button>'
+      + (custom ? '<button onclick="resetTitleEdit(\'' + day.date + '\')" style="width:100%;margin-top:6px;background:none;border:none;font-size:11px;color:var(--ink-3);cursor:pointer;text-decoration:underline;">↩ Revenir au programme initial</button>' : '')
+      + '</div>'
+      // Documents
+      + '<div class="ag-docs" id="docs-' + day.date + '"></div>'
       + '</div>'
       + '</div>';
   });
@@ -892,7 +1044,13 @@ function buildAgenda() {
 
 function toggleAgendaDay(date) {
   const el = document.getElementById('aday-' + date);
-  if (el) el.classList.toggle('open');
+  if (!el) return;
+  el.classList.toggle('open');
+  // Initialise les docs au premier ouverture
+  if (el.classList.contains('open')) {
+    const docsEl = document.getElementById('docs-' + date);
+    if (docsEl && docsEl.innerHTML === '') renderDocs(date);
+  }
 }
 
 function startEdit(date) {
@@ -916,8 +1074,128 @@ function saveNote(date) {
   showToast('✓ Note enregistrée');
 }
 
+// ═══════════════════════════════════════════
+// DOCUMENTS AGENDA
+// ═══════════════════════════════════════════
 
- // no-op, plus d'animation kitch
+function getDocs(date) {
+  try { return JSON.parse(localStorage.getItem('docs_' + date) || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveDocs(date, docs) {
+  localStorage.setItem('docs_' + date, JSON.stringify(docs));
+}
+
+function renderDocs(date) {
+  const container = document.getElementById('docs-' + date);
+  if (!container) return;
+  const docs = getDocs(date);
+  let html = '<div class="ag-docs-title">📎 Documents</div>';
+
+  if (docs.length === 0) {
+    html += '<div class="ag-doc-pending" onclick="addDoc(\'' + date + '\')">'
+      + '<span style="font-size:22px;">📥</span>'
+      + '<div class="ag-doc-pending-text">'
+      + '<strong>Aucun document</strong>'
+      + 'Billet, réservation, QR code… Téléchargez d\'abord le PDF depuis Gmail, puis ajoutez-le ici.'
+      + '</div>'
+      + '</div>';
+  } else {
+    docs.forEach(function(doc, i) {
+      html += '<div class="ag-doc-item">'
+        + '<span class="ag-doc-icon">📄</span>'
+        + '<span class="ag-doc-name" title="' + doc.name + '">' + doc.name + '</span>'
+        + '<button class="ag-doc-open" onclick="openDoc(\'' + date + '\',' + i + ')">Ouvrir</button>'
+        + '<button class="ag-doc-delete" onclick="deleteDoc(\'' + date + '\',' + i + ')" title="Supprimer">✕</button>'
+        + '</div>';
+    });
+  }
+
+  html += '<button class="ag-add-doc" onclick="addDoc(\'' + date + '\')">'
+    + '<span>＋</span> Ajouter un document'
+    + '</button>';
+
+  container.innerHTML = html;
+}
+
+function addDoc(date) {
+  // Crée un input file invisible et le déclenche
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/pdf,image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.onchange = function() {
+    const file = input.files[0];
+    if (!file) { document.body.removeChild(input); return; }
+
+    // Vérifier taille (max 4MB pour localStorage)
+    if (file.size > 4 * 1024 * 1024) {
+      showToast('⚠️ Fichier trop volumineux (max 4MB)');
+      document.body.removeChild(input);
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const docs = getDocs(date);
+      docs.push({ name: file.name, type: file.type, data: e.target.result });
+      try {
+        saveDocs(date, docs);
+        renderDocs(date);
+        showToast('📎 Document ajouté : ' + file.name);
+      } catch(err) {
+        showToast('⚠️ Stockage plein — supprimez un document');
+      }
+      document.body.removeChild(input);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  input.click();
+}
+
+function openDoc(date, index) {
+  const docs = getDocs(date);
+  const doc = docs[index];
+  if (!doc) return;
+
+  // Ouvre dans un nouvel onglet / plein écran
+  if (doc.type === 'application/pdf') {
+    const win = window.open('', '_blank');
+    win.document.write(
+      '<html><head><title>' + doc.name + '</title>'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<style>body{margin:0;background:#333;}embed{width:100vw;height:100vh;}</style>'
+      + '</head><body>'
+      + '<embed src="' + doc.data + '" type="application/pdf" width="100%" height="100%">'
+      + '</body></html>'
+    );
+  } else {
+    // Image
+    const win = window.open('', '_blank');
+    win.document.write(
+      '<html><head><title>' + doc.name + '</title>'
+      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+      + '<style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style>'
+      + '</head><body><img src="' + doc.data + '"></body></html>'
+    );
+  }
+}
+
+function deleteDoc(date, index) {
+  const docs = getDocs(date);
+  const name = docs[index] ? docs[index].name : 'ce document';
+  if (!confirm('Supprimer "' + name + '" ?')) return;
+  docs.splice(index, 1);
+  saveDocs(date, docs);
+  renderDocs(date);
+  showToast('🗑️ Document supprimé');
+}
+
+
 
 
 
