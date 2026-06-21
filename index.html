@@ -379,15 +379,31 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   <div class="app-grid">
     <div class="app-tile" onclick="openScanner()">
       <span class="app-icon">📷</span>
-      <span class="app-name">Scanner</span>
+      <span class="app-name">Scanner QR</span>
       <span class="app-desc">QR codes, menus, panneaux</span>
       <span class="app-badge badge-built">Intégré</span>
     </div>
-    <div class="app-tile" onclick="openTranslator()">
-      <span class="app-icon">🔤</span>
-      <span class="app-name">Traducteur</span>
-      <span class="app-desc">Photo → traduction rapide</span>
-      <span class="app-badge badge-ext">Google Lens</span>
+    <div class="app-tile" onclick="openApp('google-lens')">
+      <span class="app-icon">🔍</span>
+      <span class="app-name">Google Lens</span>
+      <span class="app-desc">Photo → traduction instantanée</span>
+      <span class="app-badge badge-ext">Ouvre l'app</span>
+    </div>
+  </div>
+
+  <div style="margin: 16px 16px 4px; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px;">Google</div>
+  <div class="app-grid">
+    <div class="app-tile" onclick="openApp('google-translate')">
+      <span class="app-icon">🗣️</span>
+      <span class="app-name">Translate</span>
+      <span class="app-desc">Traduction japonais ↔ français</span>
+      <span class="app-badge badge-ext">Ouvre l'app</span>
+    </div>
+    <div class="app-tile" onclick="openApp('google-maps')">
+      <span class="app-icon">🗺️</span>
+      <span class="app-name">Maps Tokyo</span>
+      <span class="app-desc">Itinéraires trains, métros, bus</span>
+      <span class="app-badge badge-ext">Ouvre l'app</span>
     </div>
   </div>
 
@@ -397,26 +413,18 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       <span class="app-icon">🏷️</span>
       <span class="app-name">PAYKE</span>
       <span class="app-desc">Scanner codes-barres produits japonais</span>
-      <span class="app-badge badge-jp">Japon</span>
+      <span class="app-badge badge-jp">Play Store</span>
     </div>
     <div class="app-tile" onclick="openApp('suica')">
       <span class="app-icon">🚃</span>
       <span class="app-name">Suica</span>
       <span class="app-desc">Carte de transport IC sans contact</span>
-      <span class="app-badge badge-jp">Japon</span>
+      <span class="app-badge badge-jp">Play Store</span>
     </div>
-    <div class="app-tile" onclick="openApp('google-maps-transit')">
-      <span class="app-icon">🗺️</span>
-      <span class="app-name">Transports</span>
-      <span class="app-desc">Itinéraires trains, métros, bus</span>
-      <span class="app-badge badge-ext">Google Maps</span>
-    </div>
-    <div class="app-tile" onclick="openApp('google-translate')">
-      <span class="app-icon">🗣️</span>
-      <span class="app-name">Voix JP</span>
-      <span class="app-desc">Prononcer des phrases en japonais</span>
-      <span class="app-badge badge-ext">Translate</span>
-    </div>
+  </div>
+
+  <div style="margin:12px 16px 0;background:#F0F4FF;border:1px solid #C5D0F0;border-radius:10px;padding:12px 14px;font-size:12px;color:#3A4A80;line-height:1.6;">
+    💡 <strong>Google Lens, Translate et Maps</strong> s'ouvrent directement si installés. <strong>PAYKE et Suica</strong> redirigent vers le Play Store.
   </div>
 </div>
 
@@ -1165,21 +1173,65 @@ function openGoogleLens() {
 // ═══════════════════════════════════════════
 // APP LINKS
 // ═══════════════════════════════════════════
-const APP_LINKS = {
-  payke: 'https://payke.co.jp',
-  suica: 'https://www.jreast.co.jp/mobilesuica/index.html/',
-  'google-maps-transit': 'https://www.google.com/maps/@35.6762,139.6503,12z',
-  'google-translate': 'https://translate.google.com/?sl=ja&tl=fr&op=translate',
+// Deep links + fallback web
+const APPS = {
+  'google-lens': {
+    name: 'Google Lens',
+    deep: 'googlelens://',
+    web: 'https://lens.google.com',
+  },
+  'google-translate': {
+    name: 'Google Translate',
+    deep: 'googletranslate://?text=&sl=ja&tl=fr',
+    web: 'https://translate.google.com/?sl=ja&tl=fr&op=translate',
+  },
+  'google-maps': {
+    name: 'Google Maps',
+    deep: 'comgooglemaps://?center=35.6762,139.6503&zoom=12',
+    web: 'https://www.google.com/maps/@35.6762,139.6503,12z',
+  },
+  'payke': {
+    name: 'PAYKE',
+    deep: null,
+    web: 'https://payke.co.jp',
+    store: 'https://play.google.com/store/apps/details?id=jp.payke',
+  },
+  'suica': {
+    name: 'Suica',
+    deep: null,
+    web: 'https://www.jreast.co.jp/mobilesuica/index.html/',
+    store: 'https://play.google.com/store/apps/details?id=com.jreast.android.suica',
+  },
 };
 
 function openApp(key) {
-  const url = APP_LINKS[key];
-  if (url) window.open(url, '_blank');
+  const app = APPS[key];
+  if (!app) return;
+
+  if (!app.deep) {
+    // Pas de deep link connu → site web directement
+    window.open(app.store || app.web, '_blank');
+    return;
+  }
+
+  // Tente le deep link, fallback web après 1.5s si l'app ne répond pas
+  const start = Date.now();
+  const fallback = setTimeout(function() {
+    if (Date.now() - start < 2000) {
+      window.open(app.web, '_blank');
+    }
+  }, 1500);
+
+  // Si la page redevient visible rapidement = app ouverte, annuler le fallback
+  window.addEventListener('blur', function onBlur() {
+    clearTimeout(fallback);
+    window.removeEventListener('blur', onBlur);
+  }, { once: true });
+
+  window.location.href = app.deep;
 }
 
-function openTranslator() {
-  window.open('https://lens.google.com', '_blank');
-}
+function openTranslator() { openApp('google-lens'); }
 
 // ═══════════════════════════════════════════
 // PHRASES
