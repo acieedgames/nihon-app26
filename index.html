@@ -94,7 +94,159 @@
   }
   .card-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
 
-  /* ═══════════ PAGE 1 — TAUX DE CHANGE ═══════════ */
+  /* ═══ HOME SCREEN sobre ═══ */
+  #home-screen {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; flex-direction: column;
+    background: #0F0F0F;
+    overflow-y: auto;
+  }
+  #home-screen.hidden { display: none; }
+
+  #home-header {
+    padding: 52px 24px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .home-kanji {
+    font-size: 48px; font-weight: 900;
+    color: var(--red); letter-spacing: 4px; line-height: 1;
+    margin-bottom: 12px;
+  }
+  .home-title {
+    font-size: 20px; font-weight: 700; color: #fff;
+    letter-spacing: -0.3px; margin-bottom: 4px;
+  }
+  .home-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
+  .home-cities {
+    display: inline-flex; gap: 6px; flex-wrap: wrap;
+  }
+  .home-cities {
+    font-size: 12px; color: rgba(255,255,255,0.55);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 12px; display: block;
+    letter-spacing: 0.3px;
+  }
+
+  #home-buttons {
+    padding: 20px 16px calc(32px + var(--safe-bottom));
+    flex: 1;
+  }
+  .home-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .home-btn {
+    background: #1A1A1A;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 16px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: background 0.12s, border-color 0.12s, transform 0.1s;
+    text-align: left;
+  }
+  .home-btn:active { background: #2A0A10; border-color: rgba(200,16,46,0.4); transform: scale(0.97); }
+  .home-btn .btn-icon { font-size: 26px; flex-shrink: 0; }
+  .home-btn .btn-label { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.25; }
+  .home-btn .btn-sub { font-size: 10px; color: rgba(255,255,255,0.38); margin-top: 3px; }
+  .home-btn-wide {
+    grid-column: 1 / -1;
+    border-color: rgba(200,16,46,0.25);
+    background: rgba(200,16,46,0.08);
+  }
+
+  /* INNER APP */
+  #app { display: none; flex-direction: column; height: 100%; }
+  #app.visible { display: flex; }
+
+  #back-home {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
+    color: #fff; border-radius: 20px; padding: 4px 12px;
+    font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
+
+  /* ═══ AGENDA ═══ */
+  .agenda-day {
+    margin: 10px 16px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .agenda-day-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; cursor: pointer;
+    user-select: none;
+  }
+  .agenda-day-header:active { background: var(--red-pale); }
+  .agenda-date-badge {
+    background: var(--red); color: #fff;
+    border-radius: 8px; padding: 4px 10px;
+    font-size: 13px; font-weight: 700;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .agenda-day-city {
+    font-size: 12px; font-weight: 600; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .agenda-day-title { font-size: 14px; font-weight: 600; color: var(--ink); flex: 1; }
+  .agenda-chevron { color: var(--ink-3); font-size: 14px; transition: transform 0.2s; }
+  .agenda-day.open .agenda-chevron { transform: rotate(90deg); }
+
+  .agenda-body {
+    display: none; border-top: 1px solid var(--border);
+    padding: 14px 16px;
+  }
+  .agenda-day.open .agenda-body { display: block; }
+
+  .agenda-note {
+    font-size: 13px; color: var(--ink-2); line-height: 1.6;
+    white-space: pre-wrap; min-height: 20px;
+  }
+  .agenda-note:empty::before { content: 'Aucune note — appuyez sur Modifier'; color: var(--ink-3); font-style: italic; }
+
+  .agenda-edit-btn {
+    margin-top: 10px;
+    background: none; border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 14px;
+    font-size: 12px; font-weight: 600; color: var(--red);
+    cursor: pointer; width: 100%;
+  }
+
+  .agenda-edit-area {
+    display: none; margin-top: 10px;
+  }
+  .agenda-day.editing .agenda-edit-area { display: block; }
+  .agenda-day.editing .agenda-edit-btn { display: none; }
+
+  .agenda-textarea {
+    width: 100%; border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; color: var(--ink);
+    font-family: inherit; resize: vertical; min-height: 80px;
+    background: var(--bg);
+  }
+  .agenda-save-btn {
+    margin-top: 8px; width: 100%;
+    background: var(--red); color: #fff; border: none;
+    border-radius: 8px; padding: 10px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+
+  .agenda-tag {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 6px; margin-right: 4px; margin-bottom: 8px;
+  }
+  .tag-tokyo { background: #E3F2FD; color: #1565C0; }
+  .tag-kyoto { background: #F3E5F5; color: #6A1B9A; }
+  .tag-takayama { background: #E8F5E9; color: #2E7D32; }
+  .tag-travel { background: #FFF8E1; color: #F57F17; }
+
+  .agenda-month-label {
+    margin: 16px 16px 6px;
+    font-size: 11px; font-weight: 700; color: var(--ink-3);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
   .exchange-big {
     text-align: center;
     padding: 28px 20px 24px;
@@ -374,12 +526,161 @@
   #splash {
     position: fixed; inset: 0; background: var(--red);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-    z-index: 999; transition: opacity 0.4s;
+    z-index: 999; transition: opacity 0.5s;
   }
   #splash.hide { opacity: 0; pointer-events: none; display: none; }
   #splash .jp-big { font-size: 72px; color: rgba(255,255,255,0.15); font-weight: 900; }
   #splash h2 { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
   #splash p { color: rgba(255,255,255,0.7); font-size: 14px; }
+
+  /* ═══ HOME SCREEN ═══ */
+  #home-screen {
+    position: fixed; inset: 0; z-index: 50;
+    display: flex; flex-direction: column;
+    background: #0D0A1A;
+    overflow: hidden;
+  }
+  #home-screen.hidden { display: none; }
+
+  #home-illustration {
+    flex: 1; position: relative; overflow: hidden;
+  }
+
+  /* Dégradé ciel */
+  .sky-gradient {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg,
+      #0D0A1A 0%,
+      #1A0F2E 20%,
+      #2D1B4E 40%,
+      #8B1A3A 65%,
+      #C8102E 80%,
+      #E8452A 90%,
+      #F4A261 100%
+    );
+  }
+
+  /* Lune */
+  .moon {
+    position: absolute; top: 12%; right: 22%;
+    width: 52px; height: 52px;
+    background: #FFF8DC;
+    border-radius: 50%;
+    box-shadow: 0 0 30px rgba(255,248,220,0.6), 0 0 60px rgba(255,248,220,0.2);
+  }
+
+  /* Étoiles */
+  .stars { position: absolute; inset: 0; }
+  .star {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle 2s infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: 0.3; } to { opacity: 1; } }
+
+  /* Montagne Fuji */
+  .fuji { position: absolute; bottom: 28%; left: 50%; transform: translateX(-50%); }
+
+  /* Cerisiers */
+  .sakura-left { position: absolute; bottom: 20%; left: -10px; }
+  .sakura-right { position: absolute; bottom: 20%; right: -10px; transform: scaleX(-1); }
+
+  /* Torii */
+  .torii { position: absolute; bottom: 18%; left: 50%; transform: translateX(-50%); }
+
+  /* Reflet eau */
+  .water {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 20%;
+    background: linear-gradient(180deg, rgba(200,16,46,0.3) 0%, rgba(13,10,26,0.8) 100%);
+  }
+  .water-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* Pétales animés */
+  .petal {
+    position: absolute; font-size: 14px;
+    animation: fall linear infinite;
+    pointer-events: none;
+  }
+  @keyframes fall {
+    0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 0.7; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* Texte home */
+  #home-text {
+    position: absolute; bottom: 22%; left: 0; right: 0;
+    text-align: center; padding: 0 20px;
+    pointer-events: none;
+  }
+  #home-text .kanji {
+    font-size: 56px; font-weight: 900; color: rgba(255,255,255,0.12);
+    line-height: 1; letter-spacing: 8px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+  }
+  #home-text .title {
+    font-size: 28px; font-weight: 800; color: #fff;
+    letter-spacing: -0.5px; margin-top: -8px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+  #home-text .subtitle {
+    font-size: 14px; color: rgba(255,255,255,0.75);
+    margin-top: 6px; font-weight: 400;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  }
+  #home-text .dates {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff; font-size: 12px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px; margin-top: 10px;
+    backdrop-filter: blur(4px);
+  }
+
+  /* Grille boutons home */
+  #home-buttons {
+    background: linear-gradient(180deg, transparent 0%, rgba(13,10,26,0.95) 30%, #0D0A1A 100%);
+    padding: 0 16px calc(20px + var(--safe-bottom));
+    padding-top: 60px;
+  }
+  .home-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .home-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 16px 14px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    backdrop-filter: blur(8px);
+    transition: background 0.15s, transform 0.1s;
+    text-align: left;
+  }
+  .home-btn:active { background: rgba(200,16,46,0.3); transform: scale(0.97); }
+  .home-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
+  .home-btn .btn-label { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
+  .home-btn .btn-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+  .home-btn-wide {
+    grid-column: 1 / -1;
+    background: rgba(200,16,46,0.35);
+    border-color: rgba(200,16,46,0.5);
+  }
+
+  /* INNER APP (header + tabs + pages) */
+  #app { display: none; flex-direction: column; height: 100%; }
+  #app.visible { display: flex; }
+
+  /* Bouton retour home dans header */
+  #back-home {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
+    color: #fff; border-radius: 20px; padding: 4px 12px;
+    font-size: 13px; cursor: pointer; white-space: nowrap;
+  }
 </style>
 </head>
 <body>
@@ -388,18 +689,71 @@
 <div id="splash">
   <div class="jp-big">日本</div>
   <h2>Nihon</h2>
-  <p>Compagnon de voyage · Japon</p>
+  <p>Chargement…</p>
 </div>
+
+<!-- ═══ HOME SCREEN ═══ -->
+<div id="home-screen">
+  <!-- Header sobre -->
+  <div id="home-header">
+    <div class="home-kanji">日本</div>
+    <div class="home-title">Nihon — 10 au 28 juillet 2026</div>
+    <div class="home-sub">Patrick & Inoue · Compagnon de voyage</div>
+    <div class="home-cities">🗼 Tokyo · ⛩️ Kyoto · 🏔️ Takayama</div>
+  </div>
+
+  <!-- Boutons navigation -->
+  <div id="home-buttons">
+    <div class="home-grid">
+      <button class="home-btn" onclick="openSection('change')">
+        <span class="btn-icon">💴</span>
+        <div><div class="btn-label">Taux de change</div><div class="btn-sub">EUR ↔ JPY</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('time')">
+        <span class="btn-icon">🕐</span>
+        <div><div class="btn-label">Fuseaux horaires</div><div class="btn-sub">Paris · Tokyo</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('meteo')">
+        <span class="btn-icon">🌡️</span>
+        <div><div class="btn-label">Météo & Chaleur</div><div class="btn-sub">Indice juillet</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('nav')">
+        <span class="btn-icon">🗺️</span>
+        <div><div class="btn-label">Navigation</div><div class="btn-sub">Cartes & trains</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('hotels')">
+        <span class="btn-icon">🏨</span>
+        <div><div class="btn-label">Hébergements</div><div class="btn-sub">Adresses taxi</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('apps')">
+        <span class="btn-icon">📲</span>
+        <div><div class="btn-label">Apps & Scanner</div><div class="btn-sub">Lens · PAYKE · Suica</div></div>
+      </button>
+      <button class="home-btn" onclick="openSection('agenda')">
+        <span class="btn-icon">📅</span>
+        <div><div class="btn-label">Agenda du voyage</div><div class="btn-sub">Planning 10–28 juil.</div></div>
+      </button>
+      <button class="home-btn home-btn-wide" onclick="openSection('utils')">
+        <span class="btn-icon">🗾</span>
+        <div><div class="btn-label">Pratique Japon</div><div class="btn-sub">Phrases · Urgences · Konbini</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ APP (sections internes) ═══ -->
+<div id="app">
 
 <!-- HEADER -->
 <div id="header">
-  <h1>日本 <span class="jp">Nihon</span></h1>
-  <div class="rate-pill" onclick="showTab('change')">
+  <button id="back-home" onclick="goHome()">← Accueil</button>
+  <h1 id="section-title" style="flex:1;text-align:center;">日本</h1>
+  <div class="rate-pill" onclick="openSection('change')">
     <span id="header-rate">⟳ Taux…</span>
   </div>
 </div>
 
-<!-- TABS -->
+<!-- TABS (gardés pour navigation interne rapide) -->
 <div id="tabs">
   <button class="tab active" onclick="showTab('change')" data-tab="change">
     <span class="icon">💴</span>Taux
@@ -415,6 +769,9 @@
   </button>
   <button class="tab" onclick="showTab('nav')" data-tab="nav">
     <span class="icon">🗺️</span>Nav
+  </button>
+  <button class="tab" onclick="showTab('agenda')" data-tab="agenda">
+    <span class="icon">📅</span>Agenda
   </button>
   <button class="tab" onclick="showTab('hotels')" data-tab="hotels">
     <span class="icon">🏨</span>Hôtels
@@ -625,6 +982,12 @@
   </div>
 </div>
 
+<!-- ═══════ PAGE AGENDA ═══════ -->
+<div class="page" id="page-agenda">
+  <div id="agenda-container"></div>
+  <div style="height:20px;"></div>
+</div>
+
 <!-- ═══════ PAGE MÉTÉO ═══════ -->
 <div class="page" id="page-meteo">
   <div class="card" style="margin-top:12px;">
@@ -829,6 +1192,8 @@
 </div><!-- /pages -->
 </div><!-- /main -->
 
+</div><!-- /app -->
+
 <!-- SCANNER VIEW -->
 <div id="scanner-view">
   <video id="scanner-video" autoplay playsinline muted></video>
@@ -851,13 +1216,128 @@
 
 <script>
 // ═══════════════════════════════════════════
-// CONFIG
+// NAVIGATION HOME ↔ SECTIONS
 // ═══════════════════════════════════════════
-const HOME_CITY = { name: 'Paris', tz: 'Europe/Paris' };
+const SECTION_TITLES = {
+  change:  '💴 Taux de change',
+  time:    '🕐 Fuseaux horaires',
+  apps:    '📲 Apps & Scanner',
+  meteo:   '🌡️ Météo & Chaleur',
+  nav:     '🗺️ Navigation',
+  hotels:  '🏨 Hébergements',
+  agenda:  '📅 Agenda du voyage',
+  utils:   '🗾 Pratique Japon',
+  settings:'⚙️ Réglages',
+};
+
+function openSection(id) {
+  document.getElementById('home-screen').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  showTab(id);
+  document.getElementById('section-title').textContent = SECTION_TITLES[id] || '日本';
+  if (id === 'meteo' && !document.getElementById('meteo-cities').querySelector('[style*="border-bottom"]')) fetchMeteo();
+}
+
+function goHome() {
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('home-screen').classList.remove('hidden');
+}
+
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
+  document.getElementById('section-title').textContent = SECTION_TITLES[id] || '日本';
+}
 
 // ═══════════════════════════════════════════
-// HÉBERGEMENTS
+// AGENDA
 // ═══════════════════════════════════════════
+const AGENDA_DAYS = [
+  { date:'2026-07-10', label:'Ven 10 juil.', city:'Tokyo', tag:'tag-travel', title:'✈️ Arrivée à Tokyo', preset:'Vol Paris → Tokyo. Arrivée Narita/Haneda. Check-in Hirai Ayaka House.' },
+  { date:'2026-07-11', label:'Sam 11 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 1', preset:'' },
+  { date:'2026-07-12', label:'Dim 12 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 2', preset:'' },
+  { date:'2026-07-13', label:'Lun 13 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 3', preset:'' },
+  { date:'2026-07-14', label:'Mar 14 juil.', city:'Tokyo', tag:'tag-tokyo', title:'🇫🇷 Fête nationale · Tokyo', preset:'14 juillet à Tokyo !' },
+  { date:'2026-07-15', label:'Mer 15 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 5', preset:'' },
+  { date:'2026-07-16', label:'Jeu 16 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 6', preset:'' },
+  { date:'2026-07-17', label:'Ven 17 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 7', preset:'' },
+  { date:'2026-07-18', label:'Sam 18 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 8', preset:'' },
+  { date:'2026-07-19', label:'Dim 19 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 9', preset:'' },
+  { date:'2026-07-20', label:'Lun 20 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 10', preset:'' },
+  { date:'2026-07-21', label:'Mar 21 juil.', city:'Kyoto', tag:'tag-travel', title:'🚄 Tokyo → Kyoto', preset:'Shinkansen Tokyo → Kyoto. Check-in Good Nature Hotel.' },
+  { date:'2026-07-22', label:'Mer 22 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 1', preset:'' },
+  { date:'2026-07-23', label:'Jeu 23 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 2', preset:'' },
+  { date:'2026-07-24', label:'Ven 24 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 3', preset:'' },
+  { date:'2026-07-25', label:'Sam 25 juil.', city:'Tokyo', tag:'tag-travel', title:'🚄 Kyoto → Tokyo', preset:'Shinkansen retour Tokyo. Check-in Takanawa.' },
+  { date:'2026-07-26', label:'Dim 26 juil.', city:'Takayama', tag:'tag-takayama', title:'Takayama — Jour 1', preset:'' },
+  { date:'2026-07-27', label:'Lun 27 juil.', city:'Takayama', tag:'tag-takayama', title:'Takayama — Jour 2', preset:'' },
+  { date:'2026-07-28', label:'Mar 28 juil.', city:'Takayama', tag:'tag-travel', title:'🛫 Départ retour', preset:'Dernier matin au Japon. Bon retour Patrick & Inoue !' },
+];
+
+function buildAgenda() {
+  const container = document.getElementById('agenda-container');
+  let html = '';
+  let lastCity = '';
+
+  AGENDA_DAYS.forEach((day, i) => {
+    if (day.city !== lastCity) {
+      const cityEmoji = { Tokyo:'🗼', Kyoto:'⛩️', Takayama:'🏔️' }[day.city] || '📍';
+      html += `<div class="agenda-month-label">${cityEmoji} ${day.city}</div>`;
+      lastCity = day.city;
+    }
+    const saved = localStorage.getItem('agenda_' + day.date) || '';
+    const note = saved || day.preset;
+    html += `
+    <div class="agenda-day" id="aday-${day.date}">
+      <div class="agenda-day-header" onclick="toggleAgendaDay('${day.date}')">
+        <div class="agenda-date-badge">${day.label.split(' ')[0]}<br>${day.label.split(' ').slice(1).join(' ')}</div>
+        <div style="flex:1">
+          <div class="agenda-day-city"><span class="agenda-tag ${day.tag}">${day.city}</span></div>
+          <div class="agenda-day-title">${day.title}</div>
+        </div>
+        <span class="agenda-chevron">›</span>
+      </div>
+      <div class="agenda-body">
+        <div class="agenda-note" id="note-${day.date}">${note}</div>
+        <button class="agenda-edit-btn" onclick="startEdit('${day.date}')">✏️ Modifier</button>
+        <div class="agenda-edit-area">
+          <textarea class="agenda-textarea" id="ta-${day.date}" placeholder="Visites prévues, réservations, idées…">${note}</textarea>
+          <button class="agenda-save-btn" onclick="saveNote('${day.date}')">💾 Enregistrer</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function toggleAgendaDay(date) {
+  const el = document.getElementById('aday-' + date);
+  el.classList.toggle('open');
+}
+
+function startEdit(date) {
+  const el = document.getElementById('aday-' + date);
+  el.classList.add('editing');
+  el.classList.add('open');
+  const ta = document.getElementById('ta-' + date);
+  ta.value = document.getElementById('note-' + date).textContent;
+  ta.focus();
+}
+
+function saveNote(date) {
+  const ta = document.getElementById('ta-' + date);
+  const val = ta.value.trim();
+  localStorage.setItem('agenda_' + date, val);
+  document.getElementById('note-' + date).textContent = val;
+  const el = document.getElementById('aday-' + date);
+  el.classList.remove('editing');
+  showToast('✓ Note enregistrée');
+}
+
+function buildHomeAnimations() {} // no-op, plus d'animation kitch
+
+
+
 function copyAddress(id, el) {
   const text = document.getElementById(id).innerText;
   if (navigator.clipboard) {
@@ -871,6 +1351,7 @@ function copyAddress(id, el) {
 }
 
 
+const HOME_CITY = { name: 'Paris', tz: 'Europe/Paris' };
 const JAPAN_TZ = 'Asia/Tokyo';
 const COMPARISONS = [
   { name: 'Tokyo 🗼', tz: JAPAN_TZ, highlight: true },
@@ -1343,28 +1824,23 @@ function showToast(msg) {
 // INIT
 // ═══════════════════════════════════════════
 
-// Dismiss splash IMMÉDIATEMENT — ne jamais bloquer l'UI
+// Dismiss splash IMMÉDIATEMENT
 function dismissSplash() {
   const s = document.getElementById('splash');
   s.style.opacity = '0';
   setTimeout(() => { s.style.display = 'none'; }, 400);
 }
-// Double sécurité : au chargement ET avec délai court
 window.addEventListener('DOMContentLoaded', () => setTimeout(dismissSplash, 800));
 setTimeout(dismissSplash, 1000);
 
+try { buildHomeAnimations(); } catch(e) {}
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { calcHeatIndex(); } catch(e) {}
+try { buildAgenda(); } catch(e) { console.error('agenda',e); }
 setInterval(() => { try { updateTimes(); } catch(e) {} }, 10000);
-
-// Charger météo quand on arrive sur l'onglet
-document.querySelector('[data-tab="meteo"]').addEventListener('click', () => {
-  if (!document.getElementById('meteo-cities').querySelector('div[style*="border-bottom"]')) fetchMeteo();
-});
-
 
 // Service worker for PWA
 if ('serviceWorker' in navigator) {
