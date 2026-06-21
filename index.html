@@ -33,47 +33,85 @@
   /* HEADER */
   #header {
     background: var(--red);
-    padding: 14px 20px 12px;
-    display: flex; align-items: center; gap: 12px;
-    position: relative;
+    padding: 12px 16px 10px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
   }
-  #header h1 { color: #fff; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; flex: 1; }
-  #header .jp { font-size: 13px; opacity: 0.7; font-weight: 400; }
-  #header .rate-pill {
+  #header h1 { color: #fff; font-size: 16px; font-weight: 700; }
+  #back-home {
+    background: rgba(255,255,255,0.2); border: none;
+    color: #fff; border-radius: 8px; padding: 6px 12px;
+    font-size: 18px; cursor: pointer; line-height: 1;
+    flex-shrink: 0;
+  }
+  .rate-pill {
     background: rgba(255,255,255,0.18);
     border: 1px solid rgba(255,255,255,0.25);
-    color: #fff;
-    font-size: 12px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    cursor: pointer;
-    white-space: nowrap;
+    color: #fff; font-size: 11px; font-weight: 600;
+    padding: 4px 8px; border-radius: 12px;
+    white-space: nowrap; flex-shrink: 0;
   }
 
-  /* TABS */
-  #tabs {
-    display: flex;
+  /* BOTTOM NAV */
+  #bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    overflow-x: auto;
-    scrollbar-width: none;
+    border-top: 1px solid var(--border);
+    padding: 8px 0 calc(8px + var(--safe-bottom));
+    z-index: 80;
+    display: none;
+    grid-template-columns: repeat(5, 1fr);
   }
-  #tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    flex: 1;
-    min-width: 72px;
-    padding: 12px 8px 10px;
-    border: none; background: none;
-    font-size: 11px; font-weight: 500;
-    color: var(--ink-3);
-    cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    border-bottom: 2px solid transparent;
-    transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
+  #app.visible ~ #bottom-nav { display: grid; }
+
+  .bnav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; cursor: pointer;
+    padding: 4px 2px;
+    font-size: 11px; font-weight: 500; color: var(--ink-3);
   }
-  .tab .icon { font-size: 22px; }
-  .tab.active { color: var(--red); border-bottom-color: var(--red); }
+  .bnav-btn span:first-child { font-size: 22px; line-height: 1; }
+  .bnav-btn.active { color: var(--red); }
+  .bnav-btn.active span:first-child { transform: scale(1.1); }
+  .bnav-more { }
+
+  /* MENU PLUS */
+  #more-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 90;
+  }
+  #more-overlay.open { display: block; }
+  #more-menu {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-radius: 20px 20px 0 0;
+    padding: 12px 16px calc(24px + var(--safe-bottom));
+    z-index: 91;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  #more-menu.open { transform: translateY(0); }
+  .more-handle {
+    width: 36px; height: 4px; background: var(--border);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .more-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+  }
+  .more-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 8px;
+    cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink);
+  }
+  .more-btn span:first-child { font-size: 26px; }
+  .more-btn:active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
+  .more-btn-home { background: var(--red-pale); border-color: rgba(200,16,46,0.2); color: var(--red); }
+
+  /* PAGES — padding bottom pour bottom nav */
+  .page { padding-bottom: calc(72px + var(--safe-bottom)); }
+
 
   /* PAGES */
   #pages { flex: 1; overflow: hidden; position: relative; }
@@ -744,47 +782,16 @@
 <!-- ═══ APP (sections internes) ═══ -->
 <div id="app">
 
-<!-- HEADER -->
+<!-- HEADER SECTION (titre + bouton retour) -->
 <div id="header">
-  <button id="back-home" onclick="goHome()">← Accueil</button>
-  <h1 id="section-title" style="flex:1;text-align:center;">日本</h1>
-  <div class="rate-pill" onclick="openSection('change')">
-    <span id="header-rate">⟳ Taux…</span>
+  <button id="back-home" onclick="goHome()">⌂</button>
+  <h1 id="section-title" style="flex:1;text-align:center;font-size:16px;">日本</h1>
+  <div class="rate-pill" id="rate-pill-header">
+    <span id="header-rate">⟳</span>
   </div>
 </div>
 
-<!-- TABS (gardés pour navigation interne rapide) -->
-<div id="tabs">
-  <button class="tab active" onclick="showTab('change')" data-tab="change">
-    <span class="icon">💴</span>Taux
-  </button>
-  <button class="tab" onclick="showTab('time')" data-tab="time">
-    <span class="icon">🕐</span>Heures
-  </button>
-  <button class="tab" onclick="showTab('apps')" data-tab="apps">
-    <span class="icon">📲</span>Apps
-  </button>
-  <button class="tab" onclick="showTab('meteo')" data-tab="meteo">
-    <span class="icon">🌡️</span>Météo
-  </button>
-  <button class="tab" onclick="showTab('nav')" data-tab="nav">
-    <span class="icon">🗺️</span>Nav
-  </button>
-  <button class="tab" onclick="showTab('agenda')" data-tab="agenda">
-    <span class="icon">📅</span>Agenda
-  </button>
-  <button class="tab" onclick="showTab('hotels')" data-tab="hotels">
-    <span class="icon">🏨</span>Hôtels
-  </button>
-  <button class="tab" onclick="showTab('utils')" data-tab="utils">
-    <span class="icon">🗾</span>Pratique
-  </button>
-  <button class="tab" onclick="showTab('settings')" data-tab="settings">
-    <span class="icon">⚙️</span>Réglages
-  </button>
-</div>
-
-<!-- MAIN -->
+<!-- MAIN CONTENT -->
 <div id="main">
 <div id="pages">
 
@@ -1194,6 +1201,51 @@
 
 </div><!-- /app -->
 
+<!-- BOTTOM NAV BAR — visible uniquement dans l'app -->
+<nav id="bottom-nav">
+  <button class="bnav-btn active" data-tab="change" onclick="showTab('change')">
+    <span>💴</span><span>Taux</span>
+  </button>
+  <button class="bnav-btn" data-tab="time" onclick="showTab('time')">
+    <span>🕐</span><span>Heures</span>
+  </button>
+  <button class="bnav-btn" data-tab="meteo" onclick="showTab('meteo')">
+    <span>🌡️</span><span>Météo</span>
+  </button>
+  <button class="bnav-btn" data-tab="agenda" onclick="showTab('agenda')">
+    <span>📅</span><span>Agenda</span>
+  </button>
+  <button class="bnav-btn bnav-more" onclick="toggleMoreMenu()">
+    <span>⋯</span><span>Plus</span>
+  </button>
+</nav>
+
+<!-- MENU "PLUS" (slide du bas) -->
+<div id="more-overlay" onclick="toggleMoreMenu()"></div>
+<div id="more-menu">
+  <div class="more-handle"></div>
+  <div class="more-grid">
+    <button class="more-btn" onclick="showTabFromMore('hotels')">
+      <span>🏨</span><span>Hébergements</span>
+    </button>
+    <button class="more-btn" onclick="showTabFromMore('nav')">
+      <span>🗺️</span><span>Navigation</span>
+    </button>
+    <button class="more-btn" onclick="showTabFromMore('apps')">
+      <span>📲</span><span>Apps</span>
+    </button>
+    <button class="more-btn" onclick="showTabFromMore('utils')">
+      <span>🗾</span><span>Pratique</span>
+    </button>
+    <button class="more-btn" onclick="showTabFromMore('settings')">
+      <span>⚙️</span><span>Réglages</span>
+    </button>
+    <button class="more-btn more-btn-home" onclick="goHome()">
+      <span>⌂</span><span>Accueil</span>
+    </button>
+  </div>
+</div>
+
 <!-- SCANNER VIEW -->
 <div id="scanner-view">
   <video id="scanner-video" autoplay playsinline muted></video>
@@ -1234,20 +1286,44 @@ function openSection(id) {
   document.getElementById('home-screen').classList.add('hidden');
   document.getElementById('app').classList.add('visible');
   showTab(id);
-  document.getElementById('section-title').textContent = SECTION_TITLES[id] || '日本';
   if (id === 'meteo' && !document.getElementById('meteo-cities').querySelector('[style*="border-bottom"]')) fetchMeteo();
 }
 
 function goHome() {
+  closeMoreMenu();
   document.getElementById('app').classList.remove('visible');
   document.getElementById('home-screen').classList.remove('hidden');
 }
 
 function showTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
+  document.querySelectorAll('.bnav-btn[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
   document.getElementById('section-title').textContent = SECTION_TITLES[id] || '日本';
 }
+
+function showTabFromMore(id) {
+  closeMoreMenu();
+  showTab(id);
+}
+
+function toggleMoreMenu() {
+  const menu = document.getElementById('more-menu');
+  if (menu.classList.contains('open')) { closeMoreMenu(); }
+  else {
+    document.getElementById('more-overlay').classList.add('open');
+    menu.classList.add('open');
+    document.querySelector('.bnav-more').classList.add('active');
+  }
+}
+
+function closeMoreMenu() {
+  document.getElementById('more-overlay').classList.remove('open');
+  document.getElementById('more-menu').classList.remove('open');
+  const m = document.querySelector('.bnav-more');
+  if (m) m.classList.remove('active');
+}
+
+function buildHomeAnimations() {}
 
 // ═══════════════════════════════════════════
 // AGENDA
@@ -1782,12 +1858,12 @@ const TRIP = [
 ];
 
 const NAV_LINKS = {
-  'gmaps-tokyo': 'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
-  'gmaps-kyoto': 'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
+  'gmaps-tokyo':    'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
+  'gmaps-kyoto':    'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
   'gmaps-takanawa': 'https://www.google.com/maps/search/Takanawa,+Minato,+Tokyo/@35.6380,139.7314,15z',
-  'hyperdia': 'https://www.hyperdia.com/en/',
-  'navitime': 'https://www.navitime.co.jp/map/en/',
-  'jma': 'https://www.jma.go.jp/bosai/map.html#5/35.6/138.5/&elem=root&typhoon=all',
+  'hyperdia':       'https://transit.yahoo.co.jp/?to=&from=&done=time&type=1&ws=3&s=0&ei=utf-8&nl=&no=10&expkind=1&userpass=1&mtf=1&al=1&hb=1&lb=1&sr=1',
+  'navitime':       'https://www.navitime.co.jp/map/en/',
+  'jma':            'https://www.jma.go.jp/bosai/map.html#5/35.6/138.5/&elem=root&typhoon=all',
 };
 
 function openNavApp(key) {
@@ -1796,18 +1872,24 @@ function openNavApp(key) {
 }
 
 function buildTimeline() {
-  document.getElementById('trip-timeline').innerHTML = TRIP.map((s, i) => `
-    <div style="display:flex;gap:14px;padding:0 16px;margin-bottom:4px;">
-      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
-        <div style="width:36px;height:36px;border-radius:50%;background:${s.color};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">${s.icon}</div>
-        ${i < TRIP.length-1 ? `<div style="width:2px;flex:1;min-height:24px;background:var(--border);margin:4px 0;"></div>` : ''}
-      </div>
-      <div style="padding-top:6px;padding-bottom:${i < TRIP.length-1 ? '0' : '4px'};">
-        <div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">${s.date}</div>
-        <div style="font-size:15px;font-weight:700;color:var(--ink);margin:2px 0;">${s.city}</div>
-        <div style="font-size:12px;color:var(--ink-2);">${s.note}</div>
-      </div>
-    </div>`).join('');
+  const container = document.getElementById('trip-timeline');
+  if (!container) return;
+  container.innerHTML = TRIP.map(function(s, i) {
+    const connector = i < TRIP.length - 1
+      ? '<div style="width:2px;flex:1;min-height:24px;background:var(--border);margin:4px 0;"></div>'
+      : '';
+    const pb = i < TRIP.length - 1 ? '0' : '4px';
+    return '<div style="display:flex;gap:14px;padding:0 16px;margin-bottom:4px;">'
+      + '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:' + s.color + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + s.icon + '</div>'
+      + connector
+      + '</div>'
+      + '<div style="padding-top:6px;padding-bottom:' + pb + ';">'
+      + '<div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">' + s.date + '</div>'
+      + '<div style="font-size:15px;font-weight:700;color:var(--ink);margin:2px 0;">' + s.city + '</div>'
+      + '<div style="font-size:12px;color:var(--ink-2);">' + s.note + '</div>'
+      + '</div></div>';
+  }).join('');
 }
 
 
