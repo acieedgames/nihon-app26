@@ -248,6 +248,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .tag-travel   { background: #FFF8E1; color: #F57F17; }
 .tag-custom   { background: #F0F0F0; color: #444; } /* couleur neutre, sera surchargée inline */
 .ag-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
+.ag-note-preview { font-size: 11px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; font-style: italic; }
 .ag-chev { color: var(--ink-3); font-size: 14px; transition: transform 0.2s; }
 /* Bouton édition titre */
 .ag-edit-title-btn { margin-top: 10px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; width: 100%; text-align: left; }
@@ -324,6 +325,16 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 
 /* ── AGENDA : le textarea ne doit pas déborder ── */
 .ag-textarea { width: 100%; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); font-family: inherit; resize: vertical; min-height: 80px; background: var(--bg); box-sizing: border-box; }
+
+/* ── VISIONNEUSE PDF/IMAGE ── */
+#doc-viewer { position: fixed; inset: 0; z-index: 110; background: #111; display: none; flex-direction: column; }
+#doc-viewer.open { display: flex; }
+#doc-viewer-bar { display: flex; align-items: center; gap: 10px; background: #1A1A1A; padding: 12px 16px; flex-shrink: 0; }
+#doc-viewer-name { flex: 1; color: #fff; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#doc-viewer-close { background: rgba(255,255,255,0.15); border: none; color: #fff; border-radius: 8px; padding: 7px 14px; font-size: 14px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+#doc-viewer-content { flex: 1; overflow: auto; }
+#doc-viewer-content iframe { width: 100%; height: 100%; border: none; display: block; }
+#doc-viewer-content img { width: 100%; height: auto; display: block; }
 
 #toast {
   position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(16px);
@@ -812,6 +823,15 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <!-- TOAST -->
 <div id="toast"></div>
 
+<!-- VISIONNEUSE DOCUMENTS -->
+<div id="doc-viewer">
+  <div id="doc-viewer-bar">
+    <span id="doc-viewer-name">Document</span>
+    <button id="doc-viewer-close" onclick="closeDocViewer()">✕ Fermer</button>
+  </div>
+  <div id="doc-viewer-content"></div>
+</div>
+
 <script>
 // ── NAVIGATION ──
 const TITLES = {
@@ -995,8 +1015,13 @@ function buildAgenda() {
       lastCity = day.city;
     }
 
+    // Première ligne de la note pour preview
     const saved = localStorage.getItem('agenda_' + day.date) || '';
     const note = (saved || day.preset).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const notePreview = (saved || day.preset || '').split('\n')[0].trim();
+    const previewHtml = notePreview
+      ? '<div class="ag-note-preview" id="preview-' + day.date + '">' + notePreview.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+      : '<div class="ag-note-preview" id="preview-' + day.date + '" style="display:none;"></div>';
     const parts = day.label.split(' ');
     const dateBadge = parts[0] + '<br>' + parts.slice(1).join(' ');
 
@@ -1011,6 +1036,7 @@ function buildAgenda() {
       + '<div style="flex:1;min-width:0;">'
       + '<span class="ag-tag" id="tag-' + day.date + '" style="' + tagStyle + '">' + displayCity + '</span>'
       + '<div class="ag-title" id="title-' + day.date + '">' + displayTitle + '</div>'
+      + previewHtml
       + '</div>'
       + '<span class="ag-chev">›</span>'
       + '</div>'
@@ -1070,6 +1096,13 @@ function saveNote(date) {
   const val = ta.value.trim();
   localStorage.setItem('agenda_' + date, val);
   note.textContent = val;
+  // Rafraîchir la preview (première ligne)
+  const preview = document.getElementById('preview-' + date);
+  if (preview) {
+    const first = val.split('\n')[0].trim();
+    if (first) { preview.textContent = first; preview.style.display = ''; }
+    else { preview.textContent = ''; preview.style.display = 'none'; }
+  }
   el.classList.remove('editing');
   showToast('✓ Note enregistrée');
 }
@@ -1158,31 +1191,42 @@ function addDoc(date) {
 }
 
 function openDoc(date, index) {
-  const docs = getDocs(date);
-  const doc = docs[index];
+  var docs = getDocs(date);
+  var doc = docs[index];
   if (!doc) return;
 
-  // Ouvre dans un nouvel onglet / plein écran
+  var viewer = document.getElementById('doc-viewer');
+  var content = document.getElementById('doc-viewer-content');
+  var nameEl = document.getElementById('doc-viewer-name');
+
+  nameEl.textContent = doc.name;
+  content.innerHTML = '';
+
   if (doc.type === 'application/pdf') {
-    const win = window.open('', '_blank');
-    win.document.write(
-      '<html><head><title>' + doc.name + '</title>'
-      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-      + '<style>body{margin:0;background:#333;}embed{width:100vw;height:100vh;}</style>'
-      + '</head><body>'
-      + '<embed src="' + doc.data + '" type="application/pdf" width="100%" height="100%">'
-      + '</body></html>'
-    );
+    // Embed PDF directement dans l'app — pas de nouvel onglet
+    var embed = document.createElement('embed');
+    embed.src = doc.data;
+    embed.type = 'application/pdf';
+    embed.style.cssText = 'width:100%;height:100%;border:none;display:block;';
+    content.style.height = '100%';
+    content.appendChild(embed);
   } else {
     // Image
-    const win = window.open('', '_blank');
-    win.document.write(
-      '<html><head><title>' + doc.name + '</title>'
-      + '<meta name="viewport" content="width=device-width,initial-scale=1">'
-      + '<style>body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;}img{max-width:100%;max-height:100vh;}</style>'
-      + '</head><body><img src="' + doc.data + '"></body></html>'
-    );
+    var img = document.createElement('img');
+    img.src = doc.data;
+    img.style.cssText = 'width:100%;height:auto;display:block;';
+    content.style.height = 'auto';
+    content.appendChild(img);
   }
+
+  viewer.classList.add('open');
+}
+
+function closeDocViewer() {
+  var viewer = document.getElementById('doc-viewer');
+  viewer.classList.remove('open');
+  // Nettoyer le contenu pour libérer mémoire
+  document.getElementById('doc-viewer-content').innerHTML = '';
 }
 
 function deleteDoc(date, index) {
