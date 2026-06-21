@@ -695,11 +695,11 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       <span class="app-desc">Ouvrir dans Google Maps</span>
       <span class="app-badge badge-ext">Maps</span>
     </div>
-    <div class="app-tile" onclick="openNavApp('gmaps-takanawa')">
-      <span class="app-icon">🏯</span>
-      <span class="app-name">Takanawa</span>
-      <span class="app-desc">Quartier de Tokyo sud</span>
-      <span class="app-badge badge-ext">Maps</span>
+    <div class="app-tile" onclick="openNavApp('gmaps-takayama')">
+      <span class="app-icon">🏔️</span>
+      <span class="app-name">Takayama</span>
+      <span class="app-desc">Ville de Gifu · Ryokan</span>
+      <span class="app-badge badge-jp">Maps</span>
     </div>
     <div class="app-tile" onclick="openNavApp('hyperdia')">
       <span class="app-icon">🚄</span>
@@ -1322,41 +1322,55 @@ function weatherEmoji(code) {
 function calcHeatIndex() {
   const T = parseFloat(document.getElementById('heat-temp').value) || 35;
   const H = parseFloat(document.getElementById('heat-hum').value) || 80;
-  // Formule Steadman simplifiée (°C)
-  const hi = -8.78469475556 + 1.61139411*T + 2.33854883889*H
-    - 0.14611605*T*H - 0.012308094*T*T - 0.0164248277778*H*H
-    + 0.002211732*T*T*H + 0.00072546*T*H*H - 0.000003582*T*T*H*H;
-  const feels = Math.round(hi);
+
+  // La formule Steadman n'est valide que pour T>=27°C et H>=40%
+  // En dessous on utilise directement la température
+  let feels;
+  if (T >= 27 && H >= 40) {
+    const hi = -8.78469475556 + 1.61139411*T + 2.33854883889*H
+      - 0.14611605*T*H - 0.012308094*T*T - 0.0164248277778*H*H
+      + 0.002211732*T*T*H + 0.00072546*T*H*H - 0.000003582*T*T*H*H;
+    // Sanity check : le ressenti ne peut pas dépasser T+15°C ni être absurde
+    feels = Math.round(Math.min(hi, T + 15));
+  } else {
+    feels = Math.round(T); // sous 27°C, pas de formule fiable
+  }
+
   let level, color, advice;
   if (feels < 27)      { level='Confortable'; color='#2E7D32'; advice='Conditions agréables pour visiter.'; }
   else if (feels < 32) { level='Attention'; color='#E07000'; advice='Hydratation régulière recommandée.'; }
   else if (feels < 39) { level='Danger'; color='#C8102E'; advice='Évitez les activités intenses entre 11h et 16h. Buvez souvent.'; }
   else                 { level='Danger extrême'; color='#8B0000'; advice='Restez à l\'ombre ou en intérieur climatisé. Danger de coup de chaleur.'; }
-  document.getElementById('heat-result').innerHTML = `
-    <div style="background:${color}18;border:1px solid ${color}40;border-radius:10px;padding:14px;">
-      <div style="font-size:11px;font-weight:600;color:${color};text-transform:uppercase;letter-spacing:0.8px;">${level}</div>
-      <div style="font-size:36px;font-weight:800;color:${color};margin:4px 0;">${feels}°C ressenti</div>
-      <div style="font-size:13px;color:var(--ink-2);">${advice}</div>
-      <div style="font-size:12px;color:var(--ink-3);margin-top:8px;">💧 Patrick & Inoue : minimum 500ml/h par forte chaleur</div>
-    </div>`;
+
+  document.getElementById('heat-result').innerHTML =
+    '<div style="background:' + color + '18;border:1px solid ' + color + '40;border-radius:10px;padding:14px;">'
+    + '<div style="font-size:11px;font-weight:600;color:' + color + ';text-transform:uppercase;letter-spacing:0.8px;">' + level + '</div>'
+    + '<div style="font-size:36px;font-weight:800;color:' + color + ';margin:4px 0;">' + feels + '°C ressenti</div>'
+    + '<div style="font-size:13px;color:var(--ink-2);">' + advice + '</div>'
+    + '<div style="font-size:12px;color:var(--ink-3);margin-top:8px;">💧 Patrick & Inoue : minimum 500ml/h par forte chaleur</div>'
+    + '</div>';
 }
 
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
 const TRIP = [
-  { date: '10 juil.', city: 'Arrivée Tokyo 🛬', icon: '✈️', note: 'Narita ou Haneda → Takanawa', color: '#1565C0' },
-  { date: '10–?? juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Shinjuku, Shibuya, Asakusa…', color: '#C8102E' },
-  { date: 'Mi-juillet', city: 'Kyoto ⛩️', icon: '🚄', note: 'Shinkansen depuis Tokyo · 2h15', color: '#6A1B9A' },
-  { date: 'Retour', city: 'Tokyo 🗼', icon: '🚄', note: 'Shinkansen retour', color: '#C8102E' },
-  { date: 'Fin juillet', city: 'Takanawa 🏨', icon: '🏯', note: 'Quartier sud de Tokyo · Minato-ku', color: '#2E7D32' },
+  { date: '10 juil.', city: 'Arrivée Tokyo 🗼', icon: '✈️', note: 'Narita/Haneda → Hirai Ayaka House', color: '#1565C0' },
+  { date: '10–15 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Shinjuku, Shibuya, Asakusa…', color: '#C8102E' },
+  { date: '16 juil.', city: 'Tokyo → Kyoto ⛩️', icon: '🚄', note: 'Shinkansen · 2h15 · Good Nature Hotel', color: '#6A1B9A' },
+  { date: '16–18 juil.', city: 'Kyoto ⛩️', icon: '⛩️', note: 'Fushimi Inari, Arashiyama, Gion…', color: '#6A1B9A' },
+  { date: '19 juil.', city: 'Kyoto → Tokyo 🗼', icon: '🚄', note: 'Shinkansen retour · Takanawa', color: '#C8102E' },
+  { date: '19–22 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Akihabara, Harajuku, Odaiba…', color: '#C8102E' },
+  { date: '23 juil.', city: 'Tokyo → Takayama 🏔️', icon: '🚄', note: 'Train · Ryokan Wanosato', color: '#2E7D32' },
+  { date: '23–25 juil.', city: 'Takayama 🏔️', icon: '🏯', note: 'Vieille ville, onsen, artisanat…', color: '#2E7D32' },
+  { date: '26 juil.', city: 'Takayama → Tokyo 🗼', icon: '🚄', note: 'Retour · Dernier jour', color: '#C8102E' },
   { date: '28 juil.', city: 'Départ 🛫', icon: '✈️', note: 'Bon retour Patrick & Inoue !', color: '#888' },
 ];
 
 const NAV_LINKS = {
   'gmaps-tokyo':    'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
   'gmaps-kyoto':    'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
-  'gmaps-takanawa': 'https://www.google.com/maps/search/Takanawa,+Minato,+Tokyo/@35.6380,139.7314,15z',
+  'gmaps-takayama': 'https://www.google.com/maps/search/Takayama+Gifu/@36.1461,137.2523,13z',
   'hyperdia':       'https://transit.yahoo.co.jp/?to=&from=&done=time&type=1&ws=3&s=0&ei=utf-8&nl=&no=10&expkind=1&userpass=1&mtf=1&al=1&hb=1&lb=1&sr=1',
   'navitime':       'https://www.navitime.co.jp/map/en/',
   'jma':            'https://www.jma.go.jp/bosai/map.html#5/35.6/138.5/&elem=root&typhoon=all',
