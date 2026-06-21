@@ -278,7 +278,28 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .s-row .sl span { font-size: 11px; color: var(--ink-3); }
 .s-row .sa { color: var(--red); font-size: 12px; font-weight: 600; cursor: pointer; }
 
-/* ── TOAST ── */
+/* ── SETTINGS (classes manquantes) ── */
+.settings-section { margin: 12px 16px 0; }
+.settings-section h3 { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; padding: 0 2px; }
+.setting-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 7px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.setting-row .icon { font-size: 20px; flex-shrink: 0; }
+.setting-row .label { flex: 1; }
+.setting-row .label strong { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+.setting-row .label span { font-size: 11px; color: var(--ink-3); }
+.setting-row .action { color: var(--red); font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+.add-feature-btn { display: flex; align-items: center; gap: 10px; background: var(--red-pale); border: 1.5px dashed rgba(200,16,46,0.3); border-radius: var(--radius-sm); padding: 13px 14px; cursor: pointer; color: var(--red); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+
+/* ── HEADER fixe dans l'app ── */
+#hdr { position: sticky; top: 0; z-index: 10; flex-shrink: 0; }
+
+/* ── PAGES : scroll indépendant, ne déborde pas ── */
+#pages { flex: 1; overflow: hidden; position: relative; }
+.page { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding: 0 0 calc(74px + var(--safe-bottom)); display: none; -webkit-overflow-scrolling: touch; }
+.page.on { display: block; }
+
+/* ── AGENDA : le textarea ne doit pas déborder ── */
+.ag-textarea { width: 100%; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); font-family: inherit; resize: vertical; min-height: 80px; background: var(--bg); box-sizing: border-box; }
+
 #toast {
   position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(16px);
   background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 20px;
@@ -836,63 +857,68 @@ const AGENDA_DAYS = [
 
 function buildAgenda() {
   const container = document.getElementById('agenda-container');
+  if (!container) return;
   let html = '';
   let lastCity = '';
 
-  AGENDA_DAYS.forEach((day, i) => {
+  AGENDA_DAYS.forEach((day) => {
     if (day.city !== lastCity) {
       const cityEmoji = { Tokyo:'🗼', Kyoto:'⛩️', Takayama:'🏔️' }[day.city] || '📍';
-      html += `<div class="agenda-month-label">${cityEmoji} ${day.city}</div>`;
+      html += '<div class="ag-section">' + cityEmoji + ' ' + day.city + '</div>';
       lastCity = day.city;
     }
     const saved = localStorage.getItem('agenda_' + day.date) || '';
-    const note = saved || day.preset;
-    html += `
-    <div class="agenda-day" id="aday-${day.date}">
-      <div class="agenda-day-header" onclick="toggleAgendaDay('${day.date}')">
-        <div class="agenda-date-badge">${day.label.split(' ')[0]}<br>${day.label.split(' ').slice(1).join(' ')}</div>
-        <div style="flex:1">
-          <div class="agenda-day-city"><span class="agenda-tag ${day.tag}">${day.city}</span></div>
-          <div class="agenda-day-title">${day.title}</div>
-        </div>
-        <span class="agenda-chevron">›</span>
-      </div>
-      <div class="agenda-body">
-        <div class="agenda-note" id="note-${day.date}">${note}</div>
-        <button class="agenda-edit-btn" onclick="startEdit('${day.date}')">✏️ Modifier</button>
-        <div class="agenda-edit-area">
-          <textarea class="agenda-textarea" id="ta-${day.date}" placeholder="Visites prévues, réservations, idées…">${note}</textarea>
-          <button class="agenda-save-btn" onclick="saveNote('${day.date}')">💾 Enregistrer</button>
-        </div>
-      </div>
-    </div>`;
+    const note = (saved || day.preset).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const parts = day.label.split(' ');
+    const dateBadge = parts[0] + '<br>' + parts.slice(1).join(' ');
+    html += '<div class="ag-day" id="aday-' + day.date + '">'
+      + '<div class="ag-hdr" onclick="toggleAgendaDay(\'' + day.date + '\')">'
+      + '<div class="ag-badge">' + dateBadge + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+      + '<span class="ag-tag ' + day.tag + '">' + day.city + '</span>'
+      + '<div class="ag-title">' + day.title + '</div>'
+      + '</div>'
+      + '<span class="ag-chev">›</span>'
+      + '</div>'
+      + '<div class="ag-body">'
+      + '<div class="ag-note" id="note-' + day.date + '">' + (note || '') + '</div>'
+      + '<button class="ag-edit-btn" onclick="startEdit(\'' + day.date + '\')">✏️ Modifier</button>'
+      + '<div class="ag-edit-area">'
+      + '<textarea class="ag-textarea" id="ta-' + day.date + '" placeholder="Visites prévues, réservations, idées…">' + (note || '') + '</textarea>'
+      + '<button class="ag-save-btn" onclick="saveNote(\'' + day.date + '\')">💾 Enregistrer</button>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
   });
   container.innerHTML = html;
 }
 
 function toggleAgendaDay(date) {
   const el = document.getElementById('aday-' + date);
-  el.classList.toggle('open');
+  if (el) el.classList.toggle('open');
 }
 
 function startEdit(date) {
   const el = document.getElementById('aday-' + date);
-  el.classList.add('editing');
-  el.classList.add('open');
+  if (!el) return;
+  el.classList.add('editing', 'open');
   const ta = document.getElementById('ta-' + date);
-  ta.value = document.getElementById('note-' + date).textContent;
-  ta.focus();
+  const note = document.getElementById('note-' + date);
+  if (ta && note) { ta.value = note.textContent; ta.focus(); }
 }
 
 function saveNote(date) {
   const ta = document.getElementById('ta-' + date);
+  const note = document.getElementById('note-' + date);
+  const el = document.getElementById('aday-' + date);
+  if (!ta || !note || !el) return;
   const val = ta.value.trim();
   localStorage.setItem('agenda_' + date, val);
-  document.getElementById('note-' + date).textContent = val;
-  const el = document.getElementById('aday-' + date);
+  note.textContent = val;
   el.classList.remove('editing');
   showToast('✓ Note enregistrée');
 }
+
 
  // no-op, plus d'animation kitch
 
