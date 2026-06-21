@@ -69,6 +69,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 #hdr {
   background: var(--red); padding: 12px 14px 10px;
   display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  position: sticky; top: 0; z-index: 10;
 }
 #btn-home {
   background: rgba(255,255,255,0.2); border: none; color: #fff;
@@ -80,16 +81,6 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   color: #fff; font-size: 11px; font-weight: 600;
   padding: 4px 8px; border-radius: 12px; white-space: nowrap; flex-shrink: 0;
 }
-
-/* ── PAGES ── */
-#pages { flex: 1; position: relative; overflow: hidden; }
-.page {
-  position: absolute; inset: 0;
-  overflow-y: auto;
-  padding: 0 0 calc(74px + var(--safe-bottom));
-  display: none;
-}
-.page.on { display: block; }
 
 /* ── BOTTOM NAV ── */
 #bnav {
@@ -265,7 +256,6 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .ag-edit-area { display: none; margin-top: 10px; }
 .ag-day.editing .ag-edit-area { display: block; }
 .ag-day.editing .ag-edit-btn { display: none; }
-.ag-textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); font-family: inherit; resize: vertical; min-height: 80px; background: var(--bg); }
 .ag-save-btn { margin-top: 8px; width: 100%; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
 /* ── SETTINGS ── */
@@ -288,9 +278,6 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .setting-row .label span { font-size: 11px; color: var(--ink-3); }
 .setting-row .action { color: var(--red); font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 .add-feature-btn { display: flex; align-items: center; gap: 10px; background: var(--red-pale); border: 1.5px dashed rgba(200,16,46,0.3); border-radius: var(--radius-sm); padding: 13px 14px; cursor: pointer; color: var(--red); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-
-/* ── HEADER fixe dans l'app ── */
-#hdr { position: sticky; top: 0; z-index: 10; flex-shrink: 0; }
 
 /* ── PAGES : scroll indépendant, ne déborde pas ── */
 #pages { flex: 1; overflow: hidden; position: relative; }
@@ -499,6 +486,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
       <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
     </div>
+    <div class="setting-row">
+      <span class="icon">🌐</span>
       <div class="label">
         <strong>Ville de référence</strong>
         <span id="home-city-label">Paris, France</span>
@@ -834,25 +823,25 @@ function buildHomeAnimations() {}
 // AGENDA
 // ═══════════════════════════════════════════
 const AGENDA_DAYS = [
-  { date:'2026-07-10', label:'Ven 10 juil.', city:'Tokyo', tag:'tag-travel', title:'✈️ Arrivée à Tokyo', preset:'Vol Paris → Tokyo. Arrivée Narita/Haneda. Check-in Hirai Ayaka House.' },
-  { date:'2026-07-11', label:'Sam 11 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 1', preset:'' },
-  { date:'2026-07-12', label:'Dim 12 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 2', preset:'' },
-  { date:'2026-07-13', label:'Lun 13 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 3', preset:'' },
-  { date:'2026-07-14', label:'Mar 14 juil.', city:'Tokyo', tag:'tag-tokyo', title:'🇫🇷 Fête nationale · Tokyo', preset:'14 juillet à Tokyo !' },
-  { date:'2026-07-15', label:'Mer 15 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 5', preset:'' },
-  { date:'2026-07-16', label:'Jeu 16 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 6', preset:'' },
-  { date:'2026-07-17', label:'Ven 17 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 7', preset:'' },
-  { date:'2026-07-18', label:'Sam 18 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 8', preset:'' },
-  { date:'2026-07-19', label:'Dim 19 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 9', preset:'' },
-  { date:'2026-07-20', label:'Lun 20 juil.', city:'Tokyo', tag:'tag-tokyo', title:'Tokyo — Jour 10', preset:'' },
-  { date:'2026-07-21', label:'Mar 21 juil.', city:'Kyoto', tag:'tag-travel', title:'🚄 Tokyo → Kyoto', preset:'Shinkansen Tokyo → Kyoto. Check-in Good Nature Hotel.' },
-  { date:'2026-07-22', label:'Mer 22 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 1', preset:'' },
-  { date:'2026-07-23', label:'Jeu 23 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 2', preset:'' },
-  { date:'2026-07-24', label:'Ven 24 juil.', city:'Kyoto', tag:'tag-kyoto', title:'Kyoto — Jour 3', preset:'' },
-  { date:'2026-07-25', label:'Sam 25 juil.', city:'Tokyo', tag:'tag-travel', title:'🚄 Kyoto → Tokyo', preset:'Shinkansen retour Tokyo. Check-in Takanawa.' },
-  { date:'2026-07-26', label:'Dim 26 juil.', city:'Takayama', tag:'tag-takayama', title:'Takayama — Jour 1', preset:'' },
-  { date:'2026-07-27', label:'Lun 27 juil.', city:'Takayama', tag:'tag-takayama', title:'Takayama — Jour 2', preset:'' },
-  { date:'2026-07-28', label:'Mar 28 juil.', city:'Takayama', tag:'tag-travel', title:'🛫 Départ retour', preset:'Dernier matin au Japon. Bon retour Patrick & Inoue !' },
+  { date:'2026-07-10', label:'Ven 10 juil.', city:'Tokyo', tag:'tag-travel',   title:'✈️ Arrivée à Tokyo', preset:'Vol Paris → Tokyo. Arrivée Narita/Haneda. Check-in Hirai Ayaka House.' },
+  { date:'2026-07-11', label:'Sam 11 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 1', preset:'' },
+  { date:'2026-07-12', label:'Dim 12 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 2', preset:'' },
+  { date:'2026-07-13', label:'Lun 13 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 3', preset:'' },
+  { date:'2026-07-14', label:'Mar 14 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'🇫🇷 Fête nationale · Tokyo', preset:'14 juillet à Tokyo !' },
+  { date:'2026-07-15', label:'Mer 15 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 5', preset:'' },
+  { date:'2026-07-16', label:'Jeu 16 juil.', city:'Kyoto', tag:'tag-travel',   title:'🚄 Tokyo → Kyoto', preset:'Shinkansen Tokyo → Kyoto. Check-in Good Nature Hotel.' },
+  { date:'2026-07-17', label:'Ven 17 juil.', city:'Kyoto', tag:'tag-kyoto',    title:'Kyoto — Jour 1', preset:'' },
+  { date:'2026-07-18', label:'Sam 18 juil.', city:'Kyoto', tag:'tag-kyoto',    title:'Kyoto — Jour 2', preset:'' },
+  { date:'2026-07-19', label:'Dim 19 juil.', city:'Tokyo', tag:'tag-travel',   title:'🚄 Kyoto → Tokyo', preset:'Shinkansen retour Tokyo. Check-in Takanawa.' },
+  { date:'2026-07-20', label:'Lun 20 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 6', preset:'' },
+  { date:'2026-07-21', label:'Mar 21 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 7', preset:'' },
+  { date:'2026-07-22', label:'Mer 22 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Jour 8', preset:'' },
+  { date:'2026-07-23', label:'Jeu 23 juil.', city:'Takayama', tag:'tag-travel',    title:'🚄 Tokyo → Takayama', preset:'Train vers Takayama. Check-in Ryokan Wanosato.' },
+  { date:'2026-07-24', label:'Ven 24 juil.', city:'Takayama', tag:'tag-takayama',  title:'Takayama — Jour 1', preset:'' },
+  { date:'2026-07-25', label:'Sam 25 juil.', city:'Takayama', tag:'tag-takayama',  title:'Takayama — Jour 2', preset:'' },
+  { date:'2026-07-26', label:'Dim 26 juil.', city:'Tokyo', tag:'tag-travel',   title:'🚄 Takayama → Tokyo', preset:'Retour Tokyo. Dernières heures dans la capitale.' },
+  { date:'2026-07-27', label:'Lun 27 juil.', city:'Tokyo', tag:'tag-tokyo',    title:'Tokyo — Dernier jour', preset:'' },
+  { date:'2026-07-28', label:'Mar 28 juil.', city:'Tokyo', tag:'tag-travel',   title:'🛫 Départ retour Paris', preset:'Bon retour Patrick & Inoue ! 日本ありがとう' },
 ];
 
 function buildAgenda() {
