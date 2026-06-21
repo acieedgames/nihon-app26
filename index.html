@@ -5,798 +5,325 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#C8102E">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Nihon">
-<meta name="description" content="Compagnon de voyage au Japon">
 <title>日本 Nihon</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.svg">
-<link rel="apple-touch-icon" href="icon-192.svg">
 <style>
-  :root {
-    --red: #C8102E;
-    --red-dark: #9B0C22;
-    --red-pale: #FFF0F2;
-    --ink: #1A1A1A;
-    --ink-2: #4A4A4A;
-    --ink-3: #888;
-    --bg: #FAF9F7;
-    --surface: #FFFFFF;
-    --border: rgba(0,0,0,0.08);
-    --radius: 16px;
-    --radius-sm: 10px;
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--ink); }
+:root {
+  --red: #C8102E; --red-dark: #9B0C22; --red-pale: #FFF0F2;
+  --ink: #1A1A1A; --ink-2: #4A4A4A; --ink-3: #888;
+  --bg: #FAF9F7; --surface: #FFFFFF; --border: rgba(0,0,0,0.08);
+  --radius: 16px; --radius-sm: 10px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--ink); }
 
-  /* HEADER */
-  #header {
-    background: var(--red);
-    padding: 12px 16px 10px;
-    display: flex; align-items: center; gap: 10px;
-    flex-shrink: 0;
-  }
-  #header h1 { color: #fff; font-size: 16px; font-weight: 700; }
-  #back-home {
-    background: rgba(255,255,255,0.2); border: none;
-    color: #fff; border-radius: 8px; padding: 6px 12px;
-    font-size: 18px; cursor: pointer; line-height: 1;
-    flex-shrink: 0;
-  }
-  .rate-pill {
-    background: rgba(255,255,255,0.18);
-    border: 1px solid rgba(255,255,255,0.25);
-    color: #fff; font-size: 11px; font-weight: 600;
-    padding: 4px 8px; border-radius: 12px;
-    white-space: nowrap; flex-shrink: 0;
-  }
+/* ── SPLASH ── */
+#splash {
+  position: fixed; inset: 0; background: var(--red);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  z-index: 999; transition: opacity 0.4s;
+}
+#splash.hide { opacity: 0; pointer-events: none; display: none; }
+#splash .s-jp { font-size: 64px; color: rgba(255,255,255,0.15); font-weight: 900; }
+#splash h2 { color: #fff; font-size: 22px; font-weight: 700; }
 
-  /* BOTTOM NAV */
-  #bottom-nav {
-    display: none;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 8px 0 calc(8px + var(--safe-bottom));
-    z-index: 80;
-    display: none;
-    grid-template-columns: repeat(5, 1fr);
-  }
-  #app.visible ~ #bottom-nav { display: grid; }
+/* ── HOME SCREEN ── */
+#home {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; flex-direction: column;
+  background: #0F0F0F; overflow-y: auto;
+}
+#home.hidden { display: none; }
 
-  .bnav-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    background: none; border: none; cursor: pointer;
-    padding: 4px 2px;
-    font-size: 11px; font-weight: 500; color: var(--ink-3);
-  }
-  .bnav-btn span:first-child { font-size: 22px; line-height: 1; }
-  .bnav-btn.active { color: var(--red); }
-  .bnav-btn.active span:first-child { transform: scale(1.1); }
-  .bnav-more { }
+#home-header {
+  padding: 56px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.h-kanji { font-size: 44px; font-weight: 900; color: var(--red); letter-spacing: 4px; margin-bottom: 10px; }
+.h-title { font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.h-sub   { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
+.h-cities { font-size: 12px; color: rgba(255,255,255,0.5); padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.07); }
 
-  /* MENU PLUS */
-  #more-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,0.4); z-index: 90;
-  }
-  #more-overlay.open { display: block; }
-  #more-menu {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface);
-    border-radius: 20px 20px 0 0;
-    padding: 12px 16px calc(24px + var(--safe-bottom));
-    z-index: 91;
-    transform: translateY(100%);
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-  }
-  #more-menu.open { transform: translateY(0); }
-  .more-handle {
-    width: 36px; height: 4px; background: var(--border);
-    border-radius: 2px; margin: 0 auto 16px;
-  }
-  .more-grid {
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
-  }
-  .more-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    background: var(--bg); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 8px;
-    cursor: pointer; font-size: 12px; font-weight: 600; color: var(--ink);
-  }
-  .more-btn span:first-child { font-size: 26px; }
-  .more-btn:active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
-  .more-btn-home { background: var(--red-pale); border-color: rgba(200,16,46,0.2); color: var(--red); }
+#home-btns { padding: 18px 16px calc(32px + var(--safe-bottom)); }
+.hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* PAGES — padding bottom pour bottom nav */
-  .page { padding-bottom: calc(72px + var(--safe-bottom)); }
+.hbtn {
+  background: #1A1A1A; border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px; padding: 15px 13px;
+  cursor: pointer; display: flex; align-items: center; gap: 11px;
+  text-align: left; transition: background 0.1s, transform 0.1s;
+}
+.hbtn:active { background: #2A0A10; border-color: rgba(200,16,46,0.4); transform: scale(0.97); }
+.hbtn .hi { font-size: 26px; flex-shrink: 0; }
+.hbtn .hl { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.25; display: block; }
+.hbtn .hs { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; display: block; }
+.hbtn-wide { grid-column: 1 / -1; border-color: rgba(200,16,46,0.2); background: rgba(200,16,46,0.07); }
 
+/* ── APP SHELL ── */
+#app { display: none; flex-direction: column; height: 100%; overflow: hidden; }
+#app.on { display: flex; }
 
-  /* PAGES */
-  #pages { flex: 1; overflow: hidden; position: relative; }
-  .page { position: absolute; inset: 0; overflow-y: auto; padding: 0 0 calc(16px + var(--safe-bottom)); display: none; }
-  .page.active { display: block; }
+/* ── HEADER ── */
+#hdr {
+  background: var(--red); padding: 12px 14px 10px;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+#btn-home {
+  background: rgba(255,255,255,0.2); border: none; color: #fff;
+  border-radius: 8px; padding: 7px 12px; font-size: 17px; cursor: pointer; line-height: 1;
+}
+#hdr-title { flex: 1; text-align: center; font-size: 15px; font-weight: 700; color: #fff; }
+#hdr-rate {
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
+  color: #fff; font-size: 11px; font-weight: 600;
+  padding: 4px 8px; border-radius: 12px; white-space: nowrap; flex-shrink: 0;
+}
 
-  /* LAYOUT */
-  body { display: flex; flex-direction: column; }
-  #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* ── PAGES ── */
+#pages { flex: 1; position: relative; overflow: hidden; }
+.page {
+  position: absolute; inset: 0;
+  overflow-y: auto;
+  padding: 0 0 calc(74px + var(--safe-bottom));
+  display: none;
+}
+.page.on { display: block; }
 
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    padding: 20px;
-    margin: 12px 16px 0;
-  }
-  .card-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 14px; }
+/* ── BOTTOM NAV ── */
+#bnav {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 6px 0 calc(6px + var(--safe-bottom));
+  z-index: 80; grid-template-columns: repeat(5,1fr);
+}
+#app.on ~ #bnav { display: grid; }
 
-  /* ═══ HOME SCREEN sobre ═══ */
-  #home-screen {
-    position: fixed; inset: 0; z-index: 50;
-    display: flex; flex-direction: column;
-    background: #0F0F0F;
-    overflow-y: auto;
-  }
-  #home-screen.hidden { display: none; }
+.nb {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: none; border: none; cursor: pointer;
+  padding: 4px 2px; font-size: 10px; font-weight: 500; color: var(--ink-3);
+}
+.nb span:first-child { font-size: 22px; line-height: 1.2; }
+.nb.on { color: var(--red); }
 
-  #home-header {
-    padding: 52px 24px 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-  }
-  .home-kanji {
-    font-size: 48px; font-weight: 900;
-    color: var(--red); letter-spacing: 4px; line-height: 1;
-    margin-bottom: 12px;
-  }
-  .home-title {
-    font-size: 20px; font-weight: 700; color: #fff;
-    letter-spacing: -0.3px; margin-bottom: 4px;
-  }
-  .home-sub { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 12px; }
-  .home-cities {
-    display: inline-flex; gap: 6px; flex-wrap: wrap;
-  }
-  .home-cities {
-    font-size: 12px; color: rgba(255,255,255,0.55);
-    border-top: 1px solid rgba(255,255,255,0.07);
-    padding-top: 12px; display: block;
-    letter-spacing: 0.3px;
-  }
+/* ── MORE MENU ── */
+#more-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 85; }
+#more-bg.on { display: block; }
+#more-panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  padding: 10px 16px calc(20px + var(--safe-bottom));
+  z-index: 86; transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+#more-panel.on { transform: translateY(0); }
+.more-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 14px; }
+.mgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
+.mb {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 12px; padding: 13px 6px;
+  cursor: pointer; font-size: 11px; font-weight: 600; color: var(--ink);
+}
+.mb span:first-child { font-size: 24px; }
+.mb:active { background: var(--red-pale); color: var(--red); }
+.mb-home { background: var(--red-pale); border-color: rgba(200,16,46,0.2); color: var(--red); }
 
-  #home-buttons {
-    padding: 20px 16px calc(32px + var(--safe-bottom));
-    flex: 1;
-  }
-  .home-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .home-btn {
-    background: #1A1A1A;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 16px 14px;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 12px;
-    transition: background 0.12s, border-color 0.12s, transform 0.1s;
-    text-align: left;
-  }
-  .home-btn:active { background: #2A0A10; border-color: rgba(200,16,46,0.4); transform: scale(0.97); }
-  .home-btn .btn-icon { font-size: 26px; flex-shrink: 0; }
-  .home-btn .btn-label { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.25; }
-  .home-btn .btn-sub { font-size: 10px; color: rgba(255,255,255,0.38); margin-top: 3px; }
-  .home-btn-wide {
-    grid-column: 1 / -1;
-    border-color: rgba(200,16,46,0.25);
-    background: rgba(200,16,46,0.08);
-  }
+/* ── CARD ── */
+.card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 18px; margin: 12px 16px 0; }
+.card-label { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 12px; }
 
-  /* INNER APP */
-  #app { display: none; flex-direction: column; height: 100%; }
-  #app.visible { display: flex; }
+/* ── EXCHANGE ── */
+.exchange-big { text-align: center; padding: 24px 18px 20px; }
+.amount-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 18px; }
+.exchange-big input[type=text] {
+  font-size: 42px; font-weight: 700; border: none; outline: none;
+  background: none; color: var(--ink); text-align: center; width: 170px;
+}
+.currency-badge { font-size: 15px; font-weight: 700; color: var(--red); background: var(--red-pale); padding: 5px 11px; border-radius: 8px; }
+.exchange-arrow { font-size: 26px; color: var(--ink-3); margin: 2px 0; }
+.result-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
+.result-amount { font-size: 48px; font-weight: 800; color: var(--red); line-height: 1; }
+.result-currency { font-size: 17px; color: var(--ink-2); font-weight: 600; }
+.rate-info { font-size: 12px; color: var(--ink-3); margin-top: 8px; }
+.swap-btn { display: block; margin: 12px auto 0; background: none; border: 1px solid var(--border); border-radius: 20px; padding: 7px 18px; font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.quick-amounts { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin: 0 16px; }
+.quick-btn { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 4px; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: center; }
+.quick-btn:active { background: var(--red-pale); color: var(--red); }
+.quick-btn .eur-sub { font-size: 10px; color: var(--ink-3); font-weight: 400; display: block; }
 
-  #back-home {
-    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
-    color: #fff; border-radius: 20px; padding: 4px 12px;
-    font-size: 13px; cursor: pointer; white-space: nowrap;
-  }
+/* ── TIME ── */
+.time-hero { text-align: center; padding: 24px 18px 18px; }
+.time-big { font-size: 60px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.time-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.time-row:last-child { border-bottom: none; }
+.time-row .city { font-size: 14px; font-weight: 600; }
+.time-row .tz-name { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.time-row .t { font-size: 26px; font-weight: 700; }
+.time-row.jp .t, .time-row.jp .city { color: var(--red); }
 
-  /* ═══ AGENDA ═══ */
-  .agenda-day {
-    margin: 10px 16px 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-  }
-  .agenda-day-header {
-    display: flex; align-items: center; gap: 12px;
-    padding: 13px 16px; cursor: pointer;
-    user-select: none;
-  }
-  .agenda-day-header:active { background: var(--red-pale); }
-  .agenda-date-badge {
-    background: var(--red); color: #fff;
-    border-radius: 8px; padding: 4px 10px;
-    font-size: 13px; font-weight: 700;
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .agenda-day-city {
-    font-size: 12px; font-weight: 600; color: var(--ink-3);
-    text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .agenda-day-title { font-size: 14px; font-weight: 600; color: var(--ink); flex: 1; }
-  .agenda-chevron { color: var(--ink-3); font-size: 14px; transition: transform 0.2s; }
-  .agenda-day.open .agenda-chevron { transform: rotate(90deg); }
+/* ── APPS ── */
+.app-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 16px 0; }
+.app-tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+.app-tile:active { background: var(--red-pale); }
+.app-tile .app-icon { font-size: 32px; }
+.app-tile .app-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+.app-tile .app-desc { font-size: 11px; color: var(--ink-3); line-height: 1.4; }
+.app-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 5px; width: fit-content; }
+.badge-built { background: #E8F5E9; color: #2E7D32; }
+.badge-ext { background: #E3F2FD; color: #1565C0; }
+.badge-jp { background: var(--red-pale); color: var(--red); }
 
-  .agenda-body {
-    display: none; border-top: 1px solid var(--border);
-    padding: 14px 16px;
-  }
-  .agenda-day.open .agenda-body { display: block; }
+/* ── SCANNER ── */
+#scanner-view { position: fixed; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; }
+#scanner-view.open { display: flex; }
+#scanner-video { flex: 1; object-fit: cover; width: 100%; }
+#scanner-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+#scanner-frame { width: 240px; height: 240px; border: 2px solid #fff; border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.55); }
+#scanner-label { color: #fff; font-size: 14px; margin-top: 20px; opacity: 0.85; }
+#scanner-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 20px calc(24px + var(--safe-bottom)); background: linear-gradient(transparent,rgba(0,0,0,0.7)); display: flex; gap: 12px; justify-content: center; }
+#scanner-bar button { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 40px; padding: 12px 24px; font-size: 15px; font-weight: 600; cursor: pointer; }
+#scanner-result { position: absolute; bottom: 100px; left: 20px; right: 20px; background: #fff; border-radius: 12px; padding: 16px; display: none; }
+#scanner-result.show { display: block; }
 
-  .agenda-note {
-    font-size: 13px; color: var(--ink-2); line-height: 1.6;
-    white-space: pre-wrap; min-height: 20px;
-  }
-  .agenda-note:empty::before { content: 'Aucune note — appuyez sur Modifier'; color: var(--ink-3); font-style: italic; }
+/* ── UTILS ── */
+.util-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 16px 0; }
+.util-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+.util-card h3 { font-size: 11px; font-weight: 600; color: var(--ink-3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.util-item { font-size: 12px; color: var(--ink-2); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+.util-item:last-child { border-bottom: none; }
+.util-item strong { color: var(--ink); }
+.phrase-card { margin: 10px 16px 0; }
+.phrase-row { padding: 10px 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.phrase-row:last-child { border-bottom: none; }
+.phrase-fr { font-size: 12px; color: var(--ink-2); }
+.phrase-jp { font-size: 15px; font-weight: 700; color: var(--ink); }
+.phrase-kana { font-size: 10px; color: var(--ink-3); }
+.phrase-speak { font-size: 20px; }
 
-  .agenda-edit-btn {
-    margin-top: 10px;
-    background: none; border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 14px;
-    font-size: 12px; font-weight: 600; color: var(--red);
-    cursor: pointer; width: 100%;
-  }
+/* ── METEO ── */
+.heat-inputs { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.heat-inputs input { width: 68px; font-size: 20px; font-weight: 700; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: var(--ink); }
 
-  .agenda-edit-area {
-    display: none; margin-top: 10px;
-  }
-  .agenda-day.editing .agenda-edit-area { display: block; }
-  .agenda-day.editing .agenda-edit-btn { display: none; }
+/* ── HOTELS ── */
+.hotel-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin: 10px 16px 0; overflow: hidden; }
+.hotel-card-header { display: flex; align-items: center; gap: 12px; padding: 13px 16px; }
+.hotel-flag { font-size: 30px; }
+.hotel-card-title h3 { font-size: 15px; font-weight: 700; color: var(--ink); }
+.hotel-card-title span { font-size: 11px; color: var(--ink-3); }
+.hotel-address-box { margin: 0 14px 12px; background: #F7F5F2; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; }
+.hotel-address-box:active { background: #EEE; }
+.hotel-address-label { font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.hotel-jp-address { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.5; }
+.hotel-copy-hint { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+.hotel-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 14px 14px; }
+.hotel-btn { padding: 11px 6px; border-radius: var(--radius-sm); border: none; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; text-decoration: none; }
+.hotel-btn-primary { background: var(--red); color: #fff; }
+.hotel-btn-secondary { background: var(--red-pale); color: var(--red); border: 1px solid rgba(200,16,46,0.2); }
+.hotel-btn-phone { background: #E8F5E9; color: #2E7D32; }
+.hotel-btn-web { background: #E3F2FD; color: #1565C0; }
+.hotel-divider { height: 1px; background: var(--border); margin: 0 14px 10px; }
+.hotel-info-row { display: flex; justify-content: space-between; padding: 5px 16px; font-size: 12px; }
+.hotel-info-row span { color: var(--ink-3); }
+.hotel-info-row strong { color: var(--ink); }
+.taxi-phrase { margin: 0 14px 12px; background: #FFFBEA; border: 1px solid #F0D870; border-radius: var(--radius-sm); padding: 10px 12px; }
+.taxi-phrase-label { font-size: 10px; font-weight: 600; color: #7A6000; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 5px; }
+.taxi-phrase-jp { font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.6; cursor: pointer; }
+.taxi-phrase-fr { font-size: 11px; color: #7A6000; margin-top: 3px; }
+.hotel-stars { color: #F5A623; font-size: 12px; }
 
-  .agenda-textarea {
-    width: 100%; border: 1px solid var(--border); border-radius: 8px;
-    padding: 10px 12px; font-size: 13px; color: var(--ink);
-    font-family: inherit; resize: vertical; min-height: 80px;
-    background: var(--bg);
-  }
-  .agenda-save-btn {
-    margin-top: 8px; width: 100%;
-    background: var(--red); color: #fff; border: none;
-    border-radius: 8px; padding: 10px;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-  }
+/* ── NAVIGATION ── */
+.trip-stop { display: flex; gap: 12px; padding: 0 16px; margin-bottom: 2px; }
+.trip-dot { display: flex; flex-direction: column; align-items: center; }
+.trip-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.trip-line { width: 2px; flex: 1; min-height: 20px; background: var(--border); margin: 3px 0; }
+.trip-info { padding-top: 5px; padding-bottom: 4px; }
+.trip-date { font-size: 10px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.trip-city { font-size: 14px; font-weight: 700; color: var(--ink); margin: 2px 0; }
+.trip-note { font-size: 12px; color: var(--ink-2); }
 
-  .agenda-tag {
-    display: inline-block; font-size: 10px; font-weight: 600;
-    padding: 2px 8px; border-radius: 6px; margin-right: 4px; margin-bottom: 8px;
-  }
-  .tag-tokyo { background: #E3F2FD; color: #1565C0; }
-  .tag-kyoto { background: #F3E5F5; color: #6A1B9A; }
-  .tag-takayama { background: #E8F5E9; color: #2E7D32; }
-  .tag-travel { background: #FFF8E1; color: #F57F17; }
+/* ── AGENDA ── */
+.ag-section { margin: 14px 16px 4px; font-size: 11px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: 1px; }
+.ag-day { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin: 6px 16px 0; overflow: hidden; }
+.ag-hdr { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; user-select: none; }
+.ag-hdr:active { background: var(--red-pale); }
+.ag-badge { background: var(--red); color: #fff; border-radius: 7px; padding: 3px 8px; font-size: 11px; font-weight: 700; white-space: nowrap; flex-shrink: 0; text-align: center; line-height: 1.4; }
+.ag-tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 5px; margin-bottom: 2px; }
+.tag-tokyo { background: #E3F2FD; color: #1565C0; }
+.tag-kyoto { background: #F3E5F5; color: #6A1B9A; }
+.tag-takayama { background: #E8F5E9; color: #2E7D32; }
+.tag-travel { background: #FFF8E1; color: #F57F17; }
+.ag-title { font-size: 13px; font-weight: 600; color: var(--ink); flex: 1; }
+.ag-chev { color: var(--ink-3); font-size: 14px; transition: transform 0.2s; }
+.ag-day.open .ag-chev { transform: rotate(90deg); }
+.ag-body { display: none; border-top: 1px solid var(--border); padding: 12px 14px; }
+.ag-day.open .ag-body { display: block; }
+.ag-note { font-size: 13px; color: var(--ink-2); line-height: 1.6; white-space: pre-wrap; min-height: 16px; }
+.ag-edit-btn { margin-top: 10px; background: none; border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--red); cursor: pointer; width: 100%; }
+.ag-edit-area { display: none; margin-top: 10px; }
+.ag-day.editing .ag-edit-area { display: block; }
+.ag-day.editing .ag-edit-btn { display: none; }
+.ag-textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); font-family: inherit; resize: vertical; min-height: 80px; background: var(--bg); }
+.ag-save-btn { margin-top: 8px; width: 100%; background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 10px; font-size: 13px; font-weight: 700; cursor: pointer; }
 
-  .agenda-month-label {
-    margin: 16px 16px 6px;
-    font-size: 11px; font-weight: 700; color: var(--ink-3);
-    text-transform: uppercase; letter-spacing: 1px;
-  }
+/* ── SETTINGS ── */
+.s-section { margin: 12px 16px 0; }
+.s-section h3 { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; padding: 0 4px; }
+.s-row { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 7px; padding: 12px 14px; display: flex; align-items: center; gap: 10px; }
+.s-row .si { font-size: 20px; }
+.s-row .sl { flex: 1; }
+.s-row .sl strong { display: block; font-size: 13px; font-weight: 600; color: var(--ink); }
+.s-row .sl span { font-size: 11px; color: var(--ink-3); }
+.s-row .sa { color: var(--red); font-size: 12px; font-weight: 600; cursor: pointer; }
 
-  .exchange-big {
-    text-align: center;
-    padding: 28px 20px 24px;
-  }
-  .exchange-big .amount-row {
-    display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;
-  }
-  .exchange-big input[type=text] {
-    font-size: 44px; font-weight: 700;
-    border: none; outline: none; background: none;
-    color: var(--ink); text-align: center;
-    width: 180px;
-    -webkit-appearance: none;
-  }
-  .exchange-big .currency-badge {
-    font-size: 16px; font-weight: 700; color: var(--red);
-    background: var(--red-pale);
-    padding: 6px 12px; border-radius: 8px;
-  }
-  .exchange-arrow {
-    font-size: 28px; color: var(--ink-3); margin: 4px 0;
-  }
-  .result-row { display: flex; align-items: baseline; justify-content: center; gap: 8px; }
-  .result-amount { font-size: 52px; font-weight: 800; color: var(--red); line-height: 1; }
-  .result-currency { font-size: 18px; color: var(--ink-2); font-weight: 600; }
-  .rate-info { font-size: 12px; color: var(--ink-3); margin-top: 10px; }
-
-  .quick-amounts {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-    margin: 0 16px 0;
-  }
-  .quick-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 10px 4px;
-    font-size: 13px; font-weight: 600; color: var(--ink);
-    cursor: pointer; text-align: center;
-    transition: background 0.1s;
-  }
-  .quick-btn:active { background: var(--red-pale); color: var(--red); }
-  .quick-btn .eur-sub { font-size: 10px; color: var(--ink-3); font-weight: 400; display: block; }
-
-  .swap-btn {
-    display: block; margin: 14px auto 0;
-    background: none; border: 1px solid var(--border);
-    border-radius: 20px; padding: 8px 20px;
-    font-size: 13px; color: var(--ink-2); cursor: pointer;
-  }
-
-  /* ═══════════ PAGE 2 — HEURES ═══════════ */
-  .time-hero {
-    text-align: center;
-    padding: 28px 20px 20px;
-  }
-  .time-hero .city-name { font-size: 13px; color: var(--ink-3); font-weight: 500; margin-bottom: 6px; }
-  .time-hero .time-big { font-size: 64px; font-weight: 800; letter-spacing: -2px; line-height: 1; color: var(--ink); }
-  .time-hero .date-str { font-size: 14px; color: var(--ink-2); margin-top: 8px; }
-  .time-hero .day-night { font-size: 28px; margin-top: 6px; }
-
-  .time-compare { margin: 0 16px; }
-  .time-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .time-row:last-child { border-bottom: none; }
-  .time-row .city { font-size: 14px; font-weight: 600; }
-  .time-row .tz-name { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
-  .time-row .t { font-size: 28px; font-weight: 700; color: var(--ink); }
-  .time-row .diff { font-size: 12px; color: var(--ink-3); text-align: right; }
-  .time-row.japan .t { color: var(--red); }
-  .time-row.japan .city { color: var(--red); }
-
-  .sleep-hint {
-    margin: 14px 16px 0;
-    background: #FFF8E6;
-    border: 1px solid #F0D870;
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
-    font-size: 13px; color: #7A6000;
-  }
-  .sleep-hint strong { font-weight: 600; }
-
-  /* ═══════════ PAGE 3 — APPS / SCANNER ═══════════ */
-  .app-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; margin: 12px 16px 0;
-  }
-  .app-tile {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 16px;
-    cursor: pointer;
-    text-decoration: none;
-    display: flex; flex-direction: column; gap: 10px;
-    transition: transform 0.1s, box-shadow 0.1s;
-    -webkit-user-select: none;
-  }
-  .app-tile:active { transform: scale(0.97); }
-  .app-tile .app-icon { font-size: 36px; line-height: 1; }
-  .app-tile .app-name { font-size: 15px; font-weight: 700; color: var(--ink); }
-  .app-tile .app-desc { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
-  .app-tile .app-badge {
-    font-size: 10px; font-weight: 600;
-    padding: 3px 8px; border-radius: 6px;
-    width: fit-content;
-  }
-  .badge-built { background: #E8F5E9; color: #2E7D32; }
-  .badge-ext { background: #E3F2FD; color: #1565C0; }
-  .badge-jp { background: var(--red-pale); color: var(--red); }
-
-  /* SCANNER INTÉGRÉ */
-  #scanner-view {
-    position: fixed; inset: 0; background: #000; z-index: 100;
-    display: none; flex-direction: column;
-  }
-  #scanner-view.open { display: flex; }
-  #scanner-video { flex: 1; object-fit: cover; width: 100%; }
-  #scanner-overlay {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    pointer-events: none;
-  }
-  #scanner-frame {
-    width: 240px; height: 240px;
-    border: 2px solid #fff;
-    border-radius: 12px;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
-  }
-  #scanner-label { color: #fff; font-size: 14px; margin-top: 20px; opacity: 0.85; }
-  #scanner-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 24px 20px calc(24px + var(--safe-bottom)); background: linear-gradient(transparent, rgba(0,0,0,0.7)); display: flex; gap: 12px; justify-content: center; pointer-events: all; }
-  #scanner-bar button {
-    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
-    color: #fff; border-radius: 40px; padding: 12px 24px;
-    font-size: 15px; font-weight: 600; cursor: pointer;
-  }
-  #scanner-result {
-    position: absolute; bottom: 100px; left: 20px; right: 20px;
-    background: #fff; border-radius: 12px; padding: 16px;
-    display: none;
-  }
-  #scanner-result.show { display: block; }
-  #scanner-result .scan-title { font-size: 12px; color: var(--ink-3); margin-bottom: 6px; }
-  #scanner-result .scan-text { font-size: 15px; font-weight: 600; color: var(--ink); word-break: break-all; }
-
-  /* ═══════════ PAGE 4 — UTILITAIRES ═══════════ */
-  .util-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px; margin: 12px 16px 0;
-  }
-  .util-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-  }
-  .util-card h3 { font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .util-item { font-size: 13px; color: var(--ink-2); padding: 4px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
-  .util-item:last-child { border-bottom: none; }
-  .util-item strong { color: var(--ink); }
-
-  .phrase-card { margin: 10px 16px 0; }
-  .phrase-row {
-    padding: 10px 0; border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 12px; cursor: pointer;
-  }
-  .phrase-row:last-child { border-bottom: none; }
-  .phrase-fr { font-size: 13px; color: var(--ink-2); flex: 1; }
-  .phrase-jp { font-size: 15px; font-weight: 700; color: var(--ink); }
-  .phrase-kana { font-size: 11px; color: var(--ink-3); }
-  .phrase-speak { font-size: 20px; }
-
-  /* ═══════════ PAGE 5 — PARAMÈTRES ═══════════ */
-  .settings-section { margin: 12px 16px 0; }
-  .settings-section h3 { font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; padding: 0 4px; }
-  .setting-row {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius-sm); margin-bottom: 8px;
-    padding: 14px 16px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .setting-row .icon { font-size: 22px; }
-  .setting-row .label { flex: 1; }
-  .setting-row .label strong { display: block; font-size: 14px; font-weight: 600; color: var(--ink); }
-  .setting-row .label span { font-size: 12px; color: var(--ink-3); }
-  .setting-row .action { color: var(--red); font-size: 13px; font-weight: 600; cursor: pointer; }
-  .add-feature-btn {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--red-pale); border: 1.5px dashed rgba(200,16,46,0.3);
-    border-radius: var(--radius-sm); padding: 14px 16px;
-    cursor: pointer; color: var(--red); font-size: 14px; font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  /* ═══════════ CARTES HÉBERGEMENT ═══════════ */
-  .hotel-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin: 12px 16px 0;
-    overflow: hidden;
-  }
-  .hotel-card-header {
-    padding: 14px 16px 12px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .hotel-flag { font-size: 32px; }
-  .hotel-card-title { flex: 1; }
-  .hotel-card-title h3 { font-size: 16px; font-weight: 700; color: var(--ink); }
-  .hotel-card-title span { font-size: 12px; color: var(--ink-3); }
-  .hotel-stars { color: #F5A623; font-size: 13px; }
-
-  .hotel-address-box {
-    margin: 0 16px 14px;
-    background: #F7F5F2;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 14px;
-    cursor: pointer;
-    position: relative;
-  }
-  .hotel-address-box:active { background: #EEE; }
-  .hotel-address-label { font-size: 10px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
-  .hotel-jp-address { font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.5; }
-  .hotel-copy-hint { font-size: 11px; color: var(--ink-3); margin-top: 8px; }
-
-  .hotel-actions {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 8px; padding: 0 16px 16px;
-  }
-  .hotel-btn {
-    padding: 12px 8px;
-    border-radius: var(--radius-sm);
-    border: none; font-size: 13px; font-weight: 600;
-    cursor: pointer; text-align: center;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    text-decoration: none;
-  }
-  .hotel-btn-primary { background: var(--red); color: #fff; }
-  .hotel-btn-secondary { background: var(--red-pale); color: var(--red); border: 1px solid rgba(200,16,46,0.2); }
-  .hotel-btn-phone { background: #E8F5E9; color: #2E7D32; }
-  .hotel-btn-web { background: #E3F2FD; color: #1565C0; }
-
-  .hotel-divider { height: 1px; background: var(--border); margin: 0 16px 14px; }
-  .hotel-info-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 16px; font-size: 13px;
-  }
-  .hotel-info-row span { color: var(--ink-3); }
-  .hotel-info-row strong { color: var(--ink); }
-
-  .taxi-phrase {
-    margin: 0 16px 16px;
-    background: #FFFBEA;
-    border: 1px solid #F0D870;
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-  }
-  .taxi-phrase-label { font-size: 10px; font-weight: 600; color: #7A6000; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-  .taxi-phrase-jp { font-size: 17px; font-weight: 700; color: var(--ink); line-height: 1.6; }
-  .taxi-phrase-fr { font-size: 12px; color: #7A6000; margin-top: 4px; }
-
-
-  #toast {
-    position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
-    background: var(--ink); color: #fff;
-    padding: 10px 20px; border-radius: 20px;
-    font-size: 13px; font-weight: 500;
-    opacity: 0; transition: opacity 0.2s, transform 0.2s;
-    pointer-events: none; white-space: nowrap; z-index: 200;
-  }
-  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* SPLASH */
-  #splash {
-    position: fixed; inset: 0; background: var(--red);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
-    z-index: 999; transition: opacity 0.5s;
-  }
-  #splash.hide { opacity: 0; pointer-events: none; display: none; }
-  #splash .jp-big { font-size: 72px; color: rgba(255,255,255,0.15); font-weight: 900; }
-  #splash h2 { color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
-  #splash p { color: rgba(255,255,255,0.7); font-size: 14px; }
-
-  /* ═══ HOME SCREEN ═══ */
-  #home-screen {
-    position: fixed; inset: 0; z-index: 50;
-    display: flex; flex-direction: column;
-    background: #0D0A1A;
-    overflow: hidden;
-  }
-  #home-screen.hidden { display: none; }
-
-  #home-illustration {
-    flex: 1; position: relative; overflow: hidden;
-  }
-
-  /* Dégradé ciel */
-  .sky-gradient {
-    position: absolute; inset: 0;
-    background: linear-gradient(180deg,
-      #0D0A1A 0%,
-      #1A0F2E 20%,
-      #2D1B4E 40%,
-      #8B1A3A 65%,
-      #C8102E 80%,
-      #E8452A 90%,
-      #F4A261 100%
-    );
-  }
-
-  /* Lune */
-  .moon {
-    position: absolute; top: 12%; right: 22%;
-    width: 52px; height: 52px;
-    background: #FFF8DC;
-    border-radius: 50%;
-    box-shadow: 0 0 30px rgba(255,248,220,0.6), 0 0 60px rgba(255,248,220,0.2);
-  }
-
-  /* Étoiles */
-  .stars { position: absolute; inset: 0; }
-  .star {
-    position: absolute; background: #fff; border-radius: 50%;
-    animation: twinkle 2s infinite alternate;
-  }
-  @keyframes twinkle { from { opacity: 0.3; } to { opacity: 1; } }
-
-  /* Montagne Fuji */
-  .fuji { position: absolute; bottom: 28%; left: 50%; transform: translateX(-50%); }
-
-  /* Cerisiers */
-  .sakura-left { position: absolute; bottom: 20%; left: -10px; }
-  .sakura-right { position: absolute; bottom: 20%; right: -10px; transform: scaleX(-1); }
-
-  /* Torii */
-  .torii { position: absolute; bottom: 18%; left: 50%; transform: translateX(-50%); }
-
-  /* Reflet eau */
-  .water {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 20%;
-    background: linear-gradient(180deg, rgba(200,16,46,0.3) 0%, rgba(13,10,26,0.8) 100%);
-  }
-  .water-line {
-    position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: rgba(255,255,255,0.15);
-  }
-
-  /* Pétales animés */
-  .petal {
-    position: absolute; font-size: 14px;
-    animation: fall linear infinite;
-    pointer-events: none;
-  }
-  @keyframes fall {
-    0%   { transform: translateY(-20px) rotate(0deg); opacity: 0; }
-    10%  { opacity: 1; }
-    90%  { opacity: 0.7; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-  }
-
-  /* Texte home */
-  #home-text {
-    position: absolute; bottom: 22%; left: 0; right: 0;
-    text-align: center; padding: 0 20px;
-    pointer-events: none;
-  }
-  #home-text .kanji {
-    font-size: 56px; font-weight: 900; color: rgba(255,255,255,0.12);
-    line-height: 1; letter-spacing: 8px;
-    text-shadow: 0 2px 20px rgba(0,0,0,0.5);
-  }
-  #home-text .title {
-    font-size: 28px; font-weight: 800; color: #fff;
-    letter-spacing: -0.5px; margin-top: -8px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
-  }
-  #home-text .subtitle {
-    font-size: 14px; color: rgba(255,255,255,0.75);
-    margin-top: 6px; font-weight: 400;
-    text-shadow: 0 1px 6px rgba(0,0,0,0.5);
-  }
-  #home-text .dates {
-    display: inline-block;
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff; font-size: 12px; font-weight: 600;
-    padding: 5px 14px; border-radius: 20px; margin-top: 10px;
-    backdrop-filter: blur(4px);
-  }
-
-  /* Grille boutons home */
-  #home-buttons {
-    background: linear-gradient(180deg, transparent 0%, rgba(13,10,26,0.95) 30%, #0D0A1A 100%);
-    padding: 0 16px calc(20px + var(--safe-bottom));
-    padding-top: 60px;
-  }
-  .home-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .home-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    padding: 16px 14px;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 12px;
-    backdrop-filter: blur(8px);
-    transition: background 0.15s, transform 0.1s;
-    text-align: left;
-  }
-  .home-btn:active { background: rgba(200,16,46,0.3); transform: scale(0.97); }
-  .home-btn .btn-icon { font-size: 28px; flex-shrink: 0; }
-  .home-btn .btn-label { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
-  .home-btn .btn-sub { font-size: 10px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-  .home-btn-wide {
-    grid-column: 1 / -1;
-    background: rgba(200,16,46,0.35);
-    border-color: rgba(200,16,46,0.5);
-  }
-
-  /* INNER APP (header + tabs + pages) */
-  #app { display: none; flex-direction: column; height: 100%; }
-  #app.visible { display: flex; }
-
-  /* Bouton retour home dans header */
-  #back-home {
-    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
-    color: #fff; border-radius: 20px; padding: 4px 12px;
-    font-size: 13px; cursor: pointer; white-space: nowrap;
-  }
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(16px);
+  background: var(--ink); color: #fff; padding: 9px 18px; border-radius: 20px;
+  font-size: 13px; font-weight: 500; opacity: 0; transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none; white-space: nowrap; z-index: 200;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 
 <!-- SPLASH -->
-<div id="splash">
-  <div class="jp-big">日本</div>
-  <h2>Nihon</h2>
-  <p>Chargement…</p>
-</div>
+<div id="splash"><div class="s-jp">日本</div><h2>Nihon</h2><p style="color:rgba(255,255,255,0.6);font-size:13px;">Chargement…</p></div>
 
-<!-- ═══ HOME SCREEN ═══ -->
-<div id="home-screen">
-  <!-- Header sobre -->
+<!-- HOME -->
+<div id="home">
   <div id="home-header">
-    <div class="home-kanji">日本</div>
-    <div class="home-title">Nihon — 10 au 28 juillet 2026</div>
-    <div class="home-sub">Patrick & Inoue · Compagnon de voyage</div>
-    <div class="home-cities">🗼 Tokyo · ⛩️ Kyoto · 🏔️ Takayama</div>
+    <div class="h-kanji">日本</div>
+    <div class="h-title">Nihon — 10 au 28 juillet 2026</div>
+    <div class="h-sub">Patrick & Inoue · Compagnon de voyage</div>
+    <div class="h-cities">🗼 Tokyo · ⛩️ Kyoto · 🏔️ Takayama</div>
   </div>
-
-  <!-- Boutons navigation -->
-  <div id="home-buttons">
-    <div class="home-grid">
-      <button class="home-btn" onclick="openSection('change')">
-        <span class="btn-icon">💴</span>
-        <div><div class="btn-label">Taux de change</div><div class="btn-sub">EUR ↔ JPY</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('time')">
-        <span class="btn-icon">🕐</span>
-        <div><div class="btn-label">Fuseaux horaires</div><div class="btn-sub">Paris · Tokyo</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('meteo')">
-        <span class="btn-icon">🌡️</span>
-        <div><div class="btn-label">Météo & Chaleur</div><div class="btn-sub">Indice juillet</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('nav')">
-        <span class="btn-icon">🗺️</span>
-        <div><div class="btn-label">Navigation</div><div class="btn-sub">Cartes & trains</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('hotels')">
-        <span class="btn-icon">🏨</span>
-        <div><div class="btn-label">Hébergements</div><div class="btn-sub">Adresses taxi</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('apps')">
-        <span class="btn-icon">📲</span>
-        <div><div class="btn-label">Apps & Scanner</div><div class="btn-sub">Lens · PAYKE · Suica</div></div>
-      </button>
-      <button class="home-btn" onclick="openSection('agenda')">
-        <span class="btn-icon">📅</span>
-        <div><div class="btn-label">Agenda du voyage</div><div class="btn-sub">Planning 10–28 juil.</div></div>
-      </button>
-      <button class="home-btn home-btn-wide" onclick="openSection('utils')">
-        <span class="btn-icon">🗾</span>
-        <div><div class="btn-label">Pratique Japon</div><div class="btn-sub">Phrases · Urgences · Konbini</div></div>
-      </button>
-    </div>
-  </div>
+  <div id="home-btns"><div class="hgrid">
+    <button class="hbtn" onclick="go('change')"><span class="hi">💴</span><div><span class="hl">Taux de change</span><span class="hs">EUR ↔ JPY</span></div></button>
+    <button class="hbtn" onclick="go('time')"><span class="hi">🕐</span><div><span class="hl">Fuseaux horaires</span><span class="hs">Paris · Tokyo</span></div></button>
+    <button class="hbtn" onclick="go('meteo')"><span class="hi">🌡️</span><div><span class="hl">Météo & Chaleur</span><span class="hs">Indice juillet</span></div></button>
+    <button class="hbtn" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Agenda du voyage</span><span class="hs">10–28 juil.</span></div></button>
+    <button class="hbtn" onclick="go('hotels')"><span class="hi">🏨</span><div><span class="hl">Hébergements</span><span class="hs">Adresses taxi</span></div></button>
+    <button class="hbtn" onclick="go('nav')"><span class="hi">🗺️</span><div><span class="hl">Navigation</span><span class="hs">Cartes & trains</span></div></button>
+    <button class="hbtn" onclick="go('apps')"><span class="hi">📲</span><div><span class="hl">Apps & Scanner</span><span class="hs">Lens · PAYKE · Suica</span></div></button>
+    <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
+  </div></div>
 </div>
 
-<!-- ═══ APP (sections internes) ═══ -->
+<!-- APP -->
 <div id="app">
-
-<!-- HEADER SECTION (titre + bouton retour) -->
-<div id="header">
-  <button id="back-home" onclick="goHome()">⌂</button>
-  <h1 id="section-title" style="flex:1;text-align:center;font-size:16px;">日本</h1>
-  <div class="rate-pill" id="rate-pill-header">
-    <span id="header-rate">⟳</span>
+  <div id="hdr">
+    <button id="btn-home" onclick="goHome()">⌂</button>
+    <span id="hdr-title">日本</span>
+    <div id="hdr-rate">⟳</div>
   </div>
-</div>
+  <div id="pages">
 
-<!-- MAIN CONTENT -->
-<div id="main">
-<div id="pages">
-
-<!-- ═══════ PAGE CHANGE ═══════ -->
-<div class="page active" id="page-change">
+<!-- PAGE CHANGE -->
+<div class="page on" id="page-change">
   <div class="card exchange-big">
     <div class="amount-row">
       <input type="text" inputmode="decimal" id="from-amount" value="100" oninput="calcExchange()" />
@@ -821,7 +348,7 @@
   </div>
 </div>
 
-<!-- ═══════ PAGE HEURES ═══════ -->
+<!-- PAGE TIME -->
 <div class="page" id="page-time">
   <div class="card time-hero">
     <div class="city-name">🗼 Tokyo · Japon</div>
@@ -838,7 +365,7 @@
   <div id="sleep-block"></div>
 </div>
 
-<!-- ═══════ PAGE APPS ═══════ -->
+<!-- PAGE APPS -->
 <div class="page" id="page-apps">
   <div style="margin: 16px 16px 4px; font-size: 11px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.8px;">Outils intégrés</div>
   <div class="app-grid">
@@ -885,7 +412,7 @@
   </div>
 </div>
 
-<!-- ═══════ PAGE PRATIQUE ═══════ -->
+<!-- PAGE UTILS -->
 <div class="page" id="page-utils">
   <div class="util-grid">
     <div class="util-card">
@@ -924,7 +451,7 @@
   </div>
 </div>
 
-<!-- ═══════ PAGE RÉGLAGES ═══════ -->
+<!-- PAGE SETTINGS -->
 <div class="page" id="page-settings">
   <div class="settings-section">
     <h3>Application</h3>
@@ -989,13 +516,13 @@
   </div>
 </div>
 
-<!-- ═══════ PAGE AGENDA ═══════ -->
+<!-- PAGE AGENDA -->
 <div class="page" id="page-agenda">
   <div id="agenda-container"></div>
   <div style="height:20px;"></div>
 </div>
 
-<!-- ═══════ PAGE MÉTÉO ═══════ -->
+<!-- PAGE METEO -->
 <div class="page" id="page-meteo">
   <div class="card" style="margin-top:12px;">
     <div class="card-label">🌡️ Météo en direct · Juillet au Japon</div>
@@ -1034,7 +561,7 @@
   </div>
 </div>
 
-<!-- ═══════ PAGE HÉBERGEMENTS ═══════ -->
+<!-- PAGE HOTELS -->
 <div class="page" id="page-hotels">
 
   <div style="margin:14px 16px 4px;font-size:12px;color:var(--ink-3);line-height:1.6;">
@@ -1138,7 +665,7 @@
 
 </div>
 
-<!-- ═══════ PAGE NAVIGATION ═══════ -->
+<!-- PAGE NAV -->
 <div class="page" id="page-nav">
   <div style="margin:12px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Votre itinéraire · 10–28 juillet</div>
 
@@ -1196,134 +723,91 @@
   </div>
 </div>
 
-</div><!-- /pages -->
-</div><!-- /main -->
 
+  </div><!-- /pages -->
 </div><!-- /app -->
 
-<!-- BOTTOM NAV BAR — visible uniquement dans l'app -->
-<nav id="bottom-nav">
-  <button class="bnav-btn active" data-tab="change" onclick="showTab('change')">
-    <span>💴</span><span>Taux</span>
-  </button>
-  <button class="bnav-btn" data-tab="time" onclick="showTab('time')">
-    <span>🕐</span><span>Heures</span>
-  </button>
-  <button class="bnav-btn" data-tab="meteo" onclick="showTab('meteo')">
-    <span>🌡️</span><span>Météo</span>
-  </button>
-  <button class="bnav-btn" data-tab="agenda" onclick="showTab('agenda')">
-    <span>📅</span><span>Agenda</span>
-  </button>
-  <button class="bnav-btn bnav-more" onclick="toggleMoreMenu()">
-    <span>⋯</span><span>Plus</span>
-  </button>
+<!-- BOTTOM NAV -->
+<nav id="bnav">
+  <button class="nb on" data-p="change" onclick="showPage('change')"><span>💴</span><span>Taux</span></button>
+  <button class="nb" data-p="time" onclick="showPage('time')"><span>🕐</span><span>Heures</span></button>
+  <button class="nb" data-p="meteo" onclick="showPage('meteo')"><span>🌡️</span><span>Météo</span></button>
+  <button class="nb" data-p="agenda" onclick="showPage('agenda')"><span>📅</span><span>Agenda</span></button>
+  <button class="nb" onclick="toggleMore()"><span>⋯</span><span>Plus</span></button>
 </nav>
 
-<!-- MENU "PLUS" (slide du bas) -->
-<div id="more-overlay" onclick="toggleMoreMenu()"></div>
-<div id="more-menu">
+<!-- MORE MENU -->
+<div id="more-bg" onclick="closeMore()"></div>
+<div id="more-panel">
   <div class="more-handle"></div>
-  <div class="more-grid">
-    <button class="more-btn" onclick="showTabFromMore('hotels')">
-      <span>🏨</span><span>Hébergements</span>
-    </button>
-    <button class="more-btn" onclick="showTabFromMore('nav')">
-      <span>🗺️</span><span>Navigation</span>
-    </button>
-    <button class="more-btn" onclick="showTabFromMore('apps')">
-      <span>📲</span><span>Apps</span>
-    </button>
-    <button class="more-btn" onclick="showTabFromMore('utils')">
-      <span>🗾</span><span>Pratique</span>
-    </button>
-    <button class="more-btn" onclick="showTabFromMore('settings')">
-      <span>⚙️</span><span>Réglages</span>
-    </button>
-    <button class="more-btn more-btn-home" onclick="goHome()">
-      <span>⌂</span><span>Accueil</span>
-    </button>
+  <div class="mgrid">
+    <button class="mb " onclick="showPageFromMore('hotels')"><span>🏨</span><span>Hébergements</span></button>
+    <button class="mb " onclick="showPageFromMore('nav')"><span>🗺️</span><span>Navigation</span></button>
+    <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
+    <button class="mb " onclick="showPageFromMore('utils')"><span>🗾</span><span>Pratique</span></button>
+    <button class="mb " onclick="showPageFromMore('settings')"><span>⚙️</span><span>Réglages</span></button>
+    <button class="mb mb-home" onclick="goHome()"><span>⌂</span><span>Accueil</span></button>
   </div>
 </div>
 
-<!-- SCANNER VIEW -->
-<div id="scanner-view">
-  <video id="scanner-video" autoplay playsinline muted></video>
-  <div id="scanner-overlay">
-    <div id="scanner-frame"></div>
-    <div id="scanner-label">Pointez vers un QR code ou du texte</div>
-  </div>
-  <div id="scanner-result">
-    <div class="scan-title">Résultat</div>
-    <div class="scan-text" id="scan-text-out">—</div>
-  </div>
-  <div id="scanner-bar">
-    <button onclick="closeScanner()">✕ Fermer</button>
-    <button onclick="openGoogleLens()">🔍 Google Lens</button>
-  </div>
-</div>
+<!-- SCANNER -->
+<div id="scanner-view"><video id="scanner-video" autoplay playsinline muted></video><div id="scanner-overlay"><div id="scanner-frame"></div><div id="scanner-label">Pointez vers un QR code</div></div><div id="scanner-result"><div style="font-size:11px;color:#888;margin-bottom:4px;">Résultat</div><div id="scan-out" style="font-size:14px;font-weight:600;word-break:break-all;"></div></div><div id="scanner-bar"><button onclick="closeScanner()">✕ Fermer</button><button onclick="window.open('https://lens.google.com','_blank')">🔍 Lens</button></div></div>
 
 <!-- TOAST -->
 <div id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════
-// NAVIGATION HOME ↔ SECTIONS
-// ═══════════════════════════════════════════
-const SECTION_TITLES = {
-  change:  '💴 Taux de change',
-  time:    '🕐 Fuseaux horaires',
-  apps:    '📲 Apps & Scanner',
-  meteo:   '🌡️ Météo & Chaleur',
-  nav:     '🗺️ Navigation',
-  hotels:  '🏨 Hébergements',
-  agenda:  '📅 Agenda du voyage',
-  utils:   '🗾 Pratique Japon',
-  settings:'⚙️ Réglages',
+// ── NAVIGATION ──
+const TITLES = {
+  change:'💴 Taux de change', time:'🕐 Fuseaux horaires',
+  apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
+  nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
+  agenda:'📅 Agenda', utils:'🗾 Pratique Japon', settings:'⚙️ Réglages'
 };
-
-function openSection(id) {
-  document.getElementById('home-screen').classList.add('hidden');
-  document.getElementById('app').classList.add('visible');
-  showTab(id);
-  if (id === 'meteo' && !document.getElementById('meteo-cities').querySelector('[style*="border-bottom"]')) fetchMeteo();
-}
-
-function goHome() {
-  closeMoreMenu();
-  document.getElementById('app').classList.remove('visible');
-  document.getElementById('home-screen').classList.remove('hidden');
-}
-
-function showTab(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
-  document.querySelectorAll('.bnav-btn[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
-  document.getElementById('section-title').textContent = SECTION_TITLES[id] || '日本';
-}
-
-function showTabFromMore(id) {
-  closeMoreMenu();
-  showTab(id);
-}
-
-function toggleMoreMenu() {
-  const menu = document.getElementById('more-menu');
-  if (menu.classList.contains('open')) { closeMoreMenu(); }
-  else {
-    document.getElementById('more-overlay').classList.add('open');
-    menu.classList.add('open');
-    document.querySelector('.bnav-more').classList.add('active');
+function go(id) {
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('app').classList.add('on');
+  showPage(id);
+  if (id === 'meteo') {
+    var c = document.getElementById('meteo-cities');
+    if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo();
   }
 }
-
-function closeMoreMenu() {
-  document.getElementById('more-overlay').classList.remove('open');
-  document.getElementById('more-menu').classList.remove('open');
-  const m = document.querySelector('.bnav-more');
-  if (m) m.classList.remove('active');
+function goHome() {
+  closeMore();
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('home').classList.remove('hidden');
 }
-
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
+  var pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('on');
+  document.querySelectorAll('.nb[data-p]').forEach(function(b){
+    b.classList.toggle('on', b.dataset.p === id);
+  });
+  var t = document.getElementById('hdr-title');
+  if (t) t.textContent = TITLES[id] || '日本';
+}
+function showPageFromMore(id) { closeMore(); showPage(id); }
+function toggleMore() {
+  var p = document.getElementById('more-panel');
+  if (p.classList.contains('on')) {
+    closeMore();
+  } else {
+    document.getElementById('more-bg').classList.add('on');
+    p.classList.add('on');
+  }
+}
+function closeMore() {
+  document.getElementById('more-bg').classList.remove('on');
+  document.getElementById('more-panel').classList.remove('on');
+}
+// Aliases compatibilité
+function openSection(id) { go(id); }
+function showTab(id) { showPage(id); }
+function openNavApp(key) { var u = NAV_LINKS[key]; if (u) window.open(u, '_blank'); }
 function buildHomeAnimations() {}
+
 
 // ═══════════════════════════════════════════
 // AGENDA
@@ -1410,7 +894,7 @@ function saveNote(date) {
   showToast('✓ Note enregistrée');
 }
 
-function buildHomeAnimations() {} // no-op, plus d'animation kitch
+ // no-op, plus d'animation kitch
 
 
 
@@ -1462,10 +946,7 @@ let rateTimestamp = null;
 // ═══════════════════════════════════════════
 // TABS
 // ═══════════════════════════════════════════
-function showTab(id) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + id));
-}
+
 
 // ═══════════════════════════════════════════
 // EXCHANGE
@@ -1903,31 +1384,24 @@ function showToast(msg) {
 }
 
 // ═══════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════
 
-// Dismiss splash IMMÉDIATEMENT
+
+// ── INIT ──
 function dismissSplash() {
-  const s = document.getElementById('splash');
+  var s = document.getElementById('splash');
   s.style.opacity = '0';
-  setTimeout(() => { s.style.display = 'none'; }, 400);
+  setTimeout(function() { s.style.display = 'none'; }, 400);
 }
-window.addEventListener('DOMContentLoaded', () => setTimeout(dismissSplash, 800));
-setTimeout(dismissSplash, 1000);
-
-try { buildHomeAnimations(); } catch(e) {}
+setTimeout(dismissSplash, 900);
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { calcHeatIndex(); } catch(e) {}
-try { buildAgenda(); } catch(e) { console.error('agenda',e); }
-setInterval(() => { try { updateTimes(); } catch(e) {} }, 10000);
+try { buildAgenda(); } catch(e) { console.error('agenda', e); }
+setInterval(function() { try { updateTimes(); } catch(e) {} }, 10000);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 
-// Service worker for PWA
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
-}
 </script>
 </body>
 </html>
