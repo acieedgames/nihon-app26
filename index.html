@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#C8102E">
+<meta name="theme-color" content="#0F0F0F" id="meta-theme-color">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Nihon">
 <title>日本 Nihon</title>
@@ -741,7 +741,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.2</strong>
+        <strong>Nihon v1.3</strong>
         <span>PWA · Agent IA Gemini · Géolocalisation</span>
       </div>
     </div>
@@ -1038,21 +1038,59 @@ const TITLES = {
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
   settings:'⚙️ Réglages', ai:'🤖 Assistant IA'
 };
+
+// ── Theme color dynamique (barre système Android) ──
+function setThemeColor(color) {
+  var m = document.getElementById('meta-theme-color');
+  if (m) m.setAttribute('content', color);
+}
+
+// ── History API : intercepte le bouton back Android ──
+var _inApp = false;
+var _currentPage = 'change';
+
+function _pushState(id) {
+  history.pushState({ page: id }, '', '');
+}
+
+window.addEventListener('popstate', function(e) {
+  if (document.getElementById('more-panel').classList.contains('on')) {
+    closeMore();
+    history.pushState({ page: _currentPage }, '', '');
+    return;
+  }
+  if (_inApp) {
+    // On est dans l'app → retour à l'accueil
+    _doGoHome();
+  }
+  // Si on était déjà sur l'accueil, laisser le navigateur gérer (quitter la PWA)
+});
+
 function go(id) {
   document.getElementById('home').classList.add('hidden');
   document.getElementById('app').classList.add('on');
+  _inApp = true;
+  setThemeColor('#C8102E');
+  _pushState(id);
   showPage(id);
   if (id === 'meteo') {
     var c = document.getElementById('meteo-cities');
     if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo();
   }
 }
-function goHome() {
+function _doGoHome() {
   closeMore();
+  _inApp = false;
   document.getElementById('app').classList.remove('on');
   document.getElementById('home').classList.remove('hidden');
+  setThemeColor('#0F0F0F');
+}
+function goHome() {
+  _doGoHome();
+  history.pushState({ home: true }, '', '');
 }
 function showPage(id) {
+  _currentPage = id;
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
   var pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('on');
@@ -1061,10 +1099,8 @@ function showPage(id) {
   });
   var t = document.getElementById('hdr-title');
   if (t) t.textContent = TITLES[id] || '日本';
-  // Gérer la barre d'input IA
   var inputBar = document.getElementById('ai-input-bar');
   if (inputBar) inputBar.style.display = (id === 'ai' && getApiKey()) ? 'flex' : 'none';
-  // Init selon page
   if (id === 'ai') initAiPage();
   if (id === 'settings') try { loadPrefsUI(); } catch(e) {}
   if (id === 'meteo') { var c = document.getElementById('meteo-cities'); if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo(); }
@@ -2452,6 +2488,8 @@ function dismissSplash() {
   s.style.opacity = '0';
   setTimeout(function() { s.style.display = 'none'; }, 400);
 }
+// État initial : on est sur l'accueil
+history.replaceState({ home: true }, '', '');
 setTimeout(dismissSplash, 900);
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
