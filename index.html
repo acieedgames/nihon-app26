@@ -613,6 +613,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
       <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
     </div>
+  </div><!-- /settings-section Application -->
+
   <!-- SECTION GÉOLOCALISATION -->
   <div class="settings-section">
     <h3>📍 Géolocalisation</h3>
@@ -1976,7 +1978,7 @@ function onRateReady() {
   calcExchange();
   buildQuickGrid();
   buildOtherRates();
-  document.getElementById('header-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
+  document.getElementById('hdr-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
   if (rateTimestamp) {
     document.getElementById('last-rate-update').textContent =
       'Dernière mise à jour : ' + new Date(rateTimestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
@@ -2121,7 +2123,7 @@ async function scanFrame() {
     const codes = await barcodeDetector.detect(video);
     if (codes.length > 0) {
       const result = document.getElementById('scanner-result');
-      document.getElementById('scan-text-out').textContent = codes[0].rawValue;
+      document.getElementById('scan-out').textContent = codes[0].rawValue;
       result.classList.add('show');
       clearInterval(scanInterval);
     }
