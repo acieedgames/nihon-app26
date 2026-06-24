@@ -17,7 +17,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--ink); }
+html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; background: #0F0F0F; color: var(--ink); }
 
 /* ── SPLASH ── */
 #splash {
@@ -60,6 +60,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .hbtn .hl { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.25; display: block; }
 .hbtn .hs { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 2px; display: block; }
 .hbtn-wide { grid-column: 1 / -1; border-color: rgba(200,16,46,0.2); background: rgba(200,16,46,0.07); }
+.hbtn-ai { background: rgba(200,16,46,0.18); border-color: rgba(200,16,46,0.5); }
 
 /* ── APP SHELL ── */
 #app { display: none; flex-direction: column; height: 100%; overflow: hidden; }
@@ -437,6 +438,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <button class="hbtn" onclick="go('nav')"><span class="hi">🗺️</span><div><span class="hl">Navigation</span><span class="hs">Cartes & trains</span></div></button>
     <button class="hbtn" onclick="go('apps')"><span class="hi">📲</span><div><span class="hl">Apps & Scanner</span><span class="hs">Lens · PAYKE · Suica</span></div></button>
     <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
+    <button class="hbtn hbtn-wide hbtn-ai" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant IA</span><span class="hs">Groq · Questions voyage</span></div></button>
   </div></div>
 </div>
 
