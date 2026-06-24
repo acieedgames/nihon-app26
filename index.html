@@ -613,6 +613,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
       <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
     </div>
+  </div><!-- /settings-section Application -->
+
   <!-- SECTION GÉOLOCALISATION -->
   <div class="settings-section">
     <h3>📍 Géolocalisation</h3>
@@ -1039,31 +1041,21 @@ const TITLES = {
   settings:'⚙️ Réglages', ai:'🤖 Assistant IA'
 };
 
-// ── Theme color dynamique (barre système Android) ──
 function setThemeColor(color) {
   var m = document.getElementById('meta-theme-color');
   if (m) m.setAttribute('content', color);
 }
 
-// ── History API : intercepte le bouton back Android ──
 var _inApp = false;
-var _currentPage = 'change';
-
-function _pushState(id) {
-  history.pushState({ page: id }, '', '');
-}
-
-window.addEventListener('popstate', function(e) {
+window.addEventListener('popstate', function() {
   if (document.getElementById('more-panel').classList.contains('on')) {
     closeMore();
-    history.pushState({ page: _currentPage }, '', '');
+    history.pushState({}, '');
     return;
   }
   if (_inApp) {
-    // On est dans l'app → retour à l'accueil
     _doGoHome();
   }
-  // Si on était déjà sur l'accueil, laisser le navigateur gérer (quitter la PWA)
 });
 
 function go(id) {
@@ -1071,7 +1063,7 @@ function go(id) {
   document.getElementById('app').classList.add('on');
   _inApp = true;
   setThemeColor('#C8102E');
-  _pushState(id);
+  history.pushState({}, '');
   showPage(id);
   if (id === 'meteo') {
     var c = document.getElementById('meteo-cities');
@@ -1087,10 +1079,9 @@ function _doGoHome() {
 }
 function goHome() {
   _doGoHome();
-  history.pushState({ home: true }, '', '');
+  history.pushState({}, '');
 }
 function showPage(id) {
-  _currentPage = id;
   document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('on'); });
   var pg = document.getElementById('page-' + id);
   if (pg) pg.classList.add('on');
@@ -1595,36 +1586,25 @@ async function sendAiMessage() {
   var typingEl = showAiTyping();
 
   try {
-    // Construire le corps Gemini : contents = historique, systemInstruction séparé
     var body = {
       contents: aiHistory,
       systemInstruction: { parts: [{ text: buildAiContext() }] },
       generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
     };
-
     var response = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      }
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
     );
-
     if (!response.ok) {
       var err = await response.json().catch(function(){ return {}; });
       if (response.status === 400 || response.status === 403) throw new Error('Clé API invalide — vérifiez dans Réglages');
-      var msg = (err.error && err.error.message) ? err.error.message : 'Erreur ' + response.status;
-      throw new Error(msg);
+      throw new Error((err.error && err.error.message) ? err.error.message : 'Erreur ' + response.status);
     }
-
     var data = await response.json();
     var reply = data.candidates[0].content.parts[0].text;
-    // Gemini : rôle 'model' dans l'historique
     aiHistory.push({ role: 'model', parts: [{ text: reply }] });
     typingEl.remove();
     appendAiMessage('assistant', reply);
-
   } catch(e) {
     typingEl.remove();
     appendAiMessage('assistant', '⚠️ ' + (e.message || 'Erreur de connexion'));
@@ -2014,7 +1994,7 @@ function onRateReady() {
   calcExchange();
   buildQuickGrid();
   buildOtherRates();
-  document.getElementById('header-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
+  document.getElementById('hdr-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
   if (rateTimestamp) {
     document.getElementById('last-rate-update').textContent =
       'Dernière mise à jour : ' + new Date(rateTimestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
@@ -2159,7 +2139,7 @@ async function scanFrame() {
     const codes = await barcodeDetector.detect(video);
     if (codes.length > 0) {
       const result = document.getElementById('scanner-result');
-      document.getElementById('scan-text-out').textContent = codes[0].rawValue;
+      document.getElementById('scan-out').textContent = codes[0].rawValue;
       result.classList.add('show');
       clearInterval(scanInterval);
     }
@@ -2488,8 +2468,7 @@ function dismissSplash() {
   s.style.opacity = '0';
   setTimeout(function() { s.style.display = 'none'; }, 400);
 }
-// État initial : on est sur l'accueil
-history.replaceState({ home: true }, '', '');
+history.replaceState({}, '');
 setTimeout(dismissSplash, 900);
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
