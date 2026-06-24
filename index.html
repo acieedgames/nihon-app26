@@ -613,8 +613,6 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
       <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
     </div>
-  </div><!-- /settings-section Application -->
-
   <!-- SECTION GÉOLOCALISATION -->
   <div class="settings-section">
     <h3>📍 Géolocalisation</h3>
@@ -723,7 +721,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row" style="cursor:pointer;" onclick="showPage('ai')">
       <span class="icon">🤖</span>
       <div class="label">
-        <strong>Clé API Anthropic</strong>
+        <strong>Clé API Gemini</strong>
         <span id="api-key-status">Non configurée</span>
       </div>
       <span class="action" onclick="event.stopPropagation();resetApiKey()">Changer</span>
@@ -743,8 +741,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.1</strong>
-        <span>PWA · Agent IA · Géolocalisation</span>
+        <strong>Nihon v1.2</strong>
+        <span>PWA · Agent IA Gemini · Géolocalisation</span>
       </div>
     </div>
   </div>
@@ -962,17 +960,17 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <div class="page" id="page-ai">
   <div id="ai-setup" style="display:none;">
     <div class="card" style="margin-top:20px;">
-      <div class="card-label">🔑 Clé API Anthropic</div>
+      <div class="card-label">🔑 Clé API Gemini</div>
       <p style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px;">
-        Pour activer l'assistant IA, entrez votre clé API Anthropic. Elle sera stockée uniquement sur votre téléphone.
+        Créez une clé gratuite sur Google AI Studio (sans CB). Elle sera stockée uniquement sur votre téléphone.
       </p>
-      <input type="password" id="ai-key-input" placeholder="sk-ant-..." 
+      <input type="password" id="ai-key-input" placeholder="AIza..."
         style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);background:var(--bg);box-sizing:border-box;margin-bottom:10px;">
       <button onclick="saveApiKey()" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
         Activer l'assistant
       </button>
-      <a href="https://console.anthropic.com" target="_blank" style="display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--ink-3);">
-        Obtenir une clé sur console.anthropic.com →
+      <a href="https://aistudio.google.com/apikey" target="_blank" style="display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--ink-3);">
+        → Obtenir une clé gratuite sur aistudio.google.com
       </a>
     </div>
   </div>
@@ -1427,18 +1425,18 @@ function buildAiContextGeo() {
 
 
 // ═══════════════════════════════════════════
-// AGENT IA
+// AGENT IA — Gemini 2.5 Flash (gratuit)
 // ═══════════════════════════════════════════
 var aiHistory = [];
 var aiTyping = false;
 
-function getApiKey() { return localStorage.getItem('anthropic_key') || ''; }
+function getApiKey() { return localStorage.getItem('gemini_key') || ''; }
 function saveApiKey() {
   var key = document.getElementById('ai-key-input').value.trim();
-  if (!key.startsWith('sk-ant-')) { showToast('⚠️ Clé invalide — commence par sk-ant-'); return; }
-  localStorage.setItem('anthropic_key', key);
+  if (!key.startsWith('AIza')) { showToast('⚠️ Clé invalide — commence par AIza'); return; }
+  localStorage.setItem('gemini_key', key);
   initAiPage();
-  showToast('✅ Clé enregistrée');
+  showToast('✅ Clé Gemini enregistrée');
 }
 
 function buildAiContext() {
@@ -1554,38 +1552,40 @@ async function sendAiMessage() {
   input.value = '';
   input.style.height = 'auto';
   appendAiMessage('user', text);
-  aiHistory.push({ role: 'user', content: text });
+  aiHistory.push({ role: 'user', parts: [{ text: text }] });
 
   document.getElementById('ai-send-btn').disabled = true;
   aiTyping = true;
   var typingEl = showAiTyping();
 
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        system: buildAiContext(),
-        messages: aiHistory,
-      })
-    });
+    // Construire le corps Gemini : contents = historique, systemInstruction séparé
+    var body = {
+      contents: aiHistory,
+      systemInstruction: { parts: [{ text: buildAiContext() }] },
+      generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
+    };
+
+    var response = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }
+    );
 
     if (!response.ok) {
       var err = await response.json().catch(function(){ return {}; });
-      if (response.status === 401) throw new Error('Clé API invalide — vérifiez dans Réglages');
-      throw new Error(err.error && err.error.message ? err.error.message : 'Erreur ' + response.status);
+      if (response.status === 400 || response.status === 403) throw new Error('Clé API invalide — vérifiez dans Réglages');
+      var msg = (err.error && err.error.message) ? err.error.message : 'Erreur ' + response.status;
+      throw new Error(msg);
     }
 
     var data = await response.json();
-    var reply = data.content[0].text;
-    aiHistory.push({ role: 'assistant', content: reply });
+    var reply = data.candidates[0].content.parts[0].text;
+    // Gemini : rôle 'model' dans l'historique
+    aiHistory.push({ role: 'model', parts: [{ text: reply }] });
     typingEl.remove();
     appendAiMessage('assistant', reply);
 
@@ -1612,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function resetApiKey() {
-  localStorage.removeItem('anthropic_key');
+  localStorage.removeItem('gemini_key');
   aiHistory = [];
   document.getElementById('ai-messages').innerHTML = '';
   initAiPage();
@@ -1978,7 +1978,7 @@ function onRateReady() {
   calcExchange();
   buildQuickGrid();
   buildOtherRates();
-  document.getElementById('hdr-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
+  document.getElementById('header-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
   if (rateTimestamp) {
     document.getElementById('last-rate-update').textContent =
       'Dernière mise à jour : ' + new Date(rateTimestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
@@ -2123,7 +2123,7 @@ async function scanFrame() {
     const codes = await barcodeDetector.detect(video);
     if (codes.length > 0) {
       const result = document.getElementById('scanner-result');
-      document.getElementById('scan-out').textContent = codes[0].rawValue;
+      document.getElementById('scan-text-out').textContent = codes[0].rawValue;
       result.classList.add('show');
       clearInterval(scanInterval);
     }
