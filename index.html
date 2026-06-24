@@ -326,6 +326,76 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 /* ── AGENDA : le textarea ne doit pas déborder ── */
 .ag-textarea { width: 100%; max-width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--ink); font-family: inherit; resize: vertical; min-height: 80px; background: var(--bg); box-sizing: border-box; }
 
+/* ── AGENT IA ── */
+#page-ai { display: none; flex-direction: column; padding: 0 !important; }
+#page-ai.on { display: flex; }
+
+#ai-chat { display: flex; flex-direction: column; flex: 1; height: 100%; }
+
+#ai-messages {
+  flex: 1; overflow-y: auto; padding: 12px 16px;
+  padding-bottom: calc(130px + var(--safe-bottom));
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ai-msg { max-width: 88%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+.ai-msg.user { background: var(--red); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.ai-msg.assistant { background: var(--surface); border: 1px solid var(--border); color: var(--ink); align-self: flex-start; border-bottom-left-radius: 4px; }
+.ai-msg.loading { color: var(--ink-3); font-style: italic; }
+
+#ai-suggestions {
+  padding: 0 16px 8px; display: flex; gap: 8px;
+  overflow-x: auto; scrollbar-width: none; flex-shrink: 0;
+}
+#ai-suggestions::-webkit-scrollbar { display: none; }
+.ai-suggestion {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 7px 14px;
+  font-size: 12px; font-weight: 500; color: var(--ink-2);
+  white-space: nowrap; cursor: pointer; flex-shrink: 0;
+}
+.ai-suggestion:active { background: var(--red-pale); color: var(--red); border-color: var(--red); }
+
+#ai-input-bar {
+  position: fixed; bottom: calc(56px + var(--safe-bottom)); left: 0; right: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: 10px 16px; display: none;
+  align-items: flex-end; gap: 10px;
+}
+#page-ai.on ~ #bnav ~ * #ai-input-bar,
+#app.on #ai-input-bar { display: flex; }
+
+#ai-input {
+  flex: 1; border: 1px solid var(--border); border-radius: 20px;
+  padding: 10px 16px; font-size: 14px; font-family: inherit;
+  resize: none; max-height: 100px; outline: none; background: var(--bg);
+  color: var(--ink); line-height: 1.4;
+}
+#ai-send-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--red); border: none; color: #fff;
+  font-size: 18px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+#ai-send-btn:disabled { background: var(--border); }
+
+.ai-key-change { font-size: 11px; color: var(--ink-3); text-align: center; margin-top: 8px; cursor: pointer; text-decoration: underline; }
+
+/* ── PRÉFÉRENCES ── */
+.pref-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 16px; overflow: hidden; }
+.pref-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
+.pref-row:last-child { border-bottom: none; }
+.pref-label { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.pref-stepper { display: flex; align-items: center; gap: 10px; }
+.pref-stepper button { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink); font-weight: 700; }
+.pref-stepper button:active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
+.pref-stepper span { font-size: 15px; font-weight: 700; color: var(--ink); min-width: 40px; text-align: center; }
+.pref-toggle-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.pref-toggle { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.pref-toggle.active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
+.pref-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.pref-tag { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.pref-tag.active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
+
 /* ── VISIONNEUSE PDF/IMAGE ── */
 #doc-viewer { position: fixed; inset: 0; z-index: 110; background: #111; display: none; flex-direction: column; }
 #doc-viewer.open { display: flex; }
@@ -543,41 +613,136 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
       <span class="action" onclick="speakJapanese('こんにちは、パトリックさん！')">Tester</span>
     </div>
-    <div class="setting-row">
-      <span class="icon">🌐</span>
+  <!-- SECTION GÉOLOCALISATION -->
+  <div class="settings-section">
+    <h3>📍 Géolocalisation</h3>
+    <div class="setting-row" id="geo-row" style="cursor:pointer;" onclick="requestGeo()">
+      <span class="icon">📍</span>
       <div class="label">
-        <strong>Ville de référence</strong>
-        <span id="home-city-label">Paris, France</span>
+        <strong>Position actuelle</strong>
+        <span id="geo-status">Appuyez pour activer</span>
       </div>
-      <span class="action" onclick="changeHomeCity()">Changer</span>
+      <span class="action" id="geo-action">Activer</span>
+    </div>
+    <div id="geo-detail" style="display:none;margin:0 16px 8px;background:#F0F9FF;border:1px solid #BAE0FF;border-radius:10px;padding:12px 14px;font-size:12px;color:#0057A8;line-height:1.7;">
+      <div id="geo-city" style="font-weight:700;font-size:14px;"></div>
+      <div id="geo-coords" style="color:#4A90C4;"></div>
+      <div id="geo-source" style="color:#4A90C4;"></div>
+    </div>
+  </div>
+
+  <!-- SECTION PRÉFÉRENCES VOYAGE -->
+  <div class="settings-section">
+    <h3>🍜 Préférences restaurant</h3>
+    <div class="pref-card">
+      <div class="pref-row">
+        <span class="pref-label">Note minimale</span>
+        <div class="pref-stepper">
+          <button onclick="adjustPref('minRating',-0.1)">−</button>
+          <span id="pref-minRating">4.0</span>⭐
+          <button onclick="adjustPref('minRating',0.1)">＋</button>
+        </div>
+      </div>
+      <div class="pref-row">
+        <span class="pref-label">Distance max</span>
+        <div class="pref-stepper">
+          <button onclick="adjustPref('maxDistance',-100)">−</button>
+          <span id="pref-maxDistance">800</span>m
+          <button onclick="adjustPref('maxDistance',100)">＋</button>
+        </div>
+      </div>
+      <div class="pref-row">
+        <span class="pref-label">Mode</span>
+        <div class="pref-toggle-group" id="pref-mode">
+          <button class="pref-toggle active" onclick="setPrefMode('gourmet')">🎯 Gourmet</button>
+          <button class="pref-toggle" onclick="setPrefMode('balanced')">⚖️ Équilibré</button>
+          <button class="pref-toggle" onclick="setPrefMode('budget')">💴 Éco</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="settings-section">
-    <h3>Fonctionnalités supplémentaires</h3>
-    <div class="add-feature-btn" onclick="suggestFeature()">
-      <span style="font-size:22px;">＋</span>
-      Demander une nouvelle fonctionnalité
-    </div>
-    <div class="setting-row">
-      <span class="icon">☔</span>
-      <div class="label"><strong>Météo Japan</strong><span>À venir</span></div>
-      <span class="action" style="color:var(--ink-3)">Bientôt</span>
-    </div>
-    <div class="setting-row">
-      <span class="icon">🍣</span>
-      <div class="label"><strong>Allergènes aliments</strong><span>Décodeur menus japonais</span></div>
-      <span class="action" style="color:var(--ink-3)">Bientôt</span>
+    <h3>🛍️ Préférences shopping</h3>
+    <div class="pref-card">
+      <div class="pref-row">
+        <span class="pref-label">Distance max</span>
+        <div class="pref-stepper">
+          <button onclick="adjustPref('maxDistanceShopping',-100)">−</button>
+          <span id="pref-maxDistanceShopping">1000</span>m
+          <button onclick="adjustPref('maxDistanceShopping',100)">＋</button>
+        </div>
+      </div>
+      <div class="pref-row">
+        <span class="pref-label">Centres d'intérêt</span>
+        <div class="pref-tags" id="pref-shopping-tags">
+          <button class="pref-tag active" onclick="toggleShoppingTag('souvenirs')">🎁 Souvenirs</button>
+          <button class="pref-tag active" onclick="toggleShoppingTag('mode')">👘 Mode</button>
+          <button class="pref-tag" onclick="toggleShoppingTag('electronics')">📱 Électronique</button>
+          <button class="pref-tag" onclick="toggleShoppingTag('cosmetiques')">💄 Cosmétiques</button>
+          <button class="pref-tag" onclick="toggleShoppingTag('manga')">📚 Manga/Anime</button>
+          <button class="pref-tag" onclick="toggleShoppingTag('alimentation')">🍱 Alimentation</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="settings-section">
-    <h3>À propos</h3>
+    <h3>👤 Profil voyageur</h3>
+    <div class="pref-card">
+      <div class="pref-row">
+        <span class="pref-label">Budget repas / personne</span>
+        <div class="pref-stepper">
+          <button onclick="adjustPref('budgetMeal',-500)">−</button>
+          <span id="pref-budgetMeal">2000</span>¥
+          <button onclick="adjustPref('budgetMeal',500)">＋</button>
+        </div>
+      </div>
+      <div class="pref-row">
+        <span class="pref-label">Mobilité</span>
+        <div class="pref-toggle-group" id="pref-mobility">
+          <button class="pref-toggle active" onclick="setPrefMobility('walking')">🚶 Marche</button>
+          <button class="pref-toggle" onclick="setPrefMobility('transit')">🚇 Métro</button>
+          <button class="pref-toggle" onclick="setPrefMobility('any')">🚕 Tout</button>
+        </div>
+      </div>
+      <div class="pref-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <span class="pref-label">Allergies / régime</span>
+        <textarea id="pref-allergies" placeholder="Ex: sans gluten, végétarien, allergie fruits de mer…"
+          style="width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--ink);resize:none;height:60px;box-sizing:border-box;"
+          onchange="savePrefText('allergies',this.value)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION CLÉS API -->
+  <div class="settings-section">
+    <h3>🔑 APIs</h3>
+    <div class="setting-row" style="cursor:pointer;" onclick="showPage('ai')">
+      <span class="icon">🤖</span>
+      <div class="label">
+        <strong>Clé API Anthropic</strong>
+        <span id="api-key-status">Non configurée</span>
+      </div>
+      <span class="action" onclick="event.stopPropagation();resetApiKey()">Changer</span>
+    </div>
+    <div class="setting-row">
+      <span class="icon">🗺️</span>
+      <div class="label">
+        <strong>Google Places API</strong>
+        <span id="places-key-status">Non configurée</span>
+      </div>
+      <span class="action" onclick="setPlacesKey()">Configurer</span>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3>ℹ️ À propos</h3>
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.0</strong>
-        <span>PWA · Fonctionne hors ligne (partiellement)</span>
+        <strong>Nihon v1.1</strong>
+        <span>PWA · Agent IA · Géolocalisation</span>
       </div>
     </div>
   </div>
@@ -791,6 +956,31 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 </div>
 
 
+<!-- PAGE AI -->
+<div class="page" id="page-ai">
+  <div id="ai-setup" style="display:none;">
+    <div class="card" style="margin-top:20px;">
+      <div class="card-label">🔑 Clé API Anthropic</div>
+      <p style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px;">
+        Pour activer l'assistant IA, entrez votre clé API Anthropic. Elle sera stockée uniquement sur votre téléphone.
+      </p>
+      <input type="password" id="ai-key-input" placeholder="sk-ant-..." 
+        style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);background:var(--bg);box-sizing:border-box;margin-bottom:10px;">
+      <button onclick="saveApiKey()" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
+        Activer l'assistant
+      </button>
+      <a href="https://console.anthropic.com" target="_blank" style="display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--ink-3);">
+        Obtenir une clé sur console.anthropic.com →
+      </a>
+    </div>
+  </div>
+
+  <div id="ai-chat" style="display:none;height:100%;flex-direction:column;">
+    <div id="ai-messages"></div>
+    <div id="ai-suggestions"></div>
+  </div>
+</div>
+
   </div><!-- /pages -->
 </div><!-- /app -->
 
@@ -798,16 +988,23 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <nav id="bnav">
   <button class="nb on" data-p="change" onclick="showPage('change')"><span>💴</span><span>Taux</span></button>
   <button class="nb" data-p="time" onclick="showPage('time')"><span>🕐</span><span>Heures</span></button>
-  <button class="nb" data-p="meteo" onclick="showPage('meteo')"><span>🌡️</span><span>Météo</span></button>
   <button class="nb" data-p="agenda" onclick="showPage('agenda')"><span>📅</span><span>Agenda</span></button>
+  <button class="nb" data-p="ai" onclick="showPage('ai')"><span>🤖</span><span>Assistant</span></button>
   <button class="nb" onclick="toggleMore()"><span>⋯</span><span>Plus</span></button>
 </nav>
+
+<!-- BARRE INPUT IA (fixe, au-dessus de la bottom nav) -->
+<div id="ai-input-bar" style="display:none;">
+  <textarea id="ai-input" placeholder="Posez une question sur votre voyage…" rows="1"></textarea>
+  <button id="ai-send-btn" onclick="sendAiMessage()">↑</button>
+</div>
 
 <!-- MORE MENU -->
 <div id="more-bg" onclick="closeMore()"></div>
 <div id="more-panel">
   <div class="more-handle"></div>
   <div class="mgrid">
+    <button class="mb " onclick="showPageFromMore('meteo')"><span>🌡️</span><span>Météo</span></button>
     <button class="mb " onclick="showPageFromMore('hotels')"><span>🏨</span><span>Hébergements</span></button>
     <button class="mb " onclick="showPageFromMore('nav')"><span>🗺️</span><span>Navigation</span></button>
     <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
@@ -838,7 +1035,8 @@ const TITLES = {
   change:'💴 Taux de change', time:'🕐 Fuseaux horaires',
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
-  agenda:'📅 Agenda', utils:'🗾 Pratique Japon', settings:'⚙️ Réglages'
+  agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA'
 };
 function go(id) {
   document.getElementById('home').classList.add('hidden');
@@ -863,6 +1061,13 @@ function showPage(id) {
   });
   var t = document.getElementById('hdr-title');
   if (t) t.textContent = TITLES[id] || '日本';
+  // Gérer la barre d'input IA
+  var inputBar = document.getElementById('ai-input-bar');
+  if (inputBar) inputBar.style.display = (id === 'ai' && getApiKey()) ? 'flex' : 'none';
+  // Init selon page
+  if (id === 'ai') initAiPage();
+  if (id === 'settings') try { loadPrefsUI(); } catch(e) {}
+  if (id === 'meteo') { var c = document.getElementById('meteo-cities'); if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo(); }
 }
 function showPageFromMore(id) { closeMore(); showPage(id); }
 function toggleMore() {
@@ -969,7 +1174,449 @@ function resetTitleEdit(date) {
   showToast('↩ Programme réinitialisé');
 }
 
-function buildHomeAnimations() {}
+// ═══════════════════════════════════════════
+// GÉOLOCALISATION
+// ═══════════════════════════════════════════
+var geoCache = null; // { lat, lon, city, district, source, ts }
+
+function requestGeo() {
+  var status = document.getElementById('geo-status');
+  var action = document.getElementById('geo-action');
+  status.textContent = 'Localisation en cours…';
+  action.textContent = '…';
+
+  if (!navigator.geolocation) {
+    status.textContent = 'Non supporté — utilise le planning';
+    action.textContent = 'Fallback';
+    geoFallback();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
+      geoCache = { lat: lat, lon: lon, source: 'GPS', ts: Date.now() };
+      localStorage.setItem('geo_cache', JSON.stringify(geoCache));
+      // Reverse geocoding via OSM Nominatim (gratuit)
+      reverseGeocode(lat, lon);
+    },
+    function(err) {
+      status.textContent = 'Accès refusé — utilise le planning';
+      action.textContent = 'Fallback';
+      geoFallback();
+    },
+    { timeout: 10000, enableHighAccuracy: true }
+  );
+}
+
+async function reverseGeocode(lat, lon) {
+  try {
+    var r = await fetch(
+      'https://nominatim.openstreetmap.org/reverse?lat=' + lat + '&lon=' + lon + '&format=json&accept-language=fr',
+      { headers: { 'User-Agent': 'NihonTravelApp/1.0' } }
+    );
+    var data = await r.json();
+    var addr = data.address || {};
+    var district = addr.suburb || addr.neighbourhood || addr.quarter || addr.city_district || '';
+    var city     = addr.city || addr.town || addr.village || '';
+    geoCache.city     = city;
+    geoCache.district = district;
+    geoCache.fullAddr = data.display_name || '';
+    localStorage.setItem('geo_cache', JSON.stringify(geoCache));
+    updateGeoUI();
+  } catch(e) {
+    geoCache.city = 'Tokyo';
+    geoCache.district = '';
+    updateGeoUI();
+  }
+}
+
+function geoFallback() {
+  // Utilise la ville du jour courant dans l'agenda
+  var today = new Date().toISOString().slice(0,10);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === today; });
+  var custom = day ? getCustomTitle(day.date) : null;
+  var city = custom ? custom.city : (day ? day.city : 'Tokyo');
+  // Hôtel du jour pour le quartier
+  var hotelDistrict = {
+    'Tokyo': 'Hirai, Edogawa', 'Kyoto': 'Shimogyo-ku, Kawaramachi', 'Takayama': 'Ichinomiyamachi'
+  }[city] || '';
+  geoCache = { city: city, district: hotelDistrict, source: 'planning', ts: Date.now() };
+  localStorage.setItem('geo_cache', JSON.stringify(geoCache));
+  updateGeoUI();
+}
+
+function updateGeoUI() {
+  if (!geoCache) return;
+  var status = document.getElementById('geo-status');
+  var action = document.getElementById('geo-action');
+  var detail = document.getElementById('geo-detail');
+  var cityEl  = document.getElementById('geo-city');
+  var coordEl = document.getElementById('geo-coords');
+  var srcEl   = document.getElementById('geo-source');
+
+  if (!status) return;
+  var loc = (geoCache.district ? geoCache.district + ', ' : '') + (geoCache.city || '');
+  status.textContent = loc || 'Position connue';
+  action.textContent = 'Actualiser';
+  if (detail) {
+    detail.style.display = 'block';
+    if (cityEl) cityEl.textContent = '📍 ' + loc;
+    if (coordEl && geoCache.lat) coordEl.textContent = geoCache.lat.toFixed(5) + ', ' + geoCache.lon.toFixed(5);
+    if (srcEl) srcEl.textContent = 'Source : ' + (geoCache.source === 'GPS' ? '🛰️ GPS' : '📅 Planning du jour');
+  }
+}
+
+function getCurrentGeo() {
+  // Retourne le contexte geo actuel (depuis cache ou fallback silencieux)
+  var stored = localStorage.getItem('geo_cache');
+  if (stored) {
+    try { geoCache = JSON.parse(stored); } catch(e) {}
+  }
+  if (!geoCache || (Date.now() - (geoCache.ts||0)) > 30*60*1000) {
+    // Cache > 30 min ou absent → fallback planning silencieux
+    geoFallback();
+  }
+  return geoCache;
+}
+
+// ═══════════════════════════════════════════
+// PRÉFÉRENCES VOYAGEUR
+// ═══════════════════════════════════════════
+var PREFS_DEFAULT = {
+  minRating: 4.0,
+  maxDistance: 800,
+  maxDistanceShopping: 1000,
+  budgetMeal: 2000,
+  mode: 'gourmet',
+  mobility: 'walking',
+  allergies: '',
+  shoppingTags: ['souvenirs','mode'],
+};
+
+function getPrefs() {
+  try {
+    var stored = JSON.parse(localStorage.getItem('travel_prefs') || '{}');
+    return Object.assign({}, PREFS_DEFAULT, stored);
+  } catch(e) { return Object.assign({}, PREFS_DEFAULT); }
+}
+
+function savePrefs(prefs) {
+  localStorage.setItem('travel_prefs', JSON.stringify(prefs));
+}
+
+function adjustPref(key, delta) {
+  var prefs = getPrefs();
+  prefs[key] = Math.round((prefs[key] + delta) * 10) / 10;
+  // Limites
+  if (key === 'minRating') prefs[key] = Math.min(5, Math.max(3, prefs[key]));
+  if (key === 'maxDistance') prefs[key] = Math.min(3000, Math.max(200, prefs[key]));
+  if (key === 'maxDistanceShopping') prefs[key] = Math.min(5000, Math.max(200, prefs[key]));
+  if (key === 'budgetMeal') prefs[key] = Math.min(20000, Math.max(500, prefs[key]));
+  savePrefs(prefs);
+  var el = document.getElementById('pref-' + key);
+  if (el) el.textContent = prefs[key];
+}
+
+function setPrefMode(mode) {
+  var prefs = getPrefs(); prefs.mode = mode; savePrefs(prefs);
+  document.querySelectorAll('#pref-mode .pref-toggle').forEach(function(b){
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(mode) || b.onclick.toString().includes(mode));
+  });
+  // Refresh buttons
+  loadPrefsUI();
+}
+
+function setPrefMobility(mobility) {
+  var prefs = getPrefs(); prefs.mobility = mobility; savePrefs(prefs);
+  loadPrefsUI();
+}
+
+function toggleShoppingTag(tag) {
+  var prefs = getPrefs();
+  var idx = prefs.shoppingTags.indexOf(tag);
+  if (idx >= 0) prefs.shoppingTags.splice(idx,1);
+  else prefs.shoppingTags.push(tag);
+  savePrefs(prefs);
+  document.querySelectorAll('#pref-shopping-tags .pref-tag').forEach(function(b){
+    var t = b.onclick.toString().match(/'(\w+)'/);
+    if (t) b.classList.toggle('active', prefs.shoppingTags.indexOf(t[1]) >= 0);
+  });
+}
+
+function savePrefText(key, val) {
+  var prefs = getPrefs(); prefs[key] = val; savePrefs(prefs);
+}
+
+function loadPrefsUI() {
+  var prefs = getPrefs();
+  // Steppers
+  ['minRating','maxDistance','maxDistanceShopping','budgetMeal'].forEach(function(k){
+    var el = document.getElementById('pref-' + k);
+    if (el) el.textContent = prefs[k];
+  });
+  // Mode
+  document.querySelectorAll('#pref-mode .pref-toggle').forEach(function(b){
+    var m = b.onclick.toString().match(/'(\w+)'/);
+    if (m) b.classList.toggle('active', m[1] === prefs.mode);
+  });
+  // Mobility
+  document.querySelectorAll('#pref-mobility .pref-toggle').forEach(function(b){
+    var m = b.onclick.toString().match(/'(\w+)'/);
+    if (m) b.classList.toggle('active', m[1] === prefs.mobility);
+  });
+  // Shopping tags
+  document.querySelectorAll('#pref-shopping-tags .pref-tag').forEach(function(b){
+    var m = b.onclick.toString().match(/'(\w+)'/);
+    if (m) b.classList.toggle('active', prefs.shoppingTags.indexOf(m[1]) >= 0);
+  });
+  // Allergies
+  var ta = document.getElementById('pref-allergies');
+  if (ta) ta.value = prefs.allergies || '';
+  // API status
+  var akEl = document.getElementById('api-key-status');
+  if (akEl) akEl.textContent = getApiKey() ? '✅ Configurée' : '⚠️ Non configurée';
+  var pkEl = document.getElementById('places-key-status');
+  if (pkEl) pkEl.textContent = localStorage.getItem('places_key') ? '✅ Configurée' : 'Non configurée';
+  // Geo
+  updateGeoUI();
+}
+
+function setPlacesKey() {
+  var key = prompt('Clé Google Places API (AIza…) :');
+  if (key && key.startsWith('AIza')) {
+    localStorage.setItem('places_key', key);
+    showToast('✅ Clé Places enregistrée');
+    loadPrefsUI();
+  } else if (key) {
+    showToast('⚠️ Clé invalide');
+  }
+}
+
+function buildAiContextGeo() {
+  // Contexte géo + préférences pour l'agent IA
+  var geo   = getCurrentGeo();
+  var prefs = getPrefs();
+  var modeLabel = { gourmet: 'gourmet (priorité qualité)', balanced: 'équilibré', budget: 'économique (priorité prix)' }[prefs.mode] || prefs.mode;
+  var mobilityLabel = { walking: 'à pied', transit: 'transports en commun', any: 'tous modes' }[prefs.mobility] || prefs.mobility;
+
+  var geoStr = geo
+    ? '\nPOSITION ACTUELLE : ' + (geo.district ? geo.district + ', ' : '') + (geo.city || 'Tokyo')
+      + (geo.lat ? ' (GPS: ' + geo.lat.toFixed(4) + ',' + geo.lon.toFixed(4) + ')' : '')
+      + ' [Source: ' + (geo.source === 'GPS' ? 'GPS précis' : 'planning du jour') + ']'
+    : '\nPOSITION : Tokyo (par défaut)';
+
+  return geoStr
+    + '\n\nPRÉFÉRENCES VOYAGEUR :'
+    + '\n- Mode : ' + modeLabel
+    + '\n- Budget repas : ' + prefs.budgetMeal + '¥/personne'
+    + '\n- Distance max restaurant : ' + prefs.maxDistance + 'm'
+    + '\n- Distance max shopping : ' + prefs.maxDistanceShopping + 'm'
+    + '\n- Note minimale : ' + prefs.minRating + '/5'
+    + '\n- Mobilité : ' + mobilityLabel
+    + (prefs.allergies ? '\n- Régime/Allergies : ' + prefs.allergies : '')
+    + (prefs.shoppingTags.length ? '\n- Shopping préféré : ' + prefs.shoppingTags.join(', ') : '')
+    + '\n\nIMPORTANT : Ne jamais inventer de restaurants ou commerces. '
+    + 'Si Google Places n\'est pas disponible, demande à l\'utilisateur de préciser ou suggère des types de lieux sans noms inventés.';
+}
+
+
+
+
+// ═══════════════════════════════════════════
+// AGENT IA
+// ═══════════════════════════════════════════
+var aiHistory = [];
+var aiTyping = false;
+
+function getApiKey() { return localStorage.getItem('anthropic_key') || ''; }
+function saveApiKey() {
+  var key = document.getElementById('ai-key-input').value.trim();
+  if (!key.startsWith('sk-ant-')) { showToast('⚠️ Clé invalide — commence par sk-ant-'); return; }
+  localStorage.setItem('anthropic_key', key);
+  initAiPage();
+  showToast('✅ Clé enregistrée');
+}
+
+function buildAiContext() {
+  // Contexte complet du voyage injecté dans le system prompt
+  var today = new Date();
+  var todayStr = today.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  var todayIso = today.toISOString().slice(0,10);
+
+  // Trouver le jour actuel dans l'agenda
+  var currentDay = AGENDA_DAYS.find(function(d){ return d.date === todayIso; });
+  var currentCity = currentDay ? (getCustomTitle(currentDay.date) || currentDay).city : 'Tokyo';
+
+  // Résumé de l'agenda
+  var agendaSummary = AGENDA_DAYS.map(function(d) {
+    var custom = getCustomTitle(d.date);
+    var note = localStorage.getItem('agenda_' + d.date) || '';
+    var title = custom ? custom.title : d.title;
+    var city  = custom ? custom.city  : d.city;
+    return d.label + ' — ' + city + ' : ' + title + (note ? ' [Note: ' + note.split('\n')[0] + ']' : '');
+  }).join('\n');
+
+  // Hébergements
+  var hotels = [
+    'Tokyo (10-15 juil.) : Hirai Ayaka House, 5 Chome-45-1 Hirai, Edogawa',
+    'Kyoto (16-18 juil.) : Good Nature Hotel, Shimogyo-ku Kawaramachi, tél 075-352-6730',
+    'Takayama (23-24 juil.) : Ryokan Wanosato, Ichinomiyamachi 1682, tél 0577-53-2321',
+  ].join('\n');
+
+  return 'Tu es un assistant de voyage personnel pour Patrick Bloch et sa fille Inoue (17 ans).'
+    + ' Ils voyagent au Japon du 10 au 28 juillet 2026.'
+    + ' Aujourd\'hui nous sommes le ' + todayStr + '.'
+    + (currentDay ? ' Ils sont actuellement à ' + currentCity + '.' : '')
+    + '\n\nITINÉRAIRE COMPLET :\n' + agendaSummary
+    + '\n\nHÉBERGEMENTS :\n' + hotels
+    + '\n\nDEVISE : 1 EUR ≈ ' + (rateEURJPY ? rateEURJPY.toFixed(0) : '163') + ' JPY.'
+    + buildAiContextGeo()
+    + '\n\nRéponds en français, de façon concise et pratique. Tu connais bien le Japon.'
+    + ' Donne des conseils terrain concrets : accès, horaires, prix, conseils culturels.'
+    + ' Pour les adresses japonaises, inclus toujours la version en japonais si pertinent.'
+    + ' Quand l\'utilisateur parle de restaurant ou shopping, utilise sa position et ses préférences.';
+}
+
+function buildSuggestions() {
+  var today = new Date().toISOString().slice(0,10);
+  var currentDay = AGENDA_DAYS.find(function(d){ return d.date === today; });
+  var city = currentDay ? currentDay.city : 'Tokyo';
+
+  var suggestions = [
+    'Que faire aujourd\'hui à ' + city + ' ?',
+    'Restaurant recommandé ce soir',
+    'Comment prendre le métro ?',
+    'Que visiter demain ?',
+    'Météo et conseils vestimentaires',
+    'Urgences : où aller si besoin ?',
+  ];
+  var html = suggestions.map(function(s) {
+    return '<button class="ai-suggestion" onclick="askSuggestion(\'' + s.replace(/'/g, "\\'") + '\')">' + s + '</button>';
+  }).join('');
+  document.getElementById('ai-suggestions').innerHTML = html;
+}
+
+function askSuggestion(text) {
+  document.getElementById('ai-input').value = text;
+  sendAiMessage();
+}
+
+function initAiPage() {
+  var key = getApiKey();
+  var setup = document.getElementById('ai-setup');
+  var chat  = document.getElementById('ai-chat');
+  var inputBar = document.getElementById('ai-input-bar');
+
+  if (!key) {
+    setup.style.display = 'block';
+    chat.style.display  = 'none';
+    if (inputBar) inputBar.style.display = 'none';
+  } else {
+    setup.style.display = 'none';
+    chat.style.display  = 'flex';
+    if (inputBar) inputBar.style.display = 'flex';
+    buildSuggestions();
+    if (aiHistory.length === 0) {
+      appendAiMessage('assistant',
+        '👋 Bonjour Patrick et Inoue ! Je suis votre assistant de voyage au Japon.\n\n'
+        + 'Je connais votre itinéraire complet, vos hébergements et le taux de change du jour. '
+        + 'Posez-moi n\'importe quelle question sur votre voyage !');
+    }
+  }
+}
+
+function appendAiMessage(role, text) {
+  var msgs = document.getElementById('ai-messages');
+  var div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function showAiTyping() {
+  return appendAiMessage('assistant loading', '…');
+}
+
+async function sendAiMessage() {
+  if (aiTyping) return;
+  var input = document.getElementById('ai-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var key = getApiKey();
+  if (!key) { showToast('⚠️ Clé API manquante'); return; }
+
+  input.value = '';
+  input.style.height = 'auto';
+  appendAiMessage('user', text);
+  aiHistory.push({ role: 'user', content: text });
+
+  document.getElementById('ai-send-btn').disabled = true;
+  aiTyping = true;
+  var typingEl = showAiTyping();
+
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: buildAiContext(),
+        messages: aiHistory,
+      })
+    });
+
+    if (!response.ok) {
+      var err = await response.json().catch(function(){ return {}; });
+      if (response.status === 401) throw new Error('Clé API invalide — vérifiez dans Réglages');
+      throw new Error(err.error && err.error.message ? err.error.message : 'Erreur ' + response.status);
+    }
+
+    var data = await response.json();
+    var reply = data.content[0].text;
+    aiHistory.push({ role: 'assistant', content: reply });
+    typingEl.remove();
+    appendAiMessage('assistant', reply);
+
+  } catch(e) {
+    typingEl.remove();
+    appendAiMessage('assistant', '⚠️ ' + (e.message || 'Erreur de connexion'));
+  } finally {
+    aiTyping = false;
+    document.getElementById('ai-send-btn').disabled = false;
+  }
+}
+
+// Auto-resize textarea
+document.addEventListener('DOMContentLoaded', function() {
+  var inp = document.getElementById('ai-input');
+  if (!inp) return;
+  inp.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+  });
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAiMessage(); }
+  });
+});
+
+function resetApiKey() {
+  localStorage.removeItem('anthropic_key');
+  aiHistory = [];
+  document.getElementById('ai-messages').innerHTML = '';
+  initAiPage();
+}
+
+
 
 
 // ═══════════════════════════════════════════
@@ -1809,6 +2456,8 @@ try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
+try { loadPrefsUI(); } catch(e) {}
+try { getCurrentGeo(); } catch(e) {} // charge le cache geo silencieusement
 setInterval(function() { try { updateTimes(); } catch(e) {} }, 10000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 
