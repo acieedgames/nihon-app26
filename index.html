@@ -723,7 +723,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row" style="cursor:pointer;" onclick="showPage('ai')">
       <span class="icon">🤖</span>
       <div class="label">
-        <strong>Clé API Gemini</strong>
+        <strong>Clé API Groq</strong>
         <span id="api-key-status">Non configurée</span>
       </div>
       <span class="action" onclick="event.stopPropagation();resetApiKey()">Changer</span>
@@ -744,7 +744,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       <span class="icon">ℹ️</span>
       <div class="label">
         <strong>Nihon v1.3</strong>
-        <span>PWA · Agent IA Gemini · Géolocalisation</span>
+        <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
   </div>
@@ -962,17 +962,17 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <div class="page" id="page-ai">
   <div id="ai-setup" style="display:none;">
     <div class="card" style="margin-top:20px;">
-      <div class="card-label">🔑 Clé API Gemini</div>
+      <div class="card-label">🔑 Clé API Groq</div>
       <p style="font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px;">
-        Créez une clé gratuite sur Google AI Studio (sans CB). Elle sera stockée uniquement sur votre téléphone.
+        Créez une clé gratuite sur console.groq.com (sans CB). Elle sera stockée uniquement sur votre téléphone.
       </p>
-      <input type="password" id="ai-key-input" placeholder="AIza..."
+      <input type="password" id="ai-key-input" placeholder="gsk_..."
         style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--ink);background:var(--bg);box-sizing:border-box;margin-bottom:10px;">
       <button onclick="saveApiKey()" style="width:100%;background:var(--red);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;">
         Activer l'assistant
       </button>
-      <a href="https://aistudio.google.com/apikey" target="_blank" style="display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--ink-3);">
-        → Obtenir une clé gratuite sur aistudio.google.com
+      <a href="https://console.groq.com/keys" target="_blank" style="display:block;text-align:center;margin-top:10px;font-size:12px;color:var(--ink-3);">
+        → Obtenir une clé gratuite sur console.groq.com
       </a>
     </div>
   </div>
@@ -1457,13 +1457,13 @@ function buildAiContextGeo() {
 var aiHistory = [];
 var aiTyping = false;
 
-function getApiKey() { return localStorage.getItem('gemini_key') || ''; }
+function getApiKey() { return localStorage.getItem('groq_key') || ''; }
 function saveApiKey() {
   var key = document.getElementById('ai-key-input').value.trim();
-  if (!key.startsWith('AIza')) { showToast('⚠️ Clé invalide — commence par AIza'); return; }
-  localStorage.setItem('gemini_key', key);
+  if (!key.startsWith('gsk_')) { showToast('⚠️ Clé invalide — commence par gsk_'); return; }
+  localStorage.setItem('groq_key', key);
   initAiPage();
-  showToast('✅ Clé Gemini enregistrée');
+  showToast('✅ Clé Groq enregistrée');
 }
 
 function buildAiContext() {
@@ -1579,30 +1579,37 @@ async function sendAiMessage() {
   input.value = '';
   input.style.height = 'auto';
   appendAiMessage('user', text);
-  aiHistory.push({ role: 'user', parts: [{ text: text }] });
+  aiHistory.push({ role: 'user', content: text });
 
   document.getElementById('ai-send-btn').disabled = true;
   aiTyping = true;
   var typingEl = showAiTyping();
 
   try {
-    var body = {
-      contents: aiHistory,
-      systemInstruction: { parts: [{ text: buildAiContext() }] },
-      generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
-    };
-    var response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key,
-      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
+    var messages = [{ role: 'system', content: buildAiContext() }].concat(
+      aiHistory.map(function(m) { return { role: m.role, content: m.content }; })
     );
+    var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + key,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: messages,
+        max_tokens: 1024,
+        temperature: 0.7,
+      })
+    });
     if (!response.ok) {
       var err = await response.json().catch(function(){ return {}; });
-      if (response.status === 400 || response.status === 403) throw new Error('Clé API invalide — vérifiez dans Réglages');
+      if (response.status === 401) throw new Error('Clé API invalide — vérifiez dans Réglages');
       throw new Error((err.error && err.error.message) ? err.error.message : 'Erreur ' + response.status);
     }
     var data = await response.json();
-    var reply = data.candidates[0].content.parts[0].text;
-    aiHistory.push({ role: 'model', parts: [{ text: reply }] });
+    var reply = data.choices[0].message.content;
+    aiHistory.push({ role: 'assistant', content: reply });
     typingEl.remove();
     appendAiMessage('assistant', reply);
   } catch(e) {
@@ -1628,7 +1635,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function resetApiKey() {
-  localStorage.removeItem('gemini_key');
+  localStorage.removeItem('groq_key');
   aiHistory = [];
   document.getElementById('ai-messages').innerHTML = '';
   initAiPage();
