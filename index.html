@@ -443,6 +443,14 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   background:var(--red); color:#fff; border:none; border-radius:12px;
   padding:10px 14px; font-size:18px; cursor:pointer; flex-shrink:0;
 }
+.places-mic-btn {
+  background:var(--surface); border:1.5px solid var(--border); border-radius:12px;
+  padding:10px 14px; font-size:18px; cursor:pointer; flex-shrink:0; color:var(--ink-2);
+}
+.places-mic-btn.listening {
+  background:#FFF0F2; border-color:var(--red); color:var(--red);
+  animation: pulse-mic 1s ease-in-out infinite;
+}
 .places-filters { display:flex; gap:6px; padding:10px 16px 0; overflow-x:auto; scrollbar-width:none; }
 .places-filters::-webkit-scrollbar { display:none; }
 .pf-btn {
@@ -850,7 +858,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.7</strong>
+        <strong>Nihon v1.8</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1077,6 +1085,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   <!-- Barre recherche + GPS -->
   <div class="places-search-bar">
     <input type="text" id="places-search-input" placeholder="Ramen, konbini, temple…" oninput="onPlacesInput()">
+    <button class="places-mic-btn" id="places-mic-btn" onclick="togglePlacesVoice()" title="Parler">🎤</button>
     <button class="places-locate-btn" onclick="locateAndSearch()" title="Autour de moi">📍</button>
   </div>
 
@@ -2724,6 +2733,46 @@ var SHOP_FILTERS = [
   { key:'konbini',     label:'🏪 Konbini',      q: '["shop"="convenience"]' },
 ];
 
+
+function togglePlacesVoice() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('⚠️ Micro non supporté'); return; }
+  var btn = document.getElementById('places-mic-btn');
+  if (btn && btn.classList.contains('listening')) {
+    placesVoiceRecog && placesVoiceRecog.stop();
+    return;
+  }
+  placesVoiceRecog = new SR();
+  placesVoiceRecog.lang = 'fr-FR';
+  placesVoiceRecog.continuous = false;
+  placesVoiceRecog.interimResults = true;
+
+  placesVoiceRecog.onstart = function() {
+    if (btn) { btn.classList.add('listening'); btn.textContent = '⏹'; }
+    showToast('🎤 Parlez…');
+  };
+  placesVoiceRecog.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    var inp = document.getElementById('places-search-input');
+    if (inp) inp.value = t;
+    if (e.results[e.results.length-1].isFinal) {
+      setTimeout(function() {
+        if (inp && inp.value.trim() && placesGeo) searchPlacesText(inp.value.trim());
+      }, 600);
+    }
+  };
+  placesVoiceRecog.onerror = function(e) {
+    var msg = { 'not-allowed':'Micro non autorisé', 'no-speech':'Aucune voix', 'network':'Erreur réseau' };
+    showToast('⚠️ ' + (msg[e.error] || 'Erreur micro'));
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  placesVoiceRecog.onend = function() {
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  try { placesVoiceRecog.start(); } catch(e) { showToast('⚠️ Impossible de démarrer le micro'); }
+}
+var placesVoiceRecog = null;
 function setPlacesTab(tab) {
   placesTab = tab;
   placesFilter = null;
