@@ -45,6 +45,19 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .h-title { font-size: 19px; font-weight: 700; color: #fff; margin-bottom: 4px; }
 .h-sub   { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 14px; }
 .h-cities { font-size: 12px; color: rgba(255,255,255,0.5); padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.07); }
+.h-clocks {
+  display: flex; gap: 0; margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.h-clock {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.h-clock:first-child { align-items: flex-start; }
+.h-clock:last-child  { align-items: flex-end; }
+.h-clock-city { font-size: 10px; color: rgba(255,255,255,0.4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+.h-clock-time { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1; }
+.h-clock-date { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
+.h-clock-sep  { width: 1px; background: rgba(255,255,255,0.1); margin: 4px 16px; }
 
 #home-btns { padding: 18px 16px calc(32px + var(--safe-bottom)); }
 .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -397,6 +410,71 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .pref-tag { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 5px 10px; font-size: 11px; font-weight: 600; color: var(--ink-2); cursor: pointer; }
 .pref-tag.active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
 
+
+/* ── PLACES ── */
+.places-tabs { display:flex; gap:8px; padding:14px 16px 0; }
+.places-tab {
+  flex:1; padding:10px 6px; border-radius:12px;
+  border:1px solid var(--border); background:var(--surface);
+  font-size:13px; font-weight:700; color:var(--ink-2); cursor:pointer; text-align:center;
+}
+.places-tab.on { background:var(--red); color:#fff; border-color:var(--red); }
+.places-search-bar { display:flex; gap:8px; padding:12px 16px 0; }
+.places-search-bar input {
+  flex:1; border:1px solid var(--border); border-radius:12px;
+  padding:10px 14px; font-size:14px; color:var(--ink); background:var(--bg);
+}
+.places-locate-btn {
+  background:var(--red); color:#fff; border:none; border-radius:12px;
+  padding:10px 14px; font-size:18px; cursor:pointer; flex-shrink:0;
+}
+.places-filters { display:flex; gap:6px; padding:10px 16px 0; overflow-x:auto; scrollbar-width:none; }
+.places-filters::-webkit-scrollbar { display:none; }
+.pf-btn {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:6px 12px; font-size:12px; font-weight:600; color:var(--ink-2);
+  white-space:nowrap; cursor:pointer; flex-shrink:0;
+}
+.pf-btn.on { background:var(--red-pale); color:var(--red); border-color:var(--red); }
+.places-list { padding:10px 16px; }
+.place-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+  padding:14px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start;
+}
+.place-card:active { background:var(--red-pale); }
+.place-rank {
+  width:28px; height:28px; border-radius:50%; background:var(--red);
+  color:#fff; font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.place-info { flex:1; min-width:0; }
+.place-name { font-size:14px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.place-type { font-size:11px; color:var(--ink-3); margin-bottom:5px; }
+.place-meta { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+.place-tag { font-size:11px; padding:2px 8px; border-radius:5px; font-weight:600; }
+.tag-dist { background:#E3F2FD; color:#1565C0; }
+.tag-open { background:#E8F5E9; color:#2E7D32; }
+.tag-rating { background:#FFF8E1; color:#F57F17; }
+.place-addr { font-size:12px; color:var(--ink-3); }
+.place-actions { display:flex; gap:6px; margin-top:8px; }
+.place-btn {
+  padding:7px 12px; border-radius:8px; border:none;
+  font-size:12px; font-weight:600; cursor:pointer; flex-shrink:0;
+}
+.place-btn-map { background:var(--red); color:#fff; }
+.place-btn-ai  { background:var(--red-pale); color:var(--red); border:1px solid rgba(200,16,46,0.2); }
+.places-empty {
+  text-align:center; padding:40px 20px;
+  font-size:14px; color:var(--ink-3); line-height:1.8;
+}
+.places-loading { text-align:center; padding:30px; color:var(--ink-3); font-size:14px; }
+.places-ai-banner {
+  margin:10px 16px 0; background:#F0F4FF; border:1px solid #C5D0F0;
+  border-radius:12px; padding:12px 14px;
+  font-size:12px; color:#3A4A80; line-height:1.6; cursor:pointer;
+}
+.places-ai-banner:active { background:#E3EAF8; }
+
 /* ── VISIONNEUSE PDF/IMAGE ── */
 #doc-viewer { position: fixed; inset: 0; z-index: 110; background: #111; display: none; flex-direction: column; }
 #doc-viewer.open { display: flex; }
@@ -427,11 +505,23 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="h-kanji">日本</div>
     <div class="h-title">Nihon — 10 au 28 juillet 2026</div>
     <div class="h-sub">Patrick & Inoue · Compagnon de voyage</div>
-    <div class="h-cities">🗼 Tokyo · ⛩️ Kyoto · 🏔️ Takayama</div>
+    <div class="h-clocks">
+      <div class="h-clock">
+        <span class="h-clock-city">🗼 Tokyo</span>
+        <span class="h-clock-time" id="home-tokyo-time">--:--</span>
+        <span class="h-clock-date" id="home-tokyo-date"></span>
+      </div>
+      <div class="h-clock-sep"></div>
+      <div class="h-clock">
+        <span class="h-clock-city">🗺️ Paris</span>
+        <span class="h-clock-time" id="home-paris-time">--:--</span>
+        <span class="h-clock-date" id="home-paris-date"></span>
+      </div>
+    </div>
   </div>
   <div id="home-btns"><div class="hgrid">
-    <button class="hbtn" onclick="go('change')"><span class="hi">💴</span><div><span class="hl">Taux de change</span><span class="hs">EUR ↔ JPY</span></div></button>
-    <button class="hbtn" onclick="go('time')"><span class="hi">🕐</span><div><span class="hl">Fuseaux horaires</span><span class="hs">Paris · Tokyo</span></div></button>
+    <button class="hbtn" onclick="go('places')"><span class="hi">📍</span><div><span class="hl">Restos & Shopping</span><span class="hs">Autour de moi · OSM</span></div></button>
+    <button class="hbtn" onclick="go('change')"><span class="hi">💴</span><div><span class="hl">Taux de change</span><span class="hs">JPY ↔ EUR</span></div></button>
     <button class="hbtn" onclick="go('meteo')"><span class="hi">🌡️</span><div><span class="hl">Météo & Chaleur</span><span class="hs">Indice juillet</span></div></button>
     <button class="hbtn" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Agenda du voyage</span><span class="hs">10–28 juil.</span></div></button>
     <button class="hbtn" onclick="go('hotels')"><span class="hi">🏨</span><div><span class="hl">Hébergements</span><span class="hs">Adresses taxi</span></div></button>
@@ -455,13 +545,13 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <div class="page on" id="page-change">
   <div class="card exchange-big">
     <div class="amount-row">
-      <input type="text" inputmode="decimal" id="from-amount" value="100" oninput="calcExchange()" />
-      <span class="currency-badge" id="from-label">EUR</span>
+      <input type="text" inputmode="decimal" id="from-amount" value="10000" oninput="calcExchange()" />
+      <span class="currency-badge" id="from-label">JPY</span>
     </div>
     <div class="exchange-arrow">↕</div>
     <div class="result-row">
       <span class="result-amount" id="to-amount">—</span>
-      <span class="result-currency" id="to-label">JPY</span>
+      <span class="result-currency" id="to-label">EUR</span>
     </div>
     <div class="rate-info" id="rate-info">Chargement du taux…</div>
     <button class="swap-btn" onclick="swapCurrencies()">⇅ Inverser EUR / JPY</button>
@@ -745,7 +835,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.3</strong>
+        <strong>Nihon v1.5</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -960,6 +1050,38 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 </div>
 
 
+
+<!-- PAGE PLACES -->
+<div class="page" id="page-places">
+  <!-- Onglets Restos / Shopping -->
+  <div class="places-tabs">
+    <button class="places-tab on" id="ptab-food" onclick="setPlacesTab('food')">🍜 Restos & Cafés</button>
+    <button class="places-tab" id="ptab-shop" onclick="setPlacesTab('shop')">🛍️ Shopping</button>
+  </div>
+
+  <!-- Barre recherche + GPS -->
+  <div class="places-search-bar">
+    <input type="text" id="places-search-input" placeholder="Ramen, konbini, temple…" oninput="onPlacesInput()">
+    <button class="places-locate-btn" onclick="locateAndSearch()" title="Autour de moi">📍</button>
+  </div>
+
+  <!-- Filtres -->
+  <div class="places-filters" id="places-filters"></div>
+
+  <!-- Bannière IA -->
+  <div class="places-ai-banner" id="places-ai-banner" onclick="askPlacesAi()" style="display:none;">
+    🤖 <strong>Demander à l'assistant</strong> — "Quel est le meilleur ramen ici ?" ou "Trouve un konbini ouvert maintenant"
+  </div>
+
+  <!-- Liste résultats -->
+  <div class="places-list" id="places-list">
+    <div class="places-empty">
+      📍 Appuyez sur <strong>📍</strong> pour chercher autour de vous<br>
+      ou tapez un type de lieu à chercher
+    </div>
+  </div>
+</div>
+
 <!-- PAGE AI -->
 <div class="page" id="page-ai">
   <div id="ai-setup" style="display:none;">
@@ -990,7 +1112,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 
 <!-- BOTTOM NAV -->
 <nav id="bnav">
-  <button class="nb on" data-p="change" onclick="showPage('change')"><span>💴</span><span>Taux</span></button>
+  <button class="nb on" data-p="places" onclick="showPage('places')"><span>📍</span><span>Restos</span></button>
   <button class="nb" data-p="time" onclick="showPage('time')"><span>🕐</span><span>Heures</span></button>
   <button class="nb" data-p="agenda" onclick="showPage('agenda')"><span>📅</span><span>Agenda</span></button>
   <button class="nb" data-p="ai" onclick="showPage('ai')"><span>🤖</span><span>Assistant</span></button>
@@ -1008,6 +1130,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <div id="more-panel">
   <div class="more-handle"></div>
   <div class="mgrid">
+    <button class="mb " onclick="showPageFromMore('places')"><span>📍</span><span>Restos</span></button>
+    <button class="mb " onclick="showPageFromMore('change')"><span>💴</span><span>Taux</span></button>
     <button class="mb " onclick="showPageFromMore('meteo')"><span>🌡️</span><span>Météo</span></button>
     <button class="mb " onclick="showPageFromMore('hotels')"><span>🏨</span><span>Hébergements</span></button>
     <button class="mb " onclick="showPageFromMore('nav')"><span>🗺️</span><span>Navigation</span></button>
@@ -1040,7 +1164,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping'
 };
 
 function setThemeColor(color) {
@@ -1959,7 +2083,7 @@ const PHRASES = [
 ];
 
 let rateEURJPY = null;
-let fromEUR = true;
+let fromEUR = false;
 let rateTimestamp = null;
 
 // ═══════════════════════════════════════════
@@ -2071,7 +2195,24 @@ function buildOtherRates() {
 // ═══════════════════════════════════════════
 // TIME
 // ═══════════════════════════════════════════
+
+function updateHomeClock() {
+  var now = new Date();
+  var tokyoTime = now.toLocaleString('fr-FR', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit' });
+  var tokyoDate = now.toLocaleDateString('fr-FR', { timeZone: 'Asia/Tokyo', weekday: 'short', day: 'numeric', month: 'short' });
+  var parisTime = now.toLocaleString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' });
+  var parisDate = now.toLocaleDateString('fr-FR', { timeZone: 'Europe/Paris', weekday: 'short', day: 'numeric', month: 'short' });
+  var tT = document.getElementById('home-tokyo-time');
+  var tD = document.getElementById('home-tokyo-date');
+  var pT = document.getElementById('home-paris-time');
+  var pD = document.getElementById('home-paris-date');
+  if (tT) tT.textContent = tokyoTime;
+  if (tD) tD.textContent = tokyoDate;
+  if (pT) pT.textContent = parisTime;
+  if (pD) pD.textContent = parisDate;
+}
 function updateTimes() {
+  updateHomeClock();
   const now = new Date();
   // Tokyo
   const tokyoStr = now.toLocaleString('fr-FR', { timeZone: JAPAN_TZ, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -2471,6 +2612,284 @@ function showToast(msg) {
 // ═══════════════════════════════════════════
 
 
+
+// ═══════════════════════════════════════════
+// PLACES — OpenStreetMap Overpass API
+// ═══════════════════════════════════════════
+var placesTab = 'food';
+var placesGeo = null; // { lat, lon }
+var placesResults = [];
+var placesFilter = null;
+var placesSearchTimer = null;
+
+var FOOD_FILTERS = [
+  { key:'all',        label:'🍽️ Tout',      q: '["amenity"~"restaurant|cafe|fast_food|ramen|sushi|izakaya"]' },
+  { key:'restaurant', label:'🍜 Restaurant', q: '["amenity"="restaurant"]' },
+  { key:'cafe',       label:'☕ Café',       q: '["amenity"="cafe"]' },
+  { key:'ramen',      label:'🍜 Ramen',      q: '["cuisine"="ramen"]' },
+  { key:'sushi',      label:'🐟 Sushi',      q: '["cuisine"="sushi"]' },
+  { key:'konbini',    label:'🏪 Konbini',    q: '["shop"~"convenience|supermarket"]["brand"~"7-Eleven|FamilyMart|Lawson|Ministop|Seicomart",i]' },
+  { key:'fastfood',   label:'🍔 Fast food',  q: '["amenity"="fast_food"]' },
+];
+
+var SHOP_FILTERS = [
+  { key:'all',         label:'🛍️ Tout',        q: '["shop"~"clothes|department_store|mall|electronics|gift|souvenir|books|cosmetics|convenience"]' },
+  { key:'souvenirs',   label:'🎁 Souvenirs',   q: '["shop"~"gift|souvenir"]' },
+  { key:'mode',        label:'👘 Mode',         q: '["shop"="clothes"]' },
+  { key:'electronics', label:'📱 Électronique', q: '["shop"="electronics"]' },
+  { key:'books',       label:'📚 Manga/Livres', q: '["shop"="books"]' },
+  { key:'cosmetiques', label:'💄 Cosmétiques',  q: '["shop"="cosmetics"]' },
+  { key:'konbini',     label:'🏪 Konbini',      q: '["shop"="convenience"]' },
+];
+
+function setPlacesTab(tab) {
+  placesTab = tab;
+  placesFilter = null;
+  document.getElementById('ptab-food').classList.toggle('on', tab === 'food');
+  document.getElementById('ptab-shop').classList.toggle('on', tab === 'shop');
+  buildPlacesFilters();
+  if (placesGeo) searchPlaces();
+}
+
+function buildPlacesFilters() {
+  var filters = placesTab === 'food' ? FOOD_FILTERS : SHOP_FILTERS;
+  var html = filters.map(function(f) {
+    var on = (!placesFilter && f.key === 'all') || placesFilter === f.key ? ' on' : '';
+    return '<button class="pf-btn' + on + '" onclick="setPlacesFilter(\'' + f.key + '\')">' + f.label + '</button>';
+  }).join('');
+  document.getElementById('places-filters').innerHTML = html;
+}
+
+function setPlacesFilter(key) {
+  placesFilter = key === 'all' ? null : key;
+  buildPlacesFilters();
+  if (placesGeo) searchPlaces();
+}
+
+function onPlacesInput() {
+  clearTimeout(placesSearchTimer);
+  placesSearchTimer = setTimeout(function() {
+    var q = document.getElementById('places-search-input').value.trim();
+    if (q.length >= 2 && placesGeo) searchPlacesText(q);
+  }, 600);
+}
+
+function locateAndSearch() {
+  var list = document.getElementById('places-list');
+  list.innerHTML = '<div class="places-loading">📍 Localisation en cours…</div>';
+  if (!navigator.geolocation) {
+    useFallbackGeo(); return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      placesGeo = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      searchPlaces();
+    },
+    function() { useFallbackGeo(); },
+    { timeout: 8000, enableHighAccuracy: true }
+  );
+}
+
+function useFallbackGeo() {
+  // Fallback : position de l'hôtel du jour selon agenda
+  var today = new Date().toISOString().slice(0,10);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === today; });
+  var custom = day ? getCustomTitle(day.date) : null;
+  var city = custom ? custom.city : (day ? day.city : 'Tokyo');
+  var cityCoords = {
+    'Tokyo':    { lat: 35.6762, lon: 139.6503 },
+    'Kyoto':    { lat: 35.0116, lon: 135.7681 },
+    'Takayama': { lat: 36.1461, lon: 137.2523 },
+  };
+  placesGeo = cityCoords[city] || cityCoords['Tokyo'];
+  showToast('📍 Position : centre de ' + city);
+  searchPlaces();
+}
+
+async function searchPlaces() {
+  if (!placesGeo) return;
+  var filters = placesTab === 'food' ? FOOD_FILTERS : SHOP_FILTERS;
+  var activeFilter = placesFilter ? filters.find(function(f){ return f.key === placesFilter; }) : filters[0];
+  var tagQuery = activeFilter ? activeFilter.q : filters[0].q;
+  var radius = 800;
+  var list = document.getElementById('places-list');
+  list.innerHTML = '<div class="places-loading">🔍 Recherche autour de vous…</div>';
+
+  var overpassQ =
+    '[out:json][timeout:15];' +
+    '(' +
+    'node' + tagQuery + '(around:' + radius + ',' + placesGeo.lat + ',' + placesGeo.lon + ');' +
+    'way' + tagQuery + '(around:' + radius + ',' + placesGeo.lat + ',' + placesGeo.lon + ');' +
+    ');' +
+    'out center 20;';
+
+  try {
+    var resp = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(overpassQ),
+    });
+    if (!resp.ok) throw new Error('Overpass ' + resp.status);
+    var data = await resp.json();
+    renderPlaces(data.elements);
+  } catch(e) {
+    list.innerHTML = '<div class="places-empty">⚠️ Recherche impossible<br><small>' + e.message + '</small><br><br>Vérifiez votre connexion.</div>';
+  }
+}
+
+async function searchPlacesText(query) {
+  if (!placesGeo) return;
+  var list = document.getElementById('places-list');
+  list.innerHTML = '<div class="places-loading">🔍 Recherche "' + query + '"…</div>';
+
+  var overpassQ =
+    '[out:json][timeout:15];' +
+    '(' +
+    'node["name"~"' + query + '",i](around:1000,' + placesGeo.lat + ',' + placesGeo.lon + ');' +
+    'node["amenity"~"' + query + '",i](around:1000,' + placesGeo.lat + ',' + placesGeo.lon + ');' +
+    'node["shop"~"' + query + '",i](around:1000,' + placesGeo.lat + ',' + placesGeo.lon + ');' +
+    ');' +
+    'out center 20;';
+
+  try {
+    var resp = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(overpassQ),
+    });
+    var data = await resp.json();
+    renderPlaces(data.elements);
+  } catch(e) {
+    list.innerHTML = '<div class="places-empty">⚠️ Recherche impossible</div>';
+  }
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  var R = 6371000;
+  var dLat = (lat2 - lat1) * Math.PI / 180;
+  var dLon = (lon2 - lon1) * Math.PI / 180;
+  var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+          Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+          Math.sin(dLon/2)*Math.sin(dLon/2);
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+}
+
+function renderPlaces(elements) {
+  var list = document.getElementById('places-list');
+  var banner = document.getElementById('places-ai-banner');
+
+  if (!elements || elements.length === 0) {
+    list.innerHTML = '<div class="places-empty">😔 Aucun résultat dans ce rayon<br>Essayez un autre filtre ou élargissez la recherche</div>';
+    if (banner) banner.style.display = 'none';
+    return;
+  }
+
+  placesResults = elements.map(function(el) {
+    var lat = el.lat || (el.center && el.center.lat);
+    var lon = el.lon || (el.center && el.center.lon);
+    var dist = (lat && placesGeo) ? haversine(placesGeo.lat, placesGeo.lon, lat, lon) : 9999;
+    return Object.assign({}, el, { _lat: lat, _lon: lon, _dist: dist });
+  }).sort(function(a, b) { return a._dist - b._dist; });
+
+  list.innerHTML = '';
+  placesResults.slice(0, 15).forEach(function(el, i) {
+    var tags = el.tags || {};
+    var name = tags.name || tags['name:en'] || tags['name:fr'] || tags.amenity || tags.shop || 'Lieu sans nom';
+    var type = tags.cuisine || tags.amenity || tags.shop || '';
+    var addr = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ') || tags['addr:full'] || '';
+    var distM = el._dist;
+    var distStr = distM < 9999 ? (distM < 1000 ? distM + 'm' : (distM/1000).toFixed(1) + 'km') : '';
+    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' ' + addr)
+                + (el._lat ? '&center=' + el._lat + ',' + el._lon : '');
+
+    var card = document.createElement('div');
+    card.className = 'place-card';
+
+    var rank = document.createElement('div');
+    rank.className = 'place-rank';
+    rank.textContent = i + 1;
+
+    var info = document.createElement('div');
+    info.className = 'place-info';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'place-name';
+    nameEl.textContent = name;
+    info.appendChild(nameEl);
+
+    if (type) {
+      var typeEl = document.createElement('div');
+      typeEl.className = 'place-type';
+      typeEl.textContent = type;
+      info.appendChild(typeEl);
+    }
+
+    var meta = document.createElement('div');
+    meta.className = 'place-meta';
+    if (distStr) {
+      var t1 = document.createElement('span');
+      t1.className = 'place-tag tag-dist';
+      t1.textContent = '📍 ' + distStr;
+      meta.appendChild(t1);
+    }
+    if (tags.opening_hours) {
+      var t2 = document.createElement('span');
+      t2.className = 'place-tag tag-open';
+      t2.textContent = '🕐 ' + tags.opening_hours.slice(0, 20);
+      meta.appendChild(t2);
+    }
+    info.appendChild(meta);
+
+    if (addr) {
+      var addrEl = document.createElement('div');
+      addrEl.className = 'place-addr';
+      addrEl.textContent = addr;
+      info.appendChild(addrEl);
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'place-actions';
+
+    var btnMap = document.createElement('button');
+    btnMap.className = 'place-btn place-btn-map';
+    btnMap.textContent = '🗺️ Maps';
+    btnMap.onclick = function() { window.open(mapsUrl, '_blank'); };
+
+    var btnAi = document.createElement('button');
+    btnAi.className = 'place-btn place-btn-ai';
+    btnAi.textContent = '🤖 En savoir +';
+    btnAi.onclick = (function(n, d) { return function() { askAboutPlace(n, d); }; })(name, distM);
+
+    actions.appendChild(btnMap);
+    actions.appendChild(btnAi);
+    info.appendChild(actions);
+    card.appendChild(rank);
+    card.appendChild(info);
+    list.appendChild(card);
+  });
+
+  if (banner) banner.style.display = 'block';
+}
+
+function askAboutPlace(name, dist) {
+  var question = 'Parle-moi de "' + name + '" (' + dist + 'm de moi). C\'est bien pour un repas / une visite ? Que recommandes-tu ?';
+  showPage('ai');
+  setTimeout(function() {
+    var input = document.getElementById('ai-input');
+    if (input) { input.value = question; sendAiMessage(); }
+  }, 300);
+}
+
+function askPlacesAi() {
+  var tab = placesTab === 'food' ? 'restaurant ou café' : 'magasin ou shopping';
+  var question = 'Je cherche un bon ' + tab + ' autour de moi. Qu\'est-ce que tu recommandes parmi les résultats ? (position : ' +
+    (placesGeo ? placesGeo.lat.toFixed(4) + ',' + placesGeo.lon.toFixed(4) : 'inconnue') + ')';
+  showPage('ai');
+  setTimeout(function() {
+    var input = document.getElementById('ai-input');
+    if (input) { input.value = question; sendAiMessage(); }
+  }, 300);
+}
+
+
 // ── INIT ──
 function dismissSplash() {
   var s = document.getElementById('splash');
@@ -2484,6 +2903,7 @@ try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
+try { buildPlacesFilters(); } catch(e) {}
 try { loadPrefsUI(); } catch(e) {}
 try { getCurrentGeo(); } catch(e) {} // charge le cache geo silencieusement
 setInterval(function() { try { updateTimes(); } catch(e) {} }, 10000);
