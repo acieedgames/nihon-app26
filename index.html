@@ -426,6 +426,196 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .pref-tag.active { background: var(--red-pale); border-color: var(--red); color: var(--red); }
 
 
+
+
+/* ── PROFIL SWITCHER ── */
+#profile-picker {
+  position:fixed; inset:0; background:#0F0F0F;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:32px; z-index:998; padding:32px;
+}
+#profile-picker.hidden { display:none; }
+.pp-logo { font-size:52px; font-weight:900; color:var(--red); letter-spacing:4px; }
+.pp-sub  { font-size:14px; color:rgba(255,255,255,0.4); margin-top:-20px; }
+.pp-title { font-size:18px; font-weight:700; color:#fff; }
+.pp-cards { display:grid; grid-template-columns:1fr 1fr; gap:14px; width:100%; max-width:340px; }
+.pp-card {
+  background:#1A1A1A; border:1.5px solid rgba(255,255,255,0.1);
+  border-radius:18px; padding:24px 14px; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  transition:transform 0.15s, border-color 0.15s;
+}
+.pp-card:active { transform:scale(0.96); }
+.pp-card.patrick { border-color:rgba(200,16,46,0.4); }
+.pp-card.inoue   { border-color:rgba(var(--inoue-primary-rgb),0.5); }
+.pp-card-avatar { font-size:44px; }
+.pp-card-name   { font-size:16px; font-weight:800; color:#fff; }
+.pp-card-sub    { font-size:11px; color:rgba(255,255,255,0.4); text-align:center; }
+
+/* ── VARIABLES INOUE (overridées par JS au runtime) ── */
+:root {
+  --inoue-primary: #a71212;
+  --inoue-secondary: #182534;
+  --inoue-primary-rgb: 167,18,18;
+  --inoue-pale: rgba(167,18,18,0.08);
+  --inoue-border: rgba(167,18,18,0.25);
+}
+
+/* ── ESPACE INOUE ── */
+body.inoue-mode #hdr { background: var(--inoue-secondary); }
+body.inoue-mode #meta-theme-color { content: var(--inoue-secondary); }
+body.inoue-mode .nb.on { color: var(--inoue-primary); }
+body.inoue-mode .hbtn:active { background: rgba(var(--inoue-primary-rgb),0.15); border-color: var(--inoue-border); }
+body.inoue-mode #home { background: var(--inoue-secondary); }
+body.inoue-mode .h-kanji { color: var(--inoue-primary); }
+
+/* ── HOME INOUE ── */
+#home-inoue { display:none; flex-direction:column; }
+#home-inoue.active { display:flex; }
+.inoue-home-header {
+  padding:56px 24px 24px;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.inoue-greeting { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:4px; }
+.inoue-name { font-size:40px; font-weight:900; letter-spacing:2px; margin-bottom:6px; }
+.inoue-sub  { font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:14px; }
+.inoue-clocks {
+  display:flex; gap:0; padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.07);
+}
+.inoue-hgrid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.inoue-hbtn {
+  background:#1A1A1A; border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px; padding:15px 13px;
+  cursor:pointer; display:flex; align-items:center; gap:11px;
+  text-align:left; transition:background 0.1s, transform 0.1s;
+}
+.inoue-hbtn:active { transform:scale(0.97); }
+.inoue-hbtn .hi { font-size:26px; flex-shrink:0; }
+.inoue-hbtn .hl { font-size:13px; font-weight:700; color:#fff; line-height:1.25; display:block; }
+.inoue-hbtn .hs { font-size:10px; color:rgba(255,255,255,0.35); margin-top:2px; display:block; }
+.inoue-hbtn-wide { grid-column:1/-1; }
+.inoue-switcher-btn {
+  margin:0 16px 16px; padding:12px; border-radius:12px;
+  background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.5); font-size:12px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+
+/* ── PAGE JOURNAL ── */
+.journal-day {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); margin:10px 16px 0; overflow:hidden;
+}
+.journal-day-hdr {
+  display:flex; align-items:center; gap:10px; padding:13px 14px;
+  cursor:pointer;
+}
+.journal-day-hdr:active { background:var(--red-pale); }
+.journal-date-badge {
+  border-radius:7px; padding:4px 9px;
+  font-size:11px; font-weight:700; color:#fff; flex-shrink:0;
+  text-align:center; line-height:1.4;
+}
+.journal-city-tag {
+  font-size:11px; font-weight:600; padding:2px 8px;
+  border-radius:5px; flex-shrink:0;
+}
+.journal-title { font-size:13px; font-weight:600; color:var(--ink); flex:1; }
+.journal-chev  { color:var(--ink-3); font-size:14px; transition:transform 0.2s; }
+.journal-day.open .journal-chev { transform:rotate(90deg); }
+.journal-body  { display:none; border-top:1px solid var(--border); padding:14px; }
+.journal-day.open .journal-body { display:block; }
+.journal-entry-text {
+  font-size:14px; color:var(--ink); line-height:1.8;
+  white-space:pre-wrap; min-height:20px; margin-bottom:12px;
+  font-style:italic;
+}
+.journal-entry-empty { font-size:13px; color:var(--ink-3); font-style:italic; margin-bottom:12px; }
+.journal-input-area { margin-top:10px; display:none; }
+.journal-day.editing .journal-input-area { display:block; }
+.journal-quick-input {
+  width:100%; border:1px solid var(--border); border-radius:8px;
+  padding:10px 12px; font-size:13px; color:var(--ink);
+  background:var(--bg); resize:none; min-height:70px;
+  font-family:inherit; box-sizing:border-box;
+}
+.journal-generate-btn {
+  width:100%; margin-top:8px; padding:11px;
+  border-radius:8px; border:none; font-size:13px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.journal-edit-btn {
+  background:none; border:1px solid var(--border); border-radius:8px;
+  padding:8px 14px; font-size:12px; font-weight:600; color:var(--ink-3);
+  cursor:pointer; width:100%; margin-top:4px;
+}
+.journal-free-btn {
+  display:flex; align-items:center; gap:8px;
+  background:none; border:1.5px dashed rgba(167,18,18,0.3);
+  border-radius:10px; padding:11px 14px;
+  cursor:pointer; font-size:13px; font-weight:600; width:100%;
+  margin:10px 16px 0; width:calc(100% - 32px);
+}
+.journal-loading { text-align:center; padding:12px; color:var(--ink-3); font-style:italic; font-size:13px; }
+.journal-mic-btn {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--surface); border:1.5px solid var(--border);
+  color:var(--ink-2); font-size:18px; cursor:pointer; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.journal-mic-btn.listening {
+  border-color:var(--inoue-primary); color:var(--inoue-primary);
+  background:var(--inoue-pale); animation:pulse-mic 1s ease-in-out infinite;
+}
+.journal-input-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
+.journal-input-row .journal-quick-input { flex:1; margin-bottom:0; }
+
+/* ── TRADUCTEUR PHOTO ── */
+#page-photo { display:none; flex-direction:column; padding:0 !important; }
+#page-photo.on { display:flex; }
+.photo-area {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:20px 16px; gap:16px;
+}
+.photo-preview {
+  width:100%; max-height:280px; object-fit:contain;
+  border-radius:var(--radius); border:2px solid var(--border);
+  display:none;
+}
+.photo-preview.show { display:block; }
+.photo-placeholder {
+  width:100%; height:200px; border:2px dashed var(--border);
+  border-radius:var(--radius); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px;
+  color:var(--ink-3); font-size:14px; cursor:pointer; background:var(--surface);
+}
+.photo-placeholder:active { background:var(--red-pale); border-color:var(--red); }
+.photo-placeholder .ph-icon { font-size:48px; }
+.photo-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%; }
+.photo-btn {
+  padding:13px; border-radius:var(--radius-sm); border:none;
+  font-size:14px; font-weight:700; cursor:pointer; text-align:center;
+}
+.photo-btn-cam  { background:var(--red); color:#fff; }
+.photo-btn-gal  { background:var(--surface); color:var(--ink); border:1px solid var(--border); }
+.photo-btn-full { grid-column:1/-1; background:var(--red); color:#fff; }
+.photo-result {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px; font-size:14px;
+  color:var(--ink); line-height:1.7; white-space:pre-wrap; display:none;
+}
+.photo-result.show { display:block; }
+.photo-mode-tabs { display:flex; gap:8px; width:100%; }
+.photo-mode-tab {
+  flex:1; padding:9px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); font-size:12px; font-weight:700;
+  color:var(--ink-2); cursor:pointer; text-align:center;
+}
+.photo-mode-tab.on { background:var(--red); color:#fff; border-color:var(--red); }
+.photo-loading { text-align:center; color:var(--ink-3); font-size:14px; padding:16px; display:none; }
+.photo-loading.show { display:block; }
+
 /* ── PLACES ── */
 .places-tabs { display:flex; gap:8px; padding:14px 16px 0; }
 .places-tab {
@@ -522,6 +712,26 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <!-- SPLASH -->
 <div id="splash"><div class="s-jp">日本</div><h2>Nihon</h2><p style="color:rgba(255,255,255,0.6);font-size:13px;">Chargement…</p></div>
 
+
+<!-- PROFIL SWITCHER -->
+<div id="profile-picker" class="hidden">
+  <div class="pp-logo">日本</div>
+  <div class="pp-sub">Nihon · Compagnon voyage</div>
+  <div class="pp-title">Qui voyage aujourd'hui ?</div>
+  <div class="pp-cards">
+    <div class="pp-card patrick" onclick="selectProfile('patrick')">
+      <span class="pp-card-avatar">👨</span>
+      <span class="pp-card-name">Patrick</span>
+      <span class="pp-card-sub">Accueil principal</span>
+    </div>
+    <div class="pp-card inoue" onclick="selectProfile('inoue')">
+      <span class="pp-card-avatar">🌸</span>
+      <span class="pp-card-name">Inoue</span>
+      <span class="pp-card-sub">Mon espace voyage</span>
+    </div>
+  </div>
+</div>
+
 <!-- HOME -->
 <div id="home">
   <div id="home-header">
@@ -542,6 +752,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
       </div>
     </div>
   </div>
+  <button class="inoue-switcher-btn" onclick="showProfilePicker()">🌸 Passer sur l'espace Inoue</button>
   <div id="home-btns"><div class="hgrid">
     <button class="hbtn" onclick="go('places')"><span class="hi">📍</span><div><span class="hl">Restos & Shopping</span><span class="hs">Autour de moi · OSM</span></div></button>
     <button class="hbtn" onclick="go('change')"><span class="hi">💴</span><div><span class="hl">Taux de change</span><span class="hs">JPY ↔ EUR</span></div></button>
@@ -549,10 +760,43 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <button class="hbtn" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Agenda du voyage</span><span class="hs">10–28 juil.</span></div></button>
     <button class="hbtn" onclick="go('hotels')"><span class="hi">🏨</span><div><span class="hl">Hébergements</span><span class="hs">Adresses taxi</span></div></button>
     <button class="hbtn" onclick="go('nav')"><span class="hi">🗺️</span><div><span class="hl">Navigation</span><span class="hs">Cartes & trains</span></div></button>
-    <button class="hbtn" onclick="go('apps')"><span class="hi">📲</span><div><span class="hl">Apps & Scanner</span><span class="hs">Lens · PAYKE · Suica</span></div></button>
+    <button class="hbtn" onclick="go('photo')"><span class="hi">📷</span><div><span class="hl">Traducteur photo</span><span class="hs">Menu · Kanji · Emballage</span></div></button>
     <button class="hbtn hbtn-ai" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant IA</span><span class="hs">Groq · Questions voyage</span></div></button>
     <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
   </div></div>
+</div>
+
+
+<!-- HOME INOUE -->
+<div id="home-inoue">
+  <div class="inoue-home-header">
+    <div class="inoue-greeting">✈️ Japon · 10–28 juillet 2026</div>
+    <div class="inoue-name" id="inoue-name-display" style="color:var(--inoue-primary)">🌸 Inoue</div>
+    <div class="inoue-sub">18 ans · Premier Japon</div>
+    <div class="inoue-clocks">
+      <div class="h-clock">
+        <span class="h-clock-city">🗼 Tokyo</span>
+        <span class="h-clock-time" id="inoue-tokyo-time">--:--</span>
+        <span class="h-clock-date" id="inoue-tokyo-date"></span>
+      </div>
+      <div class="h-clock-sep"></div>
+      <div class="h-clock">
+        <span class="h-clock-city">🗺️ Paris</span>
+        <span class="h-clock-time" id="inoue-paris-time">--:--</span>
+        <span class="h-clock-date" id="inoue-paris-date"></span>
+      </div>
+    </div>
+  </div>
+  <div style="padding:18px 16px calc(32px + var(--safe-bottom));">
+    <div class="inoue-hgrid">
+      <button class="inoue-hbtn" onclick="go('journal')"><span class="hi">📖</span><div><span class="hl">Mon journal</span><span class="hs">Écrire · Générer IA</span></div></button>
+      <button class="inoue-hbtn" onclick="go('inoue-shop')"><span class="hi">🛍️</span><div><span class="hl">Mon shopping</span><span class="hs">Friperies · Streetwear</span></div></button>
+      <button class="inoue-hbtn" onclick="go('photo')"><span class="hi">📷</span><div><span class="hl">Traducteur</span><span class="hs">Menu · Kanji</span></div></button>
+      <button class="inoue-hbtn" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant</span><span class="hs">Questions voyage</span></div></button>
+      <button class="inoue-hbtn inoue-hbtn-wide" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Programme du voyage</span><span class="hs">10–28 juillet · Patrick & Inoue</span></div></button>
+    </div>
+    <button class="inoue-switcher-btn" style="margin:14px 0 0;" onclick="showProfilePicker()">👨 Passer sur l'espace Patrick</button>
+  </div>
 </div>
 
 <!-- APP -->
@@ -858,7 +1102,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v1.8</strong>
+        <strong>Nihon v2.1</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1074,6 +1318,78 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 
 
 
+
+
+<!-- PAGE JOURNAL -->
+<div class="page" id="page-journal">
+  <div style="margin:14px 16px 4px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Journal de voyage · Inoue</div>
+  <button class="journal-free-btn" onclick="openFreeJournal()" style="color:var(--inoue-primary);border-color:var(--inoue-border);">
+    <span>✨</span> Nouvelle entrée libre
+  </button>
+  <div id="journal-container"></div>
+  <div style="height:20px;"></div>
+</div>
+
+<!-- PAGE SHOPPING INOUE -->
+<div class="page" id="page-inoue-shop">
+  <div class="places-tabs">
+    <button class="places-tab on" id="itab-vintage" onclick="setInouShopFilter('vintage')">👗 Vintage</button>
+    <button class="places-tab" id="itab-manga" onclick="setInouShopFilter('manga')">📚 Manga</button>
+    <button class="places-tab" id="itab-beauty" onclick="setInouShopFilter('beauty')">💄 Beauté</button>
+    <button class="places-tab" id="itab-all" onclick="setInouShopFilter('all')">🛍️ Tout</button>
+  </div>
+  <div class="places-search-bar">
+    <input type="text" id="inoue-search-input" placeholder="Harajuku, friperie, manga…" oninput="onInouePlacesInput()">
+    <button class="places-mic-btn" id="inoue-mic-btn" onclick="toggleInoueMic()" title="Parler">🎤</button>
+    <button class="places-locate-btn" onclick="locateAndSearchInoue()">📍</button>
+  </div>
+  <div class="places-list" id="inoue-shop-list">
+    <div class="places-empty">📍 Appuie sur <strong>📍</strong> pour trouver des shops autour de toi</div>
+  </div>
+</div>
+
+<!-- PAGE PHOTO -->
+<div class="page" id="page-photo">
+  <div class="photo-area">
+
+    <!-- Onglets mode -->
+    <div class="photo-mode-tabs" id="photo-mode-tabs">
+      <button class="photo-mode-tab on" id="pmode-translate" onclick="setPhotoMode('translate')">🈯 Traduire</button>
+      <button class="photo-mode-tab" id="pmode-describe" onclick="setPhotoMode('describe')">🔍 Décrire</button>
+      <button class="photo-mode-tab" id="pmode-menu" onclick="setPhotoMode('menu')">🍜 Menu</button>
+    </div>
+
+    <!-- Zone image -->
+    <div class="photo-placeholder" id="photo-placeholder" onclick="triggerPhotoInput('gallery')">
+      <span class="ph-icon">📷</span>
+      <span>Appuyez pour choisir une photo</span>
+      <span style="font-size:12px;color:var(--ink-3);">Menu · Panneau · Emballage · Ticket</span>
+    </div>
+    <img class="photo-preview" id="photo-preview" src="" alt="Aperçu">
+
+    <!-- Boutons -->
+    <div class="photo-btns" id="photo-btns">
+      <button class="photo-btn photo-btn-cam" onclick="triggerPhotoInput('camera')">📸 Caméra</button>
+      <button class="photo-btn photo-btn-gal" onclick="triggerPhotoInput('gallery')">🖼️ Galerie</button>
+    </div>
+
+    <!-- Analyser -->
+    <button class="photo-btn photo-btn-full" id="photo-analyze-btn" style="display:none;width:100%;" onclick="analyzePhoto()">
+      ✨ Analyser avec l'IA
+    </button>
+
+    <!-- Loading -->
+    <div class="photo-loading" id="photo-loading">🤖 Analyse en cours…</div>
+
+    <!-- Résultat -->
+    <div class="photo-result" id="photo-result"></div>
+
+    <!-- Input file caché -->
+    <input type="file" id="photo-file-input" accept="image/*" style="display:none;" onchange="onPhotoSelected(event)">
+    <input type="file" id="photo-cam-input" accept="image/*" capture="environment" style="display:none;" onchange="onPhotoSelected(event)">
+  </div>
+</div>
+
 <!-- PAGE PLACES -->
 <div class="page" id="page-places">
   <!-- Onglets Restos / Shopping -->
@@ -1160,6 +1476,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
     <button class="mb " onclick="showPageFromMore('meteo')"><span>🌡️</span><span>Météo</span></button>
     <button class="mb " onclick="showPageFromMore('hotels')"><span>🏨</span><span>Hébergements</span></button>
     <button class="mb " onclick="showPageFromMore('nav')"><span>🗺️</span><span>Navigation</span></button>
+    <button class="mb " onclick="showPageFromMore('photo')"><span>📷</span><span>Traducteur</span></button>
     <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
     <button class="mb " onclick="showPageFromMore('utils')"><span>🗾</span><span>Pratique</span></button>
     <button class="mb " onclick="showPageFromMore('settings')"><span>⚙️</span><span>Réglages</span></button>
@@ -1189,7 +1506,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping'
 };
 
 function setThemeColor(color) {
@@ -1747,7 +2064,7 @@ async function sendAiMessage() {
         'Authorization': 'Bearer ' + key,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'qwen/qwen3.6-27b',
         messages: messages,
         max_tokens: 1024,
         temperature: 0.7,
@@ -2639,6 +2956,554 @@ function showToast(msg) {
 
 
 
+
+
+// ═══════════════════════════════════════════
+// GESTION DES PROFILS
+// ═══════════════════════════════════════════
+var currentProfile = 'patrick';
+
+function getInouePrimary() { return localStorage.getItem('inoue_color_primary') || '#a71212'; }
+function getInouSecondary() { return localStorage.getItem('inoue_color_secondary') || '#182534'; }
+
+function applyInoueCss(primary, secondary) {
+  var r = document.documentElement.style;
+  r.setProperty('--inoue-primary', primary);
+  r.setProperty('--inoue-secondary', secondary);
+  // Calculer rgb pour les transparences
+  var hex = primary.replace('#','');
+  var bigint = parseInt(hex, 16);
+  var rr = (bigint >> 16) & 255, gg = (bigint >> 8) & 255, bb = bigint & 255;
+  r.setProperty('--inoue-primary-rgb', rr + ',' + gg + ',' + bb);
+  r.setProperty('--inoue-pale', 'rgba(' + rr + ',' + gg + ',' + bb + ',0.08)');
+  r.setProperty('--inoue-border', 'rgba(' + rr + ',' + gg + ',' + bb + ',0.25)');
+}
+
+function selectProfile(profile) {
+  currentProfile = profile;
+  localStorage.setItem('nihon_profile', profile);
+  document.getElementById('profile-picker').classList.add('hidden');
+
+  if (profile === 'inoue') {
+    applyInoueCss(getInouePrimary(), getInouSecondary());
+    document.body.classList.add('inoue-mode');
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('home-inoue').classList.add('active');
+    setThemeColor(getInouSecondary());
+    updateInoueClock();
+  } else {
+    document.body.classList.remove('inoue-mode');
+    document.getElementById('home').classList.remove('hidden');
+    document.getElementById('home-inoue').classList.remove('active');
+    setThemeColor('#0F0F0F');
+  }
+}
+
+function showProfilePicker() {
+  // Si dans l'app, revenir à l'accueil d'abord
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('home-inoue').classList.remove('active');
+  document.getElementById('profile-picker').classList.remove('hidden');
+}
+
+function goHome() {
+  _doGoHome();
+  if (currentProfile === 'inoue') {
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('home-inoue').classList.add('active');
+  }
+  history.pushState({}, '');
+}
+
+function updateInoueClock() {
+  var now = new Date();
+  var tT = document.getElementById('inoue-tokyo-time');
+  var tD = document.getElementById('inoue-tokyo-date');
+  var pT = document.getElementById('inoue-paris-time');
+  var pD = document.getElementById('inoue-paris-date');
+  if (tT) tT.textContent = now.toLocaleString('fr-FR', { timeZone:'Asia/Tokyo', hour:'2-digit', minute:'2-digit' });
+  if (tD) tD.textContent = now.toLocaleDateString('fr-FR', { timeZone:'Asia/Tokyo', weekday:'short', day:'numeric', month:'short' });
+  if (pT) pT.textContent = now.toLocaleString('fr-FR', { timeZone:'Europe/Paris', hour:'2-digit', minute:'2-digit' });
+  if (pD) pD.textContent = now.toLocaleDateString('fr-FR', { timeZone:'Europe/Paris', weekday:'short', day:'numeric', month:'short' });
+}
+
+
+// ═══════════════════════════════════════════
+// JOURNAL INOUE
+// ═══════════════════════════════════════════
+
+function getJournalEntry(date) {
+  try { return JSON.parse(localStorage.getItem('inoue_journal_' + date) || 'null'); }
+  catch(e) { return null; }
+}
+function saveJournalEntry(date, entry) {
+  localStorage.setItem('inoue_journal_' + date, JSON.stringify(entry));
+}
+
+function buildJournal() {
+  var container = document.getElementById('journal-container');
+  if (!container) return;
+  var html = '';
+  var lastCity = '';
+  AGENDA_DAYS.forEach(function(day) {
+    var custom = getCustomTitle(day.date);
+    var city   = custom ? custom.city  : day.city;
+    var title  = custom ? custom.title : day.title;
+    var entry  = getJournalEntry(day.date);
+    var style  = getCityStyle(city);
+    var parts  = day.label.split(' ');
+    var badge  = parts[0] + '<br>' + parts.slice(1).join(' ');
+    var hasEntry = entry && entry.generated;
+    var primary = getInouePrimary();
+
+    html += '<div class="journal-day" id="jday-' + day.date + '">'
+      + '<div class="journal-day-hdr" onclick="toggleJournalDay(\'' + day.date + '\')">'
+      + '<div class="journal-date-badge" style="background:' + primary + '">' + badge + '</div>'
+      + '<span class="journal-city-tag" style="background:' + style.bg + ';color:' + style.color + '">' + city + '</span>'
+      + '<span class="journal-title">' + title + '</span>'
+      + (hasEntry ? '<span style="font-size:16px;">✍️</span>' : '')
+      + '<span class="journal-chev">›</span>'
+      + '</div>'
+      + '<div class="journal-body">'
+      + (hasEntry
+          ? '<div class="journal-entry-text" id="jtext-' + day.date + '">' + entry.generated + '</div>'
+          : '<div class="journal-entry-empty" id="jtext-' + day.date + '">Pas encore d\'entrée pour ce jour…</div>'
+        )
+      + '<button class="journal-edit-btn" onclick="startJournalEdit(\'' + day.date + '\')">✏️ ' + (hasEntry ? 'Modifier' : 'Écrire ce jour') + '</button>'
+      + '<div class="journal-input-area" id="jinput-' + day.date + '">'
+      + '<div class="journal-input-row">'
+      + '<textarea class="journal-quick-input" id="jta-' + day.date + '" placeholder="Raconte ta journée… ou parle 🎤"></textarea>'
+      + '<button class="journal-mic-btn" id="jmic-' + day.date + '" onclick="toggleJournalMic(\'' + day.date + '\')" title="Parler">🎤</button>'
+      + '</div>'
+      + '<button class="journal-generate-btn" style="background:' + primary + ';color:#fff;" onclick="generateJournalEntry(\'' + day.date + '\')">'
+      + '✨ Générer mon journal IA</button>'
+      + '<button onclick="cancelJournalEdit(\'' + day.date + '\')" style="width:100%;margin-top:6px;background:none;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:12px;cursor:pointer;color:var(--ink-3);">Annuler</button>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+  });
+  container.innerHTML = html;
+}
+
+
+function toggleJournalMic(date) {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('⚠️ Micro non supporté'); return; }
+  var btn = document.getElementById('jmic-' + date);
+  if (btn && btn.classList.contains('listening')) {
+    if (window._journalMicRecog) window._journalMicRecog.stop();
+    return;
+  }
+  var recog = new SR();
+  window._journalMicRecog = recog;
+  recog.lang = 'fr-FR';
+  recog.continuous = false;
+  recog.interimResults = true;
+  recog.onstart = function() {
+    if (btn) { btn.classList.add('listening'); btn.textContent = '⏹'; }
+    showToast('🎤 Parle, je t\'écoute…');
+  };
+  recog.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    var ta = document.getElementById('jta-' + date);
+    if (ta) ta.value = t;
+    // Si final → proposer la génération automatique après 1s
+    if (e.results[e.results.length-1].isFinal) {
+      showToast('✅ Enregistré !');
+    }
+  };
+  recog.onerror = function() {
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  recog.onend = function() {
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  try { recog.start(); } catch(e) { showToast('⚠️ Impossible de démarrer le micro'); }
+}
+function toggleJournalDay(date) {
+  var el = document.getElementById('jday-' + date);
+  if (el) el.classList.toggle('open');
+}
+
+function startJournalEdit(date) {
+  var el = document.getElementById('jday-' + date);
+  if (el) { el.classList.add('editing', 'open'); }
+  var ta = document.getElementById('jta-' + date);
+  var entry = getJournalEntry(date);
+  if (ta && entry && entry.notes) ta.value = entry.notes;
+  if (ta) ta.focus();
+}
+
+function cancelJournalEdit(date) {
+  var el = document.getElementById('jday-' + date);
+  if (el) el.classList.remove('editing');
+}
+
+async function generateJournalEntry(date) {
+  var ta  = document.getElementById('jta-' + date);
+  var txt = ta ? ta.value.trim() : '';
+  var key = getApiKey();
+  if (!key) { showToast('⚠️ Clé API manquante'); return; }
+
+  var day    = AGENDA_DAYS.find(function(d){ return d.date === date; });
+  var custom = day ? getCustomTitle(day.date) : null;
+  var city   = custom ? custom.city : (day ? day.city : 'Japon');
+  var title  = custom ? custom.title : (day ? day.title : '');
+
+  var btn = document.querySelector('#jday-' + date + ' .journal-generate-btn');
+  if (btn) btn.disabled = true;
+  showToast('✨ Génération en cours…');
+
+  var notesCtx = txt || ('pas de notes, invente une belle journée typique à ' + city);
+  var prompt = [
+    "Tu es le journal intime d'Inoue, 18 ans, en voyage au Japon avec son père Patrick.",
+    'Date : ' + (day ? day.label : date) + '. Ville : ' + city + '. Programme : ' + title + '.',
+    "Notes d'Inoue : \"" + notesCtx + '".',
+    'Génère une entrée de journal intime poétique et authentique, à la première personne, en français.',
+    'Style : personnel, émotionnel, avec des détails sensoriels sur le Japon. 150-200 mots.',
+    'Commence directement par le texte, sans titre ni date.',
+  ].join(' ');
+
+  try {
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'qwen/qwen3.6-27b',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 400, temperature: 0.85,
+      })
+    });
+    var data = await resp.json();
+    var generated = data.choices[0].message.content.trim();
+    var entry = { notes: txt, generated: generated, date: date, city: city, ts: Date.now() };
+    saveJournalEntry(date, entry);
+    var el = document.getElementById('jday-' + date);
+    var textEl = document.getElementById('jtext-' + date);
+    if (textEl) {
+      textEl.className = 'journal-entry-text';
+      textEl.textContent = generated;
+    }
+    if (el) el.classList.remove('editing');
+    showToast('✍️ Journal écrit !');
+  } catch(e) {
+    showToast('⚠️ Erreur : ' + (e.message || 'connexion'));
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+function openFreeJournal() {
+  var date = new Date().toISOString().slice(0,10);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === date; });
+  if (day) {
+    showPage('journal');
+    setTimeout(function() {
+      var el = document.getElementById('jday-' + date);
+      if (el) {
+        el.classList.add('open');
+        startJournalEdit(date);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
+  } else {
+    showToast('Voyage : 10-28 juillet seulement');
+  }
+}
+
+// ═══════════════════════════════════════════
+// SHOPPING INOUE
+// ═══════════════════════════════════════════
+var inouShopFilter = 'vintage';
+var inouePlacesGeo = null;
+var inoueMicRecog = null;
+var inouSearchTimer = null;
+
+var INOUE_FILTERS = {
+  vintage: '["shop"~"clothes|second_hand|vintage"]["second_hand"!~"no"]',
+  manga:   '["shop"~"books|anime|manga|hobby|games"]',
+  beauty:  '["shop"~"cosmetics|beauty|perfumery"]',
+  all:     '["shop"~"clothes|second_hand|vintage|books|anime|cosmetics|beauty|department_store|gift|souvenir"]',
+};
+
+function setInouShopFilter(filter) {
+  inouShopFilter = filter;
+  ['vintage','manga','beauty','all'].forEach(function(f) {
+    var el = document.getElementById('itab-' + f);
+    if (el) el.classList.toggle('on', f === filter);
+  });
+  if (inouePlacesGeo) searchInouePlaces();
+}
+
+function onInouePlacesInput() {
+  clearTimeout(inouSearchTimer);
+  inouSearchTimer = setTimeout(function() {
+    var q = document.getElementById('inoue-search-input').value.trim();
+    if (q.length >= 2 && inouePlacesGeo) searchInouePlacesText(q);
+  }, 600);
+}
+
+function locateAndSearchInoue() {
+  var list = document.getElementById('inoue-shop-list');
+  list.innerHTML = '<div class="places-loading">📍 Localisation…</div>';
+  if (!navigator.geolocation) { useFallbackGeoInoue(); return; }
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      inouePlacesGeo = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      searchInouePlaces();
+    },
+    function() { useFallbackGeoInoue(); },
+    { timeout: 8000, enableHighAccuracy: true }
+  );
+}
+
+function useFallbackGeoInoue() {
+  var today = new Date().toISOString().slice(0,10);
+  var day = AGENDA_DAYS.find(function(d){ return d.date === today; });
+  var city = day ? day.city : 'Tokyo';
+  var coords = { Tokyo:{lat:35.6762,lon:139.6503}, Kyoto:{lat:35.0116,lon:135.7681}, Takayama:{lat:36.1461,lon:137.2523} };
+  inouePlacesGeo = coords[city] || coords.Tokyo;
+  showToast('📍 ' + city + ' (planning)');
+  searchInouePlaces();
+}
+
+async function searchInouePlaces() {
+  if (!inouePlacesGeo) return;
+  var tagQuery = INOUE_FILTERS[inouShopFilter] || INOUE_FILTERS.all;
+  var list = document.getElementById('inoue-shop-list');
+  list.innerHTML = '<div class="places-loading">🔍 Recherche shopping…</div>';
+  var q = '[out:json][timeout:15];(node' + tagQuery + '(around:1200,' + inouePlacesGeo.lat + ',' + inouePlacesGeo.lon + ');way' + tagQuery + '(around:1200,' + inouePlacesGeo.lat + ',' + inouePlacesGeo.lon + '););out center 20;';
+  try {
+    var resp = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data=' + encodeURIComponent(q) });
+    var data = await resp.json();
+    renderInouePlaces(data.elements, list);
+  } catch(e) {
+    list.innerHTML = '<div class="places-empty">⚠️ Recherche impossible</div>';
+  }
+}
+
+async function searchInouePlacesText(query) {
+  if (!inouePlacesGeo) return;
+  var list = document.getElementById('inoue-shop-list');
+  list.innerHTML = '<div class="places-loading">🔍 "' + query + '"…</div>';
+  var q = '[out:json][timeout:15];(node["name"~"' + query + '",i](around:1500,' + inouePlacesGeo.lat + ',' + inouePlacesGeo.lon + ');node["shop"~"' + query + '",i](around:1500,' + inouePlacesGeo.lat + ',' + inouePlacesGeo.lon + '););out center 20;';
+  try {
+    var resp = await fetch('https://overpass-api.de/api/interpreter', { method:'POST', body:'data=' + encodeURIComponent(q) });
+    var data = await resp.json();
+    renderInouePlaces(data.elements, list);
+  } catch(e) {
+    list.innerHTML = '<div class="places-empty">⚠️ Recherche impossible</div>';
+  }
+}
+
+function renderInouePlaces(elements, list) {
+  if (!elements || elements.length === 0) {
+    list.innerHTML = '<div class="places-empty">😔 Rien trouvé dans ce rayon<br>Essaie un autre filtre !</div>';
+    return;
+  }
+  var sorted = elements.map(function(el) {
+    var lat = el.lat || (el.center && el.center.lat);
+    var lon = el.lon || (el.center && el.center.lon);
+    var dist = (lat && inouePlacesGeo) ? haversine(inouePlacesGeo.lat, inouePlacesGeo.lon, lat, lon) : 9999;
+    return Object.assign({}, el, { _lat:lat, _lon:lon, _dist:dist });
+  }).sort(function(a,b){ return a._dist - b._dist; });
+
+  list.innerHTML = '';
+  sorted.slice(0,15).forEach(function(el, i) {
+    var tags = el.tags || {};
+    var name = tags.name || tags['name:en'] || tags.shop || 'Boutique';
+    var type = tags.shop || tags.amenity || '';
+    var addr = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ') || '';
+    var dist = el._dist < 9999 ? (el._dist < 1000 ? el._dist + 'm' : (el._dist/1000).toFixed(1) + 'km') : '';
+    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name + ' ' + addr)
+                + (el._lat ? '&center=' + el._lat + ',' + el._lon : '');
+
+    var card = document.createElement('div');
+    card.className = 'place-card';
+
+    var rank = document.createElement('div');
+    rank.className = 'place-rank';
+    rank.style.background = getInouePrimary();
+    rank.textContent = i + 1;
+
+    var info = document.createElement('div');
+    info.className = 'place-info';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'place-name';
+    nameEl.textContent = name;
+    info.appendChild(nameEl);
+
+    if (type) {
+      var typeEl = document.createElement('div');
+      typeEl.className = 'place-type';
+      typeEl.textContent = type;
+      info.appendChild(typeEl);
+    }
+
+    if (dist) {
+      var meta = document.createElement('div');
+      meta.className = 'place-meta';
+      var t1 = document.createElement('span');
+      t1.className = 'place-tag tag-dist';
+      t1.textContent = '📍 ' + dist;
+      meta.appendChild(t1);
+      info.appendChild(meta);
+    }
+
+    var actions = document.createElement('div');
+    actions.className = 'place-actions';
+    var btnMap = document.createElement('button');
+    btnMap.className = 'place-btn place-btn-map';
+    btnMap.style.background = getInouePrimary();
+    btnMap.textContent = '🗺️ Maps';
+    btnMap.onclick = function() { window.open(mapsUrl, '_blank'); };
+    var btnAi = document.createElement('button');
+    btnAi.className = 'place-btn place-btn-ai';
+    btnAi.style.cssText = 'background:var(--inoue-pale);color:var(--inoue-primary);border:1px solid var(--inoue-border)';
+    btnAi.textContent = '🤖 En savoir +';
+    btnAi.onclick = (function(n,d){ return function(){ askAboutPlace(n,d); }; })(name, el._dist);
+    actions.appendChild(btnMap);
+    actions.appendChild(btnAi);
+    info.appendChild(actions);
+    card.appendChild(rank);
+    card.appendChild(info);
+    list.appendChild(card);
+  });
+}
+
+function toggleInoueMic() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('⚠️ Micro non supporté'); return; }
+  var btn = document.getElementById('inoue-mic-btn');
+  if (btn && btn.classList.contains('listening')) {
+    if (inoueMicRecog) inoueMicRecog.stop();
+    return;
+  }
+  inoueMicRecog = new SR();
+  inoueMicRecog.lang = 'fr-FR';
+  inoueMicRecog.continuous = false;
+  inoueMicRecog.interimResults = true;
+  inoueMicRecog.onstart = function() {
+    if (btn) { btn.classList.add('listening'); btn.textContent = '⏹'; }
+  };
+  inoueMicRecog.onresult = function(e) {
+    var t = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) t += e.results[i][0].transcript;
+    var inp = document.getElementById('inoue-search-input');
+    if (inp) inp.value = t;
+    if (e.results[e.results.length-1].isFinal) {
+      setTimeout(function() {
+        if (inp && inp.value.trim() && inouePlacesGeo) searchInouePlacesText(inp.value.trim());
+      }, 600);
+    }
+  };
+  inoueMicRecog.onerror = function() {
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  inoueMicRecog.onend = function() {
+    if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  };
+  try { inoueMicRecog.start(); } catch(e) {}
+}
+
+// ═══════════════════════════════════════════
+// TRADUCTEUR PHOTO — Groq Vision
+// ═══════════════════════════════════════════
+var photoMode = 'translate';
+var photoBase64 = null;
+var photoMimeType = 'image/jpeg';
+
+var PHOTO_PROMPTS = {
+  translate: 'Tu es un assistant de voyage au Japon. Cette image contient du texte japonais (menu, panneau, emballage, ticket, etc.). Traduis TOUT le texte visible en français. Garde la structure originale. Si tu vois des prix en ¥, indique-les. Sois complet et précis.',
+  describe:  'Décris cette image en détail en français. Que vois-tu ? Contexte, objets, texte visible, couleurs. Utile pour un voyageur au Japon.',
+  menu:      'Ceci est un menu japonais. Liste chaque plat avec : nom japonais, traduction française, prix si visible. Indique les plats végétariens ou sans porc si tu peux le déduire. Formate en liste claire.',
+};
+
+function setPhotoMode(mode) {
+  photoMode = mode;
+  ['translate','describe','menu'].forEach(function(m) {
+    var el = document.getElementById('pmode-' + m);
+    if (el) el.classList.toggle('on', m === mode);
+  });
+  var res = document.getElementById('photo-result');
+  if (res) { res.textContent = ''; res.classList.remove('show'); }
+}
+
+function triggerPhotoInput(source) {
+  var inp = document.getElementById(source === 'camera' ? 'photo-cam-input' : 'photo-file-input');
+  if (inp) inp.click();
+}
+
+function onPhotoSelected(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 3.5 * 1024 * 1024) { showToast('⚠️ Image trop grande (max 3.5MB)'); return; }
+  photoMimeType = file.type || 'image/jpeg';
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var dataUrl = ev.target.result;
+    photoBase64 = dataUrl.split(',')[1];
+    var preview = document.getElementById('photo-preview');
+    var placeholder = document.getElementById('photo-placeholder');
+    var analyzeBtn = document.getElementById('photo-analyze-btn');
+    if (preview) { preview.src = dataUrl; preview.classList.add('show'); }
+    if (placeholder) placeholder.style.display = 'none';
+    if (analyzeBtn) analyzeBtn.style.display = 'block';
+    var res = document.getElementById('photo-result');
+    if (res) { res.textContent = ''; res.classList.remove('show'); }
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+async function analyzePhoto() {
+  if (!photoBase64) { showToast("⚠️ Choisissez d'abord une photo"); return; }
+  var key = getApiKey();
+  if (!key) { showToast('⚠️ Clé API manquante — configurez dans Réglages'); return; }
+
+  var loading = document.getElementById('photo-loading');
+  var result  = document.getElementById('photo-result');
+  var btn     = document.getElementById('photo-analyze-btn');
+  if (loading) loading.classList.add('show');
+  if (result)  { result.classList.remove('show'); result.textContent = ''; }
+  if (btn)     btn.disabled = true;
+
+  try {
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: PHOTO_PROMPTS[photoMode] },
+            { type: 'image_url', image_url: { url: 'data:' + photoMimeType + ';base64,' + photoBase64 } }
+          ]
+        }],
+        max_tokens: 1024,
+        temperature: 0.3,
+      })
+    });
+
+    if (!resp.ok) {
+      var err = await resp.json().catch(function(){ return {}; });
+      throw new Error((err.error && err.error.message) ? err.error.message : 'Erreur ' + resp.status);
+    }
+    var data = await resp.json();
+    var text = data.choices[0].message.content;
+    if (result) { result.textContent = text; result.classList.add('show'); }
+  } catch(e) {
+    if (result) { result.textContent = '⚠️ ' + (e.message || 'Erreur de connexion'); result.classList.add('show'); }
+  } finally {
+    if (loading) loading.classList.remove('show');
+    if (btn)     btn.disabled = false;
+  }
+}
+
 // ═══════════════════════════════════════════
 // RECONNAISSANCE VOCALE
 // ═══════════════════════════════════════════
@@ -3028,16 +3893,33 @@ function dismissSplash() {
   setTimeout(function() { s.style.display = 'none'; }, 400);
 }
 history.replaceState({}, '');
-setTimeout(dismissSplash, 900);
+// Charger le profil sauvegardé
+var _savedProfile = localStorage.getItem('nihon_profile');
+if (_savedProfile) {
+  setTimeout(function() {
+    selectProfile(_savedProfile);
+    dismissSplash();
+  }, 900);
+} else {
+  // Premier lancement → montrer le picker
+  setTimeout(function() {
+    document.getElementById('splash').style.opacity = '0';
+    setTimeout(function() {
+      document.getElementById('splash').style.display = 'none';
+      document.getElementById('profile-picker').classList.remove('hidden');
+    }, 400);
+  }, 900);
+}
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
 try { buildPlacesFilters(); } catch(e) {}
+try { buildJournal(); } catch(e) { console.error('journal', e); }
 try { loadPrefsUI(); } catch(e) {}
 try { getCurrentGeo(); } catch(e) {} // charge le cache geo silencieusement
-setInterval(function() { try { updateTimes(); } catch(e) {} }, 10000);
+setInterval(function() { try { updateTimes(); } catch(e) {} try { updateInoueClock(); } catch(e) {} }, 10000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 
 </script>
