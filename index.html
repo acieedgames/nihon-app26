@@ -1529,9 +1529,10 @@ window.addEventListener('popstate', function() {
 
 function go(id) {
   document.getElementById('home').classList.add('hidden');
+  document.getElementById('home-inoue').classList.remove('active');
   document.getElementById('app').classList.add('on');
   _inApp = true;
-  setThemeColor('#C8102E');
+  setThemeColor(currentProfile === 'inoue' ? getInouSecondary() : '#C8102E');
   history.pushState({}, '');
   showPage(id);
   if (id === 'meteo') {
@@ -1543,8 +1544,15 @@ function _doGoHome() {
   closeMore();
   _inApp = false;
   document.getElementById('app').classList.remove('on');
-  document.getElementById('home').classList.remove('hidden');
-  setThemeColor('#0F0F0F');
+  if (currentProfile === 'inoue') {
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('home-inoue').classList.add('active');
+    setThemeColor(getInouSecondary());
+  } else {
+    document.getElementById('home').classList.remove('hidden');
+    document.getElementById('home-inoue').classList.remove('active');
+    setThemeColor('#0F0F0F');
+  }
 }
 function goHome() {
   _doGoHome();
