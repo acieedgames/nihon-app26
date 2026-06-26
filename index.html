@@ -559,6 +559,33 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   margin:10px 16px 0; width:calc(100% - 32px);
 }
 .journal-loading { text-align:center; padding:12px; color:var(--ink-3); font-style:italic; font-size:13px; }
+.journal-photo-btns { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.journal-photo-btn {
+  padding:10px 8px; border-radius:10px; border:1.5px dashed var(--inoue-border);
+  background:var(--inoue-pale); color:var(--inoue-primary);
+  font-size:12px; font-weight:700; cursor:pointer; text-align:center; line-height:1.4;
+}
+.journal-photo-btn:active { opacity:0.7; }
+.journal-photos-strip {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;
+}
+.journal-thumb-wrap { position:relative; width:80px; height:80px; }
+.journal-thumb {
+  width:80px; height:80px; object-fit:cover;
+  border-radius:8px; border:2px solid var(--inoue-primary);
+}
+.journal-thumb-del {
+  position:absolute; top:-6px; right:-6px;
+  width:20px; height:20px; border-radius:50%;
+  background:#fff; border:1.5px solid var(--border);
+  font-size:11px; cursor:pointer; display:flex;
+  align-items:center; justify-content:center; font-weight:700;
+}
+.journal-photos-display { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+.journal-photo-view {
+  width:100%; max-height:220px; object-fit:cover;
+  border-radius:10px; border:1px solid var(--border);
+}
 .journal-mic-btn {
   width:40px; height:40px; border-radius:50%;
   background:var(--surface); border:1.5px solid var(--border);
@@ -1103,7 +1130,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.2</strong>
+        <strong>Nihon v2.3</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -3075,12 +3102,22 @@ function buildJournal() {
       + '<span class="journal-chev">›</span>'
       + '</div>'
       + '<div class="journal-body">'
+      + '<div class="journal-photos-display" id="jphotos-display-' + day.date + '">'
+      + (hasEntry && entry.photos && entry.photos.length
+          ? entry.photos.map(function(p){ return '<img class="journal-photo-view" src="' + p.thumb + '" alt="">'; }).join('')
+          : '')
+      + '</div>'
       + (hasEntry
           ? '<div class="journal-entry-text" id="jtext-' + day.date + '">' + entry.generated + '</div>'
           : '<div class="journal-entry-empty" id="jtext-' + day.date + '">Pas encore d\'entrée pour ce jour…</div>'
         )
       + '<button class="journal-edit-btn" onclick="startJournalEdit(\'' + day.date + '\')">✏️ ' + (hasEntry ? 'Modifier' : 'Écrire ce jour') + '</button>'
       + '<div class="journal-input-area" id="jinput-' + day.date + '">'
+      + '<div class="journal-photo-btns">'
+      + '<button class="journal-photo-btn" onclick="addJournalPhotos(\'' + day.date + '\',false)">🗓️ Photos du jour<br><small>galerie filtrée</small></button>'
+      + '<button class="journal-photo-btn" onclick="addJournalPhotos(\'' + day.date + '\',true)">🖼️ Choisir librement<br><small>toute la galerie</small></button>'
+      + '</div>'
+      + '<div class="journal-photos-strip" id="jphotos-' + day.date + '"></div>'
       + '<div class="journal-input-row">'
       + '<textarea class="journal-quick-input" id="jta-' + day.date + '" placeholder="Raconte ta journée… ou parle 🎤"></textarea>'
       + '<button class="journal-mic-btn" id="jmic-' + day.date + '" onclick="toggleJournalMic(\'' + day.date + '\')" title="Parler">🎤</button>'
@@ -3131,6 +3168,144 @@ function toggleJournalMic(date) {
   };
   try { recog.start(); } catch(e) { showToast('⚠️ Impossible de démarrer le micro'); }
 }
+
+// ── Photos dans le journal ──
+var _journalPendingPhotos = {}; // { date: [{thumb, description}] }
+
+function addJournalPhotos(date, freeChoice) {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  if (!freeChoice) input.capture = undefined; // galerie normale
+  document.body.appendChild(input);
+
+  input.onchange = function() {
+    var files = Array.from(input.files);
+    if (!files.length) { document.body.removeChild(input); return; }
+    if (!_journalPendingPhotos[date]) _journalPendingPhotos[date] = [];
+
+    var dayObj = AGENDA_DAYS.find(function(d){ return d.date === date; });
+
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        var img = new Image();
+        img.onload = function() {
+          // Lire EXIF date si possible
+          var photoDateOk = true;
+          var exifDate = getExifDate(ev.target.result);
+          if (exifDate && dayObj && !freeChoice) {
+            var photoDay = exifDate.slice(0, 10).replace(/:/g, '-');
+            if (photoDay !== date) {
+              var label = dayObj ? dayObj.label : date;
+              if (!confirm('Cette photo date du ' + photoDay + ' (jour du journal : ' + label + '). Ajouter quand même ?')) {
+                photoDateOk = false;
+              }
+            }
+          }
+          if (!photoDateOk) return;
+
+          // Miniature 400px max, JPEG 0.75
+          var MAX = 400;
+          var w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            var r = Math.min(MAX/w, MAX/h);
+            w = Math.round(w*r); h = Math.round(h*r);
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          var thumb = canvas.toDataURL('image/jpeg', 0.75);
+
+          var photoObj = { thumb: thumb, description: '', analyzing: true };
+          _journalPendingPhotos[date].push(photoObj);
+          renderJournalPhotoStrip(date);
+
+          // Analyse Groq vision
+          var key = getApiKey();
+          if (!key) { photoObj.analyzing = false; photoObj.description = '(pas de clé API)'; renderJournalPhotoStrip(date); return; }
+
+          var b64 = thumb.split(',')[1];
+          fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+            body: JSON.stringify({
+              model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+              messages: [{
+                role: 'user',
+                content: [
+                  { type: 'text', text: 'Décris cette photo de voyage au Japon en 1-2 phrases courtes, en français, à la troisième personne. Mentionne les éléments principaux visibles.' },
+                  { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,' + b64 } }
+                ]
+              }],
+              max_tokens: 80, temperature: 0.4,
+            })
+          }).then(function(r){ return r.json(); }).then(function(d){
+            photoObj.description = d.choices[0].message.content.trim();
+            photoObj.analyzing = false;
+            renderJournalPhotoStrip(date);
+            showToast('📷 Photo analysée !');
+          }).catch(function(){
+            photoObj.analyzing = false;
+            photoObj.description = '';
+            renderJournalPhotoStrip(date);
+          });
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    document.body.removeChild(input);
+  };
+  input.click();
+}
+
+function getExifDate(dataUrl) {
+  // Extraction EXIF basique — cherche le pattern date dans les bytes JPEG
+  try {
+    var b64 = dataUrl.split(',')[1];
+    var bin = atob(b64.slice(0, 2000)); // les 1500 premiers bytes suffisent pour l'EXIF
+    var match = bin.match(/(\d{4}):(\d{2}):(\d{2}) \d{2}:\d{2}:\d{2}/);
+    if (match) return match[0];
+  } catch(e) {}
+  return null;
+}
+
+function renderJournalPhotoStrip(date) {
+  var strip = document.getElementById('jphotos-' + date);
+  if (!strip) return;
+  var photos = _journalPendingPhotos[date] || [];
+  strip.innerHTML = '';
+  photos.forEach(function(p, i) {
+    var wrap = document.createElement('div');
+    wrap.className = 'journal-thumb-wrap';
+
+    var img = document.createElement('img');
+    img.className = 'journal-thumb';
+    img.src = p.thumb;
+    if (p.analyzing) img.style.opacity = '0.5';
+
+    var del = document.createElement('button');
+    del.className = 'journal-thumb-del';
+    del.textContent = '✕';
+    del.onclick = (function(idx){ return function() {
+      _journalPendingPhotos[date].splice(idx, 1);
+      renderJournalPhotoStrip(date);
+    }; })(i);
+
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    if (p.analyzing) {
+      var lbl = document.createElement('div');
+      lbl.style.cssText = 'font-size:9px;text-align:center;color:var(--ink-3);margin-top:2px;';
+      lbl.textContent = '🤖 analyse…';
+      wrap.appendChild(lbl);
+    }
+    strip.appendChild(wrap);
+  });
+}
+
 function toggleJournalDay(date) {
   var el = document.getElementById('jday-' + date);
   if (el) el.classList.toggle('open');
@@ -3166,14 +3341,18 @@ async function generateJournalEntry(date) {
   showToast('✨ Génération en cours…');
 
   var notesCtx = txt || ('pas de notes, invente une belle journée typique à ' + city);
+  var photos = _journalPendingPhotos[date] || [];
+  var photoDescs = photos.filter(function(p){ return p.description; }).map(function(p){ return p.description; });
   var prompt = [
     "Tu es le journal intime d'Inoue, 18 ans, en voyage au Japon avec son père Patrick.",
     'Date : ' + (day ? day.label : date) + '. Ville : ' + city + '. Programme : ' + title + '.',
     "Notes d'Inoue : \"" + notesCtx + '".',
+    photoDescs.length ? ('Photos de la journée : ' + photoDescs.join(' | ') + '.') : '',
     'Génère une entrée de journal intime poétique et authentique, à la première personne, en français.',
+    photoDescs.length ? 'Intègre naturellement les éléments des photos dans le récit.' : '',
     'Style : personnel, émotionnel, avec des détails sensoriels sur le Japon. 150-200 mots.',
     'Commence directement par le texte, sans titre ni date.',
-  ].join(' ');
+  ].filter(Boolean).join(' ');
 
   try {
     var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -3187,7 +3366,8 @@ async function generateJournalEntry(date) {
     });
     var data = await resp.json();
     var generated = data.choices[0].message.content.trim();
-    var entry = { notes: txt, generated: generated, date: date, city: city, ts: Date.now() };
+    var savedPhotos = (_journalPendingPhotos[date] || []).filter(function(p){ return !p.analyzing; });
+    var entry = { notes: txt, generated: generated, date: date, city: city, ts: Date.now(), photos: savedPhotos };
     saveJournalEntry(date, entry);
     var el = document.getElementById('jday-' + date);
     var textEl = document.getElementById('jtext-' + date);
@@ -3195,6 +3375,17 @@ async function generateJournalEntry(date) {
       textEl.className = 'journal-entry-text';
       textEl.textContent = generated;
     }
+    // Afficher les photos dans le display
+    var displayEl = document.getElementById('jphotos-display-' + date);
+    if (displayEl && savedPhotos.length) {
+      displayEl.innerHTML = savedPhotos.map(function(p){
+        return '<img class="journal-photo-view" src="' + p.thumb + '" alt="">';
+      }).join('');
+    }
+    // Vider les photos pending
+    _journalPendingPhotos[date] = [];
+    var strip = document.getElementById('jphotos-' + date);
+    if (strip) strip.innerHTML = '';
     if (el) el.classList.remove('editing');
     showToast('✍️ Journal écrit !');
   } catch(e) {
