@@ -470,8 +470,9 @@ body.inoue-mode #home { background: var(--inoue-secondary); }
 body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
 /* ── HOME INOUE ── */
-#home-inoue { display:none; flex-direction:column; }
+#home-inoue { display:none; flex-direction:column; position:fixed; inset:0; z-index:50; background:var(--inoue-secondary); overflow-y:auto; }
 #home-inoue.active { display:flex; }
+#page-inoue-shop .places-tab.on { background:var(--inoue-primary); border-color:var(--inoue-primary); }
 .inoue-home-header {
   padding:56px 24px 24px;
   border-bottom:1px solid rgba(255,255,255,0.07);
@@ -1102,7 +1103,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.1</strong>
+        <strong>Nihon v2.2</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -3234,7 +3235,12 @@ function setInouShopFilter(filter) {
     var el = document.getElementById('itab-' + f);
     if (el) el.classList.toggle('on', f === filter);
   });
-  if (inouePlacesGeo) searchInouePlaces();
+  if (inouePlacesGeo) {
+    searchInouePlaces();
+  } else {
+    var list = document.getElementById('inoue-shop-list');
+    if (list) list.innerHTML = '<div class="places-empty">📍 Appuie sur <strong>📍</strong> pour activer la localisation et lancer la recherche !</div>';
+  }
 }
 
 function onInouePlacesInput() {
