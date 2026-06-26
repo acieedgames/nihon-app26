@@ -3454,20 +3454,38 @@ function triggerPhotoInput(source) {
 function onPhotoSelected(e) {
   var file = e.target.files[0];
   if (!file) return;
-  if (file.size > 3.5 * 1024 * 1024) { showToast('⚠️ Image trop grande (max 3.5MB)'); return; }
   photoMimeType = file.type || 'image/jpeg';
   var reader = new FileReader();
   reader.onload = function(ev) {
-    var dataUrl = ev.target.result;
-    photoBase64 = dataUrl.split(',')[1];
-    var preview = document.getElementById('photo-preview');
-    var placeholder = document.getElementById('photo-placeholder');
-    var analyzeBtn = document.getElementById('photo-analyze-btn');
-    if (preview) { preview.src = dataUrl; preview.classList.add('show'); }
-    if (placeholder) placeholder.style.display = 'none';
-    if (analyzeBtn) analyzeBtn.style.display = 'block';
-    var res = document.getElementById('photo-result');
-    if (res) { res.textContent = ''; res.classList.remove('show'); }
+    // Redimensionner via canvas avant d'envoyer
+    var img = new Image();
+    img.onload = function() {
+      var MAX = 1280;
+      var w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        var ratio = Math.min(MAX/w, MAX/h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+      photoBase64 = dataUrl.split(',')[1];
+      photoMimeType = 'image/jpeg';
+      var preview = document.getElementById('photo-preview');
+      var placeholder = document.getElementById('photo-placeholder');
+      var analyzeBtn = document.getElementById('photo-analyze-btn');
+      if (preview) { preview.src = dataUrl; preview.classList.add('show'); }
+      if (placeholder) placeholder.style.display = 'none';
+      if (analyzeBtn) analyzeBtn.style.display = 'block';
+      var res = document.getElementById('photo-result');
+      if (res) { res.textContent = ''; res.classList.remove('show'); }
+      // Afficher le poids compressé
+      var kb = Math.round(photoBase64.length * 0.75 / 1024);
+      showToast('📷 Photo prête · ' + kb + ' KB');
+    };
+    img.src = ev.target.result;
   };
   reader.readAsDataURL(file);
   e.target.value = '';
