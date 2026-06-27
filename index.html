@@ -58,6 +58,12 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .h-clock-time { font-size: 26px; font-weight: 800; color: #fff; letter-spacing: -1px; line-height: 1; }
 .h-clock-date { font-size: 10px; color: rgba(255,255,255,0.35); margin-top: 1px; }
 .h-clock-sep  { width: 1px; background: rgba(255,255,255,0.1); margin: 4px 16px; }
+.h-rate-block {
+  display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0;
+}
+.h-rate-label { font-size:9px; color:rgba(255,255,255,0.35); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.h-rate-value { font-size:15px; font-weight:800; color:var(--red); line-height:1; }
+.h-rate-sub   { font-size:9px; color:rgba(255,255,255,0.3); }
 
 #home-btns { padding: 18px 16px calc(32px + var(--safe-bottom)); }
 .hgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -599,6 +605,70 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .journal-input-row { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; }
 .journal-input-row .journal-quick-input { flex:1; margin-bottom:0; }
 
+
+/* ── TRADUCTEUR VOCAL ── */
+#page-vocal { display:none; flex-direction:column; padding:0 !important; }
+#page-vocal.on { display:flex; }
+.vocal-area {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; padding:24px 20px; gap:20px;
+}
+.vocal-mic-ring {
+  width:120px; height:120px; border-radius:50%;
+  border:3px solid var(--border); background:var(--surface);
+  display:flex; align-items:center; justify-content:center;
+  font-size:48px; cursor:pointer; transition:all 0.2s;
+  position:relative; flex-shrink:0;
+}
+.vocal-mic-ring.listening {
+  border-color:var(--red); background:var(--red-pale);
+  animation:pulse-mic 1s ease-in-out infinite;
+}
+.vocal-mic-ring.speaking {
+  border-color:#2E7D32; background:#E8F5E9;
+}
+.vocal-status {
+  font-size:14px; font-weight:600; color:var(--ink-3);
+  text-align:center; min-height:20px;
+}
+.vocal-fr-box {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px; display:none;
+}
+.vocal-fr-box.show { display:block; }
+.vocal-fr-label { font-size:10px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px; }
+.vocal-fr-text  { font-size:18px; font-weight:700; color:var(--ink); line-height:1.4; }
+.vocal-jp-box {
+  width:100%; background:#F0F4FF; border:1px solid #C5D0F0;
+  border-radius:var(--radius); padding:16px; display:none;
+}
+.vocal-jp-box.show { display:block; }
+.vocal-jp-label { font-size:10px; font-weight:600; color:#3A4A80; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
+.vocal-jp-text  { font-size:26px; font-weight:800; color:#1A2A5A; line-height:1.5; margin-bottom:6px; }
+.vocal-jp-roman { font-size:13px; color:#3A4A80; font-style:italic; }
+.vocal-actions  { display:flex; gap:10px; width:100%; }
+.vocal-action-btn {
+  flex:1; padding:14px; border-radius:var(--radius-sm); border:none;
+  font-size:14px; font-weight:700; cursor:pointer;
+}
+.vocal-btn-repeat { background:var(--red); color:#fff; }
+.vocal-btn-new    { background:var(--surface); color:var(--ink); border:1px solid var(--border); }
+.vocal-hint {
+  text-align:center; font-size:12px; color:var(--ink-3);
+  line-height:1.8; padding:0 10px;
+}
+.vocal-history {
+  width:100%; border-top:1px solid var(--border); padding-top:16px; margin-top:4px;
+}
+.vocal-history-title { font-size:11px; font-weight:600; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:10px; }
+.vocal-history-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:10px 14px; margin-bottom:8px; cursor:pointer;
+}
+.vocal-history-item:active { background:var(--red-pale); }
+.vocal-history-fr  { font-size:12px; color:var(--ink-3); margin-bottom:3px; }
+.vocal-history-jp  { font-size:18px; font-weight:700; color:var(--ink); }
+
 /* ── TRADUCTEUR PHOTO ── */
 #page-photo { display:none; flex-direction:column; padding:0 !important; }
 #page-photo.on { display:flex; }
@@ -773,6 +843,12 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
         <span class="h-clock-date" id="home-tokyo-date"></span>
       </div>
       <div class="h-clock-sep"></div>
+      <div class="h-rate-block">
+        <span class="h-rate-label">1000 ¥ / EUR</span>
+        <span class="h-rate-value" id="home-rate-value">—</span>
+        <span class="h-rate-sub" id="home-rate-sub">chargement…</span>
+      </div>
+      <div class="h-clock-sep"></div>
       <div class="h-clock">
         <span class="h-clock-city">🗺️ Paris</span>
         <span class="h-clock-time" id="home-paris-time">--:--</span>
@@ -788,7 +864,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="hbtn" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Agenda du voyage</span><span class="hs">10–28 juil.</span></div></button>
     <button class="hbtn" onclick="go('hotels')"><span class="hi">🏨</span><div><span class="hl">Hébergements</span><span class="hs">Adresses taxi</span></div></button>
     <button class="hbtn" onclick="go('nav')"><span class="hi">🗺️</span><div><span class="hl">Navigation</span><span class="hs">Cartes & trains</span></div></button>
-    <button class="hbtn" onclick="go('photo')"><span class="hi">📷</span><div><span class="hl">Traducteur photo</span><span class="hs">Menu · Kanji · Emballage</span></div></button>
+    <button class="hbtn" onclick="go('vocal')"><span class="hi">🗣️</span><div><span class="hl">Traducteur vocal</span><span class="hs">FR → JP · Parler · Répéter</span></div></button>
     <button class="hbtn hbtn-ai" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant IA</span><span class="hs">Groq · Questions voyage</span></div></button>
     <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
   </div></div>
@@ -808,6 +884,12 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
         <span class="h-clock-date" id="inoue-tokyo-date"></span>
       </div>
       <div class="h-clock-sep"></div>
+      <div class="h-rate-block">
+        <span class="h-rate-label">1000 ¥ / EUR</span>
+        <span class="h-rate-value" id="inoue-rate-value">—</span>
+        <span class="h-rate-sub" id="inoue-rate-sub">chargement…</span>
+      </div>
+      <div class="h-clock-sep"></div>
       <div class="h-clock">
         <span class="h-clock-city">🗺️ Paris</span>
         <span class="h-clock-time" id="inoue-paris-time">--:--</span>
@@ -819,7 +901,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="inoue-hgrid">
       <button class="inoue-hbtn" onclick="go('journal')"><span class="hi">📖</span><div><span class="hl">Mon journal</span><span class="hs">Écrire · Générer IA</span></div></button>
       <button class="inoue-hbtn" onclick="go('inoue-shop')"><span class="hi">🛍️</span><div><span class="hl">Mon shopping</span><span class="hs">Friperies · Streetwear</span></div></button>
-      <button class="inoue-hbtn" onclick="go('photo')"><span class="hi">📷</span><div><span class="hl">Traducteur</span><span class="hs">Menu · Kanji</span></div></button>
+      <button class="inoue-hbtn" onclick="go('vocal')"><span class="hi">🗣️</span><div><span class="hl">Traducteur vocal</span><span class="hs">FR → JP · Répéter</span></div></button>
       <button class="inoue-hbtn" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant</span><span class="hs">Questions voyage</span></div></button>
       <button class="inoue-hbtn inoue-hbtn-wide" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Programme du voyage</span><span class="hs">10–28 juillet · Patrick & Inoue</span></div></button>
     </div>
@@ -1130,7 +1212,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.3</strong>
+        <strong>Nihon v2.5</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1376,6 +1458,51 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   </div>
 </div>
 
+
+<!-- PAGE TRADUCTEUR VOCAL -->
+<div class="page" id="page-vocal">
+  <div class="vocal-area">
+
+    <!-- Grand bouton micro -->
+    <div class="vocal-mic-ring" id="vocal-mic-ring" onclick="toggleVocalMic()">
+      <span id="vocal-mic-icon">🎤</span>
+    </div>
+    <div class="vocal-status" id="vocal-status">Appuie pour parler en français</div>
+
+    <!-- Phrase française reconnue -->
+    <div class="vocal-fr-box" id="vocal-fr-box">
+      <div class="vocal-fr-label">🇫🇷 Vous avez dit</div>
+      <div class="vocal-fr-text" id="vocal-fr-text"></div>
+    </div>
+
+    <!-- Traduction japonaise -->
+    <div class="vocal-jp-box" id="vocal-jp-box">
+      <div class="vocal-jp-label">🇯🇵 En japonais</div>
+      <div class="vocal-jp-text" id="vocal-jp-text"></div>
+      <div class="vocal-jp-roman" id="vocal-jp-roman"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="vocal-actions" id="vocal-actions" style="display:none;">
+      <button class="vocal-action-btn vocal-btn-repeat" onclick="vocalRepeat()">🔊 Réécouter</button>
+      <button class="vocal-action-btn vocal-btn-new" onclick="vocalReset()">🎤 Nouvelle phrase</button>
+    </div>
+
+    <!-- Hint -->
+    <div class="vocal-hint" id="vocal-hint">
+      Parle en français · L'app traduit et prononce en japonais 🇯🇵<br>
+      <strong>Retourne l'écran</strong> vers ton interlocuteur pour qu'il lise
+    </div>
+
+    <!-- Historique -->
+    <div class="vocal-history" id="vocal-history" style="display:none;">
+      <div class="vocal-history-title">Phrases récentes — appuie pour réécouter</div>
+      <div id="vocal-history-list"></div>
+    </div>
+
+  </div>
+</div>
+
 <!-- PAGE PHOTO -->
 <div class="page" id="page-photo">
   <div class="photo-area">
@@ -1504,7 +1631,8 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="mb " onclick="showPageFromMore('meteo')"><span>🌡️</span><span>Météo</span></button>
     <button class="mb " onclick="showPageFromMore('hotels')"><span>🏨</span><span>Hébergements</span></button>
     <button class="mb " onclick="showPageFromMore('nav')"><span>🗺️</span><span>Navigation</span></button>
-    <button class="mb " onclick="showPageFromMore('photo')"><span>📷</span><span>Traducteur</span></button>
+    <button class="mb " onclick="showPageFromMore('vocal')"><span>🗣️</span><span>Vocal FR→JP</span></button>
+    <button class="mb " onclick="showPageFromMore('photo')"><span>📷</span><span>Photo</span></button>
     <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
     <button class="mb " onclick="showPageFromMore('utils')"><span>🗾</span><span>Pratique</span></button>
     <button class="mb " onclick="showPageFromMore('settings')"><span>⚙️</span><span>Réglages</span></button>
@@ -1534,7 +1662,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal'
 };
 
 function setThemeColor(color) {
@@ -2506,6 +2634,15 @@ function onRateReady() {
   buildQuickGrid();
   buildOtherRates();
   document.getElementById('hdr-rate').textContent = `1€ = ${rateEURJPY.toFixed(0)}¥`;
+  var hrv = document.getElementById('home-rate-value');
+  var hrs = document.getElementById('home-rate-sub');
+  var per1000 = (1000 / rateEURJPY).toFixed(2);
+  if (hrv) hrv.textContent = per1000 + '€';
+  if (hrs) hrs.textContent = '1€ = ' + rateEURJPY.toFixed(0) + '¥';
+  var irv = document.getElementById('inoue-rate-value');
+  var irs = document.getElementById('inoue-rate-sub');
+  if (irv) irv.textContent = per1000 + '€';
+  if (irs) irs.textContent = '1€ = ' + rateEURJPY.toFixed(0) + '¥';
   if (rateTimestamp) {
     document.getElementById('last-rate-update').textContent =
       'Dernière mise à jour : ' + new Date(rateTimestamp).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
@@ -3790,6 +3927,210 @@ function stopVoice() {
   var btn = document.getElementById('ai-mic-btn');
   if (btn) { btn.classList.remove('listening'); btn.textContent = '🎤'; }
   if (voiceRecog) { try { voiceRecog.stop(); } catch(e) {} }
+}
+
+
+// ═══════════════════════════════════════════
+// TRADUCTEUR VOCAL FR → JP
+// ═══════════════════════════════════════════
+var vocalRecog      = null;
+var vocalListening  = false;
+var vocalCurrentJP  = '';
+var vocalCurrentFR  = '';
+var vocalHistory    = [];
+
+function toggleVocalMic() {
+  if (vocalListening) { stopVocalMic(); return; }
+  startVocalMic();
+}
+
+function startVocalMic() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { showToast('⚠️ Micro non supporté sur ce navigateur'); return; }
+
+  vocalRecog = new SR();
+  vocalRecog.lang = 'fr-FR';
+  vocalRecog.continuous = false;
+  vocalRecog.interimResults = true;
+
+  vocalRecog.onstart = function() {
+    vocalListening = true;
+    setVocalUI('listening', 'Écoute…', '⏹');
+    // Cacher les résultats précédents
+    document.getElementById('vocal-fr-box').classList.remove('show');
+    document.getElementById('vocal-jp-box').classList.remove('show');
+    document.getElementById('vocal-actions').style.display = 'none';
+    document.getElementById('vocal-hint').style.display = 'none';
+    document.getElementById('vocal-fr-text').textContent = '';
+  };
+
+  vocalRecog.onresult = function(e) {
+    var transcript = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    // Afficher interim
+    var frBox = document.getElementById('vocal-fr-box');
+    var frText = document.getElementById('vocal-fr-text');
+    frBox.classList.add('show');
+    frText.textContent = transcript;
+
+    if (e.results[e.results.length - 1].isFinal) {
+      vocalCurrentFR = transcript;
+      setVocalUI('thinking', 'Traduction en cours…', '🤔');
+      translateAndSpeak(transcript);
+    }
+  };
+
+  vocalRecog.onerror = function(e) {
+    var msgs = { 'not-allowed': 'Micro non autorisé', 'no-speech': 'Aucune voix détectée' };
+    showToast('⚠️ ' + (msgs[e.error] || 'Erreur micro'));
+    vocalReset();
+  };
+
+  vocalRecog.onend = function() {
+    vocalListening = false;
+  };
+
+  try { vocalRecog.start(); }
+  catch(e) { showToast('⚠️ Impossible de démarrer le micro'); }
+}
+
+function stopVocalMic() {
+  vocalListening = false;
+  if (vocalRecog) { try { vocalRecog.stop(); } catch(e) {} }
+  setVocalUI('idle', 'Appuie pour parler en français', '🎤');
+}
+
+async function translateAndSpeak(text) {
+  var key = getApiKey();
+  if (!key) {
+    showToast('⚠️ Clé API manquante');
+    vocalReset();
+    return;
+  }
+
+  try {
+    var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({
+        model: 'qwen/qwen3.6-27b',
+        messages: [{
+          role: 'user',
+          content: [
+            'Traduis en japonais poli (style keigo simple) cette phrase francaise : "' + text + '"',
+            'Reponds UNIQUEMENT avec un JSON : {"jp":"texte japonais","roman":"romanisation hepburn"}',
+            'Aucune explication, JSON uniquement.',
+          ].join(' ')
+        }],
+        max_tokens: 150,
+        temperature: 0.1,
+      })
+    });
+
+    var data = await resp.json();
+    var raw = data.choices[0].message.content.trim();
+    // Nettoyer le JSON (enlever éventuels backticks)
+    raw = raw.replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(raw);
+    vocalCurrentJP = parsed.jp || '';
+    var roman = parsed.roman || '';
+
+    // Afficher
+    document.getElementById('vocal-jp-text').textContent = vocalCurrentJP;
+    document.getElementById('vocal-jp-roman').textContent = roman;
+    document.getElementById('vocal-jp-box').classList.add('show');
+    document.getElementById('vocal-actions').style.display = 'flex';
+
+    setVocalUI('speaking', 'Lecture en japonais…', '🔊');
+
+    // Ajouter à l'historique
+    vocalHistory.unshift({ fr: text, jp: vocalCurrentJP, roman: roman });
+    if (vocalHistory.length > 8) vocalHistory.pop();
+    renderVocalHistory();
+
+    // Prononcer
+    speakJapaneseVocal(vocalCurrentJP);
+
+  } catch(e) {
+    showToast('⚠️ Erreur traduction : ' + (e.message || 'connexion'));
+    setVocalUI('idle', 'Appuie pour réessayer', '🎤');
+  }
+}
+
+function speakJapaneseVocal(text) {
+  if (!('speechSynthesis' in window)) {
+    setVocalUI('idle', 'Prêt', '🎤');
+    return;
+  }
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  if (jpVoice) u.voice = jpVoice;
+  u.rate = 0.75;
+  u.pitch = 1.0;
+  u.volume = 1.0;
+  u.onend = function() {
+    setVocalUI('idle', 'Phrase lue · appuie pour parler', '🎤');
+  };
+  setTimeout(function() { speechSynthesis.speak(u); }, 150);
+}
+
+function vocalRepeat() {
+  if (!vocalCurrentJP) return;
+  setVocalUI('speaking', 'Lecture en japonais…', '🔊');
+  speakJapaneseVocal(vocalCurrentJP);
+}
+
+function vocalReset() {
+  vocalCurrentJP = '';
+  vocalCurrentFR = '';
+  document.getElementById('vocal-fr-box').classList.remove('show');
+  document.getElementById('vocal-jp-box').classList.remove('show');
+  document.getElementById('vocal-actions').style.display = 'none';
+  document.getElementById('vocal-hint').style.display = 'block';
+  setVocalUI('idle', 'Appuie pour parler en français', '🎤');
+}
+
+function setVocalUI(state, status, icon) {
+  var ring = document.getElementById('vocal-mic-ring');
+  var ico  = document.getElementById('vocal-mic-icon');
+  var sta  = document.getElementById('vocal-status');
+  if (ring) { ring.className = 'vocal-mic-ring' + (state === 'listening' ? ' listening' : state === 'speaking' ? ' speaking' : ''); }
+  if (ico)  ico.textContent  = icon;
+  if (sta)  sta.textContent  = status;
+}
+
+function renderVocalHistory() {
+  var hist = document.getElementById('vocal-history');
+  var list = document.getElementById('vocal-history-list');
+  if (!hist || !list || !vocalHistory.length) return;
+  hist.style.display = 'block';
+  list.innerHTML = '';
+  vocalHistory.forEach(function(item) {
+    var div = document.createElement('div');
+    div.className = 'vocal-history-item';
+    var fr = document.createElement('div');
+    fr.className = 'vocal-history-fr';
+    fr.textContent = item.fr;
+    var jp = document.createElement('div');
+    jp.className = 'vocal-history-jp';
+    jp.textContent = item.jp;
+    div.appendChild(fr);
+    div.appendChild(jp);
+    div.onclick = (function(j){ return function() {
+      document.getElementById('vocal-jp-text').textContent = j.jp;
+      document.getElementById('vocal-jp-roman').textContent = j.roman || '';
+      document.getElementById('vocal-jp-box').classList.add('show');
+      document.getElementById('vocal-fr-text').textContent = j.fr;
+      document.getElementById('vocal-fr-box').classList.add('show');
+      document.getElementById('vocal-actions').style.display = 'flex';
+      vocalCurrentJP = j.jp;
+      speakJapaneseVocal(j.jp);
+    }; })(item);
+    list.appendChild(div);
+  });
 }
 
 // ═══════════════════════════════════════════
