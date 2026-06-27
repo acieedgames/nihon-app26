@@ -4017,15 +4017,17 @@ async function translateAndSpeak(text) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
-        model: 'qwen/qwen3.6-27b',
-        messages: [{
-          role: 'user',
-          content: [
-            'Traduis en japonais poli (style keigo simple) cette phrase francaise : "' + text + '"',
-            'Reponds UNIQUEMENT avec un JSON : {"jp":"texte japonais","roman":"romanisation hepburn"}',
-            'Aucune explication, JSON uniquement.',
-          ].join(' ')
-        }],
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'Tu es un traducteur FR->JP. Reponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou apres : {"jp":"...","roman":"..."}',
+          },
+          {
+            role: 'user',
+            content: 'Traduis en japonais poli : ' + text,
+          }
+        ],
         max_tokens: 150,
         temperature: 0.1,
       })
@@ -4033,9 +4035,10 @@ async function translateAndSpeak(text) {
 
     var data = await resp.json();
     var raw = data.choices[0].message.content.trim();
-    // Nettoyer le JSON (enlever éventuels backticks)
-    raw = raw.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(raw);
+    // Extraire le JSON robustement (ignore thinking tags ou texte parasite)
+    var jsonMatch = raw.match(/\{[^{}]*"jp"[^{}]*\}/);
+    if (!jsonMatch) throw new Error('Format JSON invalide : ' + raw.slice(0, 80));
+    var parsed = JSON.parse(jsonMatch[0]);
     vocalCurrentJP = parsed.jp || '';
     var roman = parsed.roman || '';
 
