@@ -669,6 +669,24 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   border-radius:10px; padding:10px 14px; margin-bottom:8px; cursor:pointer;
 }
 .vocal-history-item:active { background:var(--red-pale); }
+.vocal-mode-switch {
+  display:flex; gap:0; width:100%; border-radius:12px;
+  overflow:hidden; border:1px solid var(--border); flex-shrink:0;
+}
+.vocal-mode-btn {
+  flex:1; padding:11px 6px; border:none; font-size:13px; font-weight:700;
+  cursor:pointer; background:var(--surface); color:var(--ink-2);
+  transition:background 0.15s, color 0.15s; text-align:center; line-height:1.3;
+}
+.vocal-mode-btn.on { background:var(--red); color:#fff; }
+.vocal-result-box {
+  width:100%; border-radius:var(--radius); padding:16px; display:none;
+}
+.vocal-result-box.show { display:block; }
+.vocal-result-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
+.vocal-result-original { font-size:14px; color:var(--ink-3); margin-bottom:10px; font-style:italic; }
+.vocal-result-text { font-size:24px; font-weight:800; color:var(--ink); line-height:1.5; }
+.vocal-result-sub  { font-size:12px; margin-top:6px; font-style:italic; }
 .vocal-history-fr  { font-size:12px; color:var(--ink-3); margin-bottom:3px; }
 .vocal-history-jp  { font-size:18px; font-weight:700; color:var(--ink); }
 
@@ -1214,7 +1232,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.6</strong>
+        <strong>Nihon v2.7</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1465,23 +1483,28 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 <div class="page" id="page-vocal">
   <div class="vocal-area">
 
+    <!-- Switcher de mode -->
+    <div class="vocal-mode-switch">
+      <button class="vocal-mode-btn on" id="vmode-frjp" onclick="setVocalMode('frjp')">
+        🇫🇷 Je parle<br><small>→ japonais</small>
+      </button>
+      <button class="vocal-mode-btn" id="vmode-jpfr" onclick="setVocalMode('jpfr')">
+        🇯🇵 Il/Elle parle<br><small>→ français</small>
+      </button>
+    </div>
+
     <!-- Grand bouton micro -->
     <div class="vocal-mic-ring" id="vocal-mic-ring" onclick="toggleVocalMic()">
       <span id="vocal-mic-icon">🎤</span>
     </div>
     <div class="vocal-status" id="vocal-status">Appuie pour parler en français</div>
 
-    <!-- Phrase française reconnue -->
-    <div class="vocal-fr-box" id="vocal-fr-box">
-      <div class="vocal-fr-label">🇫🇷 Vous avez dit</div>
-      <div class="vocal-fr-text" id="vocal-fr-text"></div>
-    </div>
-
-    <!-- Traduction japonaise -->
-    <div class="vocal-jp-box" id="vocal-jp-box">
-      <div class="vocal-jp-label">🇯🇵 En japonais</div>
-      <div class="vocal-jp-text" id="vocal-jp-text"></div>
-      <div class="vocal-jp-roman" id="vocal-jp-roman"></div>
+    <!-- Boite résultat (contenu adapté au mode) -->
+    <div class="vocal-result-box" id="vocal-result-box">
+      <div class="vocal-result-label" id="vocal-result-label"></div>
+      <div class="vocal-result-original" id="vocal-result-original"></div>
+      <div class="vocal-result-text" id="vocal-result-text"></div>
+      <div class="vocal-result-sub" id="vocal-result-sub"></div>
     </div>
 
     <!-- Actions -->
@@ -1498,7 +1521,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
     <!-- Historique -->
     <div class="vocal-history" id="vocal-history" style="display:none;">
-      <div class="vocal-history-title">Phrases récentes — appuie pour réécouter</div>
+      <div class="vocal-history-title">Phrases récentes</div>
       <div id="vocal-history-list"></div>
     </div>
 
@@ -3933,13 +3956,28 @@ function stopVoice() {
 
 
 // ═══════════════════════════════════════════
-// TRADUCTEUR VOCAL FR → JP
+// TRADUCTEUR VOCAL BIDIRECTIONNEL FR↔JP
 // ═══════════════════════════════════════════
-var vocalRecog      = null;
-var vocalListening  = false;
-var vocalCurrentJP  = '';
-var vocalCurrentFR  = '';
-var vocalHistory    = [];
+var vocalRecog     = null;
+var vocalListening = false;
+var vocalCurrentTL = ''; // texte traduit courant
+var vocalHistory   = [];
+var vocalMode      = 'frjp'; // 'frjp' ou 'jpfr'
+
+function setVocalMode(mode) {
+  vocalMode = mode;
+  document.getElementById('vmode-frjp').classList.toggle('on', mode === 'frjp');
+  document.getElementById('vmode-jpfr').classList.toggle('on', mode === 'jpfr');
+  var hint = document.getElementById('vocal-hint');
+  if (mode === 'frjp') {
+    if (hint) hint.innerHTML = "Parle en fran\u00e7ais \u00b7 L'app traduit en japonais \uD83C\uDDEF\uD83C\uDDF5<br><strong>Retourne l'\u00e9cran</strong> vers ton interlocuteur";
+    setVocalUI('idle', 'Appuie pour parler en français', '🎤');
+  } else {
+    if (hint) hint.innerHTML = "Donne le t\u00e9l\u00e9phone au japonais \u00b7 Il parle \u00b7 L'app traduit en fran\u00e7ais \uD83C\uDDEB\uD83C\uDDF7<br><strong>Retourne l'\u00e9cran</strong> vers toi pour lire";
+    setVocalUI('idle', 'Appuie · donne le téléphone', '🎤');
+  }
+  vocalReset();
+}
 
 function toggleVocalMic() {
   if (vocalListening) { stopVocalMic(); return; }
@@ -3951,19 +3989,17 @@ function startVocalMic() {
   if (!SR) { showToast('⚠️ Micro non supporté sur ce navigateur'); return; }
 
   vocalRecog = new SR();
-  vocalRecog.lang = 'fr-FR';
+  vocalRecog.lang = vocalMode === 'frjp' ? 'fr-FR' : 'ja-JP';
   vocalRecog.continuous = false;
   vocalRecog.interimResults = true;
 
   vocalRecog.onstart = function() {
     vocalListening = true;
-    setVocalUI('listening', 'Écoute…', '⏹');
-    // Cacher les résultats précédents
-    document.getElementById('vocal-fr-box').classList.remove('show');
-    document.getElementById('vocal-jp-box').classList.remove('show');
+    var statusMsg = vocalMode === 'frjp' ? 'Écoute… parle en français' : 'Écoute… le japonais parle';
+    setVocalUI('listening', statusMsg, '⏹');
+    document.getElementById('vocal-result-box').classList.remove('show');
     document.getElementById('vocal-actions').style.display = 'none';
     document.getElementById('vocal-hint').style.display = 'none';
-    document.getElementById('vocal-fr-text').textContent = '';
   };
 
   vocalRecog.onresult = function(e) {
@@ -3971,14 +4007,15 @@ function startVocalMic() {
     for (var i = e.resultIndex; i < e.results.length; i++) {
       transcript += e.results[i][0].transcript;
     }
-    // Afficher interim
-    var frBox = document.getElementById('vocal-fr-box');
-    var frText = document.getElementById('vocal-fr-text');
-    frBox.classList.add('show');
-    frText.textContent = transcript;
+    // Afficher la transcription en cours dans la boite résultat
+    var box = document.getElementById('vocal-result-box');
+    var orig = document.getElementById('vocal-result-original');
+    box.classList.add('show');
+    box.style.background = vocalMode === 'frjp' ? '#E3F2FD' : '#FFF8E1';
+    box.style.border = vocalMode === 'frjp' ? '1px solid #C5D0F0' : '1px solid #F0D870';
+    if (orig) orig.textContent = transcript;
 
     if (e.results[e.results.length - 1].isFinal) {
-      vocalCurrentFR = transcript;
       setVocalUI('thinking', 'Traduction en cours…', '🤔');
       translateAndSpeak(transcript);
     }
@@ -3990,9 +4027,7 @@ function startVocalMic() {
     vocalReset();
   };
 
-  vocalRecog.onend = function() {
-    vocalListening = false;
-  };
+  vocalRecog.onend = function() { vocalListening = false; };
 
   try { vocalRecog.start(); }
   catch(e) { showToast('⚠️ Impossible de démarrer le micro'); }
@@ -4001,16 +4036,21 @@ function startVocalMic() {
 function stopVocalMic() {
   vocalListening = false;
   if (vocalRecog) { try { vocalRecog.stop(); } catch(e) {} }
-  setVocalUI('idle', 'Appuie pour parler en français', '🎤');
+  var msg = vocalMode === 'frjp' ? 'Appuie pour parler en français' : 'Appuie · donne le téléphone';
+  setVocalUI('idle', msg, '🎤');
 }
 
 async function translateAndSpeak(text) {
   var key = getApiKey();
-  if (!key) {
-    showToast('⚠️ Clé API manquante');
-    vocalReset();
-    return;
-  }
+  if (!key) { showToast('⚠️ Clé API manquante'); vocalReset(); return; }
+
+  var isFRJP = vocalMode === 'frjp';
+  var systemPrompt = isFRJP
+    ? 'Tu es un traducteur FR->JP. Reponds UNIQUEMENT avec JSON : {"jp":"texte japonais","roman":"romanisation hepburn"}. Rien dautre.'
+    : 'Tu es un traducteur JP->FR. Reponds UNIQUEMENT avec JSON : {"fr":"traduction francaise"}. Rien dautre.';
+  var userPrompt = isFRJP
+    ? 'Traduis en japonais poli : ' + text
+    : 'Traduis en francais : ' + text;
 
   try {
     var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -4019,49 +4059,75 @@ async function translateAndSpeak(text) {
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: [
-          {
-            role: 'system',
-            content: 'Tu es un traducteur FR->JP. Reponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou apres : {"jp":"...","roman":"..."}',
-          },
-          {
-            role: 'user',
-            content: 'Traduis en japonais poli : ' + text,
-          }
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: userPrompt   }
         ],
-        max_tokens: 150,
-        temperature: 0.1,
+        max_tokens: 150, temperature: 0.1,
       })
     });
 
     var data = await resp.json();
-    var raw = data.choices[0].message.content.trim();
-    // Extraire le JSON robustement (ignore thinking tags ou texte parasite)
-    var jsonMatch = raw.match(/\{[^{}]*"jp"[^{}]*\}/);
-    if (!jsonMatch) throw new Error('Format JSON invalide : ' + raw.slice(0, 80));
+    var raw  = data.choices[0].message.content.trim();
+
+    // Extraire JSON robustement
+    var jsonMatch = raw.match(/\{[^{}]+\}/);
+    if (!jsonMatch) throw new Error('JSON invalide');
     var parsed = JSON.parse(jsonMatch[0]);
-    vocalCurrentJP = parsed.jp || '';
-    var roman = parsed.roman || '';
 
-    // Afficher
-    document.getElementById('vocal-jp-text').textContent = vocalCurrentJP;
-    document.getElementById('vocal-jp-roman').textContent = roman;
-    document.getElementById('vocal-jp-box').classList.add('show');
+    // Mise à jour UI selon le mode
+    var box    = document.getElementById('vocal-result-box');
+    var label  = document.getElementById('vocal-result-label');
+    var orig   = document.getElementById('vocal-result-original');
+    var result = document.getElementById('vocal-result-text');
+    var sub    = document.getElementById('vocal-result-sub');
+
+    if (isFRJP) {
+      vocalCurrentTL = parsed.jp || '';
+      var roman = parsed.roman || '';
+      if (label)  { label.textContent = '🇯🇵 En japonais'; label.style.color = '#3A4A80'; }
+      if (orig)   orig.textContent = '🇫🇷 ' + text;
+      if (result) { result.textContent = vocalCurrentTL; result.style.fontSize = '26px'; }
+      if (sub)    { sub.textContent = roman; sub.style.color = '#3A4A80'; }
+      if (box)    { box.style.background = '#F0F4FF'; box.style.border = '1px solid #C5D0F0'; }
+      setVocalUI('speaking', 'Lecture en japonais…', '🔊');
+      vocalHistory.unshift({ src: text, tl: vocalCurrentTL, roman: roman, mode: 'frjp' });
+    } else {
+      vocalCurrentTL = parsed.fr || '';
+      if (label)  { label.textContent = '🇫🇷 En français'; label.style.color = '#5A3A00'; }
+      if (orig)   orig.textContent = '🇯🇵 ' + text;
+      if (result) { result.textContent = vocalCurrentTL; result.style.fontSize = '22px'; }
+      if (sub)    sub.textContent = '';
+      if (box)    { box.style.background = '#FFFBEA'; box.style.border = '1px solid #F0D870'; }
+      setVocalUI('speaking', 'Lecture en français…', '🔊');
+      vocalHistory.unshift({ src: text, tl: vocalCurrentTL, roman: '', mode: 'jpfr' });
+    }
+
+    if (box)    box.classList.add('show');
     document.getElementById('vocal-actions').style.display = 'flex';
-
-    setVocalUI('speaking', 'Lecture en japonais…', '🔊');
-
-    // Ajouter à l'historique
-    vocalHistory.unshift({ fr: text, jp: vocalCurrentJP, roman: roman });
     if (vocalHistory.length > 8) vocalHistory.pop();
     renderVocalHistory();
 
-    // Prononcer
-    speakJapaneseVocal(vocalCurrentJP);
+    // Prononcer dans la bonne langue
+    if (isFRJP) {
+      speakJapaneseVocal(vocalCurrentTL);
+    } else {
+      speakFrenchVocal(vocalCurrentTL);
+    }
 
   } catch(e) {
-    showToast('⚠️ Erreur traduction : ' + (e.message || 'connexion'));
+    showToast('⚠️ Erreur : ' + (e.message || 'connexion'));
     setVocalUI('idle', 'Appuie pour réessayer', '🎤');
   }
+}
+
+function speakFrenchVocal(text) {
+  if (!('speechSynthesis' in window)) { setVocalUI('idle', 'Prêt', '🎤'); return; }
+  speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'fr-FR';
+  u.rate = 0.9; u.pitch = 1.0; u.volume = 1.0;
+  u.onend = function() { setVocalUI('idle', 'Appuie · donne le téléphone', '🎤'); };
+  setTimeout(function() { speechSynthesis.speak(u); }, 150);
 }
 
 function speakJapaneseVocal(text) {
@@ -4083,19 +4149,24 @@ function speakJapaneseVocal(text) {
 }
 
 function vocalRepeat() {
-  if (!vocalCurrentJP) return;
-  setVocalUI('speaking', 'Lecture en japonais…', '🔊');
-  speakJapaneseVocal(vocalCurrentJP);
+  if (!vocalCurrentTL) return;
+  if (vocalMode === 'frjp') {
+    setVocalUI('speaking', 'Lecture en japonais…', '🔊');
+    speakJapaneseVocal(vocalCurrentTL);
+  } else {
+    setVocalUI('speaking', 'Lecture en français…', '🔊');
+    speakFrenchVocal(vocalCurrentTL);
+  }
 }
 
 function vocalReset() {
-  vocalCurrentJP = '';
-  vocalCurrentFR = '';
-  document.getElementById('vocal-fr-box').classList.remove('show');
-  document.getElementById('vocal-jp-box').classList.remove('show');
+  vocalCurrentTL = '';
+  var box = document.getElementById('vocal-result-box');
+  if (box) box.classList.remove('show');
   document.getElementById('vocal-actions').style.display = 'none';
   document.getElementById('vocal-hint').style.display = 'block';
-  setVocalUI('idle', 'Appuie pour parler en français', '🎤');
+  var msg = vocalMode === 'frjp' ? 'Appuie pour parler en français' : 'Appuie · donne le téléphone';
+  setVocalUI('idle', msg, '🎤');
 }
 
 function setVocalUI(state, status, icon) {
@@ -4116,23 +4187,38 @@ function renderVocalHistory() {
   vocalHistory.forEach(function(item) {
     var div = document.createElement('div');
     div.className = 'vocal-history-item';
-    var fr = document.createElement('div');
-    fr.className = 'vocal-history-fr';
-    fr.textContent = item.fr;
-    var jp = document.createElement('div');
-    jp.className = 'vocal-history-jp';
-    jp.textContent = item.jp;
-    div.appendChild(fr);
-    div.appendChild(jp);
+    var srcEl = document.createElement('div');
+    srcEl.className = 'vocal-history-fr';
+    srcEl.textContent = (item.mode === 'frjp' ? '🇫🇷 ' : '🇯🇵 ') + item.src;
+    var tlEl = document.createElement('div');
+    tlEl.className = 'vocal-history-jp';
+    tlEl.textContent = (item.mode === 'frjp' ? '🇯🇵 ' : '🇫🇷 ') + item.tl;
+    div.appendChild(srcEl);
+    div.appendChild(tlEl);
     div.onclick = (function(j){ return function() {
-      document.getElementById('vocal-jp-text').textContent = j.jp;
-      document.getElementById('vocal-jp-roman').textContent = j.roman || '';
-      document.getElementById('vocal-jp-box').classList.add('show');
-      document.getElementById('vocal-fr-text').textContent = j.fr;
-      document.getElementById('vocal-fr-box').classList.add('show');
+      vocalCurrentTL = j.tl;
+      var box    = document.getElementById('vocal-result-box');
+      var label  = document.getElementById('vocal-result-label');
+      var orig   = document.getElementById('vocal-result-original');
+      var result = document.getElementById('vocal-result-text');
+      var sub    = document.getElementById('vocal-result-sub');
+      if (j.mode === 'frjp') {
+        if (label)  { label.textContent = '🇯🇵 En japonais'; label.style.color = '#3A4A80'; }
+        if (orig)   orig.textContent = '🇫🇷 ' + j.src;
+        if (result) { result.textContent = j.tl; result.style.fontSize = '26px'; }
+        if (sub)    { sub.textContent = j.roman || ''; sub.style.color = '#3A4A80'; }
+        if (box)    { box.style.background = '#F0F4FF'; box.style.border = '1px solid #C5D0F0'; }
+        speakJapaneseVocal(j.tl);
+      } else {
+        if (label)  { label.textContent = '🇫🇷 En français'; label.style.color = '#5A3A00'; }
+        if (orig)   orig.textContent = '🇯🇵 ' + j.src;
+        if (result) { result.textContent = j.tl; result.style.fontSize = '22px'; }
+        if (sub)    sub.textContent = '';
+        if (box)    { box.style.background = '#FFFBEA'; box.style.border = '1px solid #F0D870'; }
+        speakFrenchVocal(j.tl);
+      }
+      if (box) box.classList.add('show');
       document.getElementById('vocal-actions').style.display = 'flex';
-      vocalCurrentJP = j.jp;
-      speakJapaneseVocal(j.jp);
     }; })(item);
     list.appendChild(div);
   });
