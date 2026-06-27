@@ -60,9 +60,12 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .h-clock-sep  { width: 1px; background: rgba(255,255,255,0.1); margin: 4px 16px; }
 .h-rate-block {
   display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0;
+  cursor:pointer; padding:6px 10px; border-radius:10px;
+  transition:background 0.15s;
 }
+.h-rate-block:active { background:rgba(200,16,46,0.15); }
 .h-rate-label { font-size:9px; color:rgba(255,255,255,0.35); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
-.h-rate-value { font-size:15px; font-weight:800; color:var(--red); line-height:1; }
+.h-rate-value { font-size:22px; font-weight:900; color:var(--red); line-height:1; }
 .h-rate-sub   { font-size:9px; color:rgba(255,255,255,0.3); }
 
 #home-btns { padding: 18px 16px calc(32px + var(--safe-bottom)); }
@@ -843,7 +846,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
         <span class="h-clock-date" id="home-tokyo-date"></span>
       </div>
       <div class="h-clock-sep"></div>
-      <div class="h-rate-block">
+      <div class="h-rate-block" onclick="go('change')" title="Ouvrir le taux de change">
         <span class="h-rate-label">1000 ¥ / EUR</span>
         <span class="h-rate-value" id="home-rate-value">—</span>
         <span class="h-rate-sub" id="home-rate-sub">chargement…</span>
@@ -859,7 +862,6 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   <button class="inoue-switcher-btn" onclick="showProfilePicker()">🌸 Passer sur l'espace Inoue</button>
   <div id="home-btns"><div class="hgrid">
     <button class="hbtn" onclick="go('places')"><span class="hi">📍</span><div><span class="hl">Restos & Shopping</span><span class="hs">Autour de moi · OSM</span></div></button>
-    <button class="hbtn" onclick="go('change')"><span class="hi">💴</span><div><span class="hl">Taux de change</span><span class="hs">JPY ↔ EUR</span></div></button>
     <button class="hbtn" onclick="go('meteo')"><span class="hi">🌡️</span><div><span class="hl">Météo & Chaleur</span><span class="hs">Indice juillet</span></div></button>
     <button class="hbtn" onclick="go('agenda')"><span class="hi">📅</span><div><span class="hl">Agenda du voyage</span><span class="hs">10–28 juil.</span></div></button>
     <button class="hbtn" onclick="go('hotels')"><span class="hi">🏨</span><div><span class="hl">Hébergements</span><span class="hs">Adresses taxi</span></div></button>
@@ -884,7 +886,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
         <span class="h-clock-date" id="inoue-tokyo-date"></span>
       </div>
       <div class="h-clock-sep"></div>
-      <div class="h-rate-block">
+      <div class="h-rate-block" onclick="go('change')" title="Ouvrir le taux de change">
         <span class="h-rate-label">1000 ¥ / EUR</span>
         <span class="h-rate-value" id="inoue-rate-value">—</span>
         <span class="h-rate-sub" id="inoue-rate-sub">chargement…</span>
@@ -1212,7 +1214,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.5</strong>
+        <strong>Nihon v2.6</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
