@@ -693,8 +693,8 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
 /* ── WIDGET FOOT ── */
 .foot-widget {
-  margin:12px 16px 0; background:#0F1923;
-  border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius);
+  margin:12px 16px 0; background:#1C2B3A;
+  border:1px solid rgba(255,255,255,0.15); border-radius:var(--radius);
   overflow:hidden;
 }
 .foot-widget-hdr {
@@ -1290,7 +1290,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.8</strong>
+        <strong>Nihon v2.9</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -4727,13 +4727,10 @@ if (_savedProfile) {
     dismissSplash();
   }, 900);
 } else {
-  // Premier lancement → montrer le picker
+  // Premier lancement → Patrick par défaut, picker accessible via bouton
   setTimeout(function() {
-    document.getElementById('splash').style.opacity = '0';
-    setTimeout(function() {
-      document.getElementById('splash').style.display = 'none';
-      document.getElementById('profile-picker').classList.remove('hidden');
-    }, 400);
+    selectProfile('patrick');
+    dismissSplash();
   }, 900);
 }
 try { fetchRate(); } catch(e) {}
@@ -4742,7 +4739,7 @@ try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
 try { buildPlacesFilters(); } catch(e) {}
-try { loadFranceMatches(); } catch(e) {}
+setTimeout(function() { try { loadFranceMatches(); } catch(e) {} }, 1200);
 try { buildJournal(); } catch(e) { console.error('journal', e); }
 try { loadPrefsUI(); } catch(e) {}
 try { getCurrentGeo(); } catch(e) {} // charge le cache geo silencieusement
