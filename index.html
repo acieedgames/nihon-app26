@@ -923,18 +923,6 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
       </div>
     </div>
   </div>
-  <!-- Widget Coupe du Monde -->
-  <div class="foot-widget" id="foot-widget">
-    <div class="foot-widget-hdr">
-      <div class="foot-widget-title">🏆 Bleus · CdM 2026 <span class="foot-widget-sub" id="foot-widget-sub">chargement…</span></div>
-      <button class="foot-widget-refresh" onclick="loadFranceMatches()" title="Actualiser">↻</button>
-    </div>
-    <div id="foot-matches-list"></div>
-    <div class="foot-widget-footer">
-      <a class="foot-m6-btn" href="https://www.6play.fr/m6" target="_blank">📺 M6 Replay</a>
-      <span class="foot-vpn-hint">🔒 VPN France requis depuis JP</span>
-    </div>
-  </div>
   <button class="inoue-switcher-btn" onclick="showProfilePicker()">🌸 Passer sur l'espace Inoue</button>
   <div id="home-btns"><div class="hgrid">
     <button class="hbtn" onclick="go('places')"><span class="hi">📍</span><div><span class="hl">Restos & Shopping</span><span class="hs">Autour de moi · OSM</span></div></button>
@@ -945,7 +933,20 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="hbtn" onclick="go('vocal')"><span class="hi">🗣️</span><div><span class="hl">Traducteur vocal</span><span class="hs">FR → JP · Parler · Répéter</span></div></button>
     <button class="hbtn hbtn-ai" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant IA</span><span class="hs">Groq · Questions voyage</span></div></button>
     <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
-  </div></div>
+  </div>
+  <!-- Widget Coupe du Monde -->
+  <div class="foot-widget" id="foot-widget" style="margin:12px 0 0;">
+    <div class="foot-widget-hdr">
+      <div class="foot-widget-title">🏆 Bleus · CdM 2026 <span class="foot-widget-sub" id="foot-widget-sub">chargement…</span></div>
+      <button class="foot-widget-refresh" onclick="loadFranceMatches()" title="Actualiser">↻</button>
+    </div>
+    <div id="foot-matches-list"></div>
+    <div class="foot-widget-footer">
+      <a class="foot-m6-btn" href="https://www.6play.fr/m6" target="_blank">📺 M6 Replay</a>
+      <span class="foot-vpn-hint">🔒 VPN France requis depuis JP</span>
+    </div>
+  </div>
+  </div>
 </div>
 
 
