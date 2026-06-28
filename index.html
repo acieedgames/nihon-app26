@@ -691,6 +691,84 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .vocal-history-jp  { font-size:18px; font-weight:700; color:var(--ink); }
 
 
+
+/* ── URGENCES MÉDICALES ── */
+.med-section { margin:12px 16px 0; }
+.med-section h3 { font-size:11px; font-weight:700; color:var(--ink-3); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; }
+.med-dentist {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px; margin-bottom:10px;
+}
+.med-dentist-name { font-size:15px; font-weight:700; color:var(--ink); margin-bottom:4px; }
+.med-dentist-tag {
+  display:inline-block; font-size:10px; font-weight:700; padding:2px 8px;
+  border-radius:5px; margin-bottom:8px;
+}
+.tag-ambasade { background:#E3F2FD; color:#1565C0; }
+.tag-english  { background:#E8F5E9; color:#2E7D32; }
+.med-dentist-info { font-size:12px; color:var(--ink-2); line-height:1.8; }
+.med-dentist-actions { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+.med-dentist-btn {
+  padding:8px 12px; border-radius:8px; border:none;
+  font-size:12px; font-weight:700; cursor:pointer; text-decoration:none;
+  display:flex; align-items:center; gap:5px;
+}
+.med-btn-tel  { background:#E8F5E9; color:#2E7D32; }
+.med-btn-maps { background:var(--red-pale); color:var(--red); }
+.med-btn-web  { background:#E3F2FD; color:#1565C0; }
+.med-phrase-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px; margin-bottom:10px;
+}
+.med-phrase-row {
+  padding:8px 0; border-bottom:1px solid var(--border);
+  cursor:pointer; display:flex; align-items:center; gap:10px;
+}
+.med-phrase-row:last-child { border-bottom:none; }
+.med-phrase-fr { font-size:12px; color:var(--ink-3); }
+.med-phrase-jp { font-size:16px; font-weight:700; color:var(--ink); }
+
+/* ── TAILLES ── */
+.size-tabs { display:flex; gap:8px; padding:12px 16px 0; }
+.size-tab {
+  flex:1; padding:9px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); font-size:12px; font-weight:700;
+  color:var(--ink-2); cursor:pointer; text-align:center;
+}
+.size-tab.on { background:var(--red); color:#fff; border-color:var(--red); }
+.size-table-wrap { margin:10px 16px 0; overflow-x:auto; }
+.size-table { width:100%; border-collapse:collapse; font-size:12px; }
+.size-table th {
+  background:var(--red); color:#fff; padding:7px 10px;
+  font-weight:700; text-align:center; white-space:nowrap;
+}
+.size-table td {
+  padding:7px 10px; text-align:center; border-bottom:1px solid var(--border);
+  color:var(--ink-2);
+}
+.size-table tr:nth-child(even) td { background:var(--bg); }
+.size-table .highlight td { background:var(--red-pale); color:var(--red); font-weight:700; }
+.size-note { font-size:11px; color:var(--ink-3); margin:8px 16px 0; line-height:1.6; }
+.size-finder {
+  margin:10px 16px 0; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:14px;
+}
+.size-finder h3 { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:10px; }
+.size-input-row { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+.size-input-row label { font-size:12px; color:var(--ink-2); min-width:80px; }
+.size-input-row input {
+  width:70px; border:1px solid var(--border); border-radius:8px;
+  padding:7px 10px; font-size:14px; font-weight:700; color:var(--ink);
+  background:var(--bg);
+}
+.size-result-box {
+  background:var(--red-pale); border:1px solid rgba(200,16,46,0.2);
+  border-radius:10px; padding:12px; margin-top:10px; display:none;
+}
+.size-result-box.show { display:block; }
+.size-result-line { font-size:14px; color:var(--ink); line-height:1.8; }
+.size-result-line strong { color:var(--red); font-size:16px; }
+
 /* ── WIDGET FOOT ── */
 .foot-widget {
   margin:12px 16px 0; background:#1C2B3A;
@@ -1291,7 +1369,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.9</strong>
+        <strong>Nihon v3.0</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1538,6 +1616,96 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 </div>
 
 
+
+<!-- PAGE URGENCES MÉDICALES -->
+<div class="page" id="page-medical">
+
+  <!-- Dentistes anglophones -->
+  <div class="med-section" style="margin-top:14px;">
+    <h3>🦷 Dentistes anglophones · Tokyo</h3>
+
+    <div class="med-dentist">
+      <div class="med-dentist-name">Cabinet Inaba 稲葉歯科医院</div>
+      <span class="med-dentist-tag tag-ambasade">🇫🇷 Référencé Ambassade de France</span>
+      <div class="med-dentist-info">
+        📍 1F Yasui Bldg, 335 Yamabukicho, Shinjuku-ku, Tokyo 162-0801<br>
+        🚇 5 min · Edogawabashi (Yurakucho line) · sortie 2<br>
+        📞 <a href="tel:+81333692000" style="color:var(--ink-2);text-decoration:none;">03-3369-2000</a><br>
+        🕐 Lun–Ven 9h30–17h30 · Sam 9h–13h · Fermé dim<br>
+        🌐 Dr. Inaba parle anglais · secrétaire française · sur RDV
+      </div>
+      <div class="med-dentist-actions">
+        <a class="med-dentist-btn med-btn-tel" href="tel:+81333692000">📞 Appeler</a>
+        <a class="med-dentist-btn med-btn-maps" href="https://www.google.com/maps/search/Inaba+Dental+Office+335+Yamabukicho+Shinjuku+Tokyo" target="_blank">🗺️ Maps</a>
+        <a class="med-dentist-btn med-btn-web" href="https://www.kameru-ha.com/english/" target="_blank">🌐 Site</a>
+      </div>
+    </div>
+
+    <div class="med-dentist">
+      <div class="med-dentist-name">Tokyo Clinic Dental Office (TCDO)</div>
+      <span class="med-dentist-tag tag-english">🇺🇸 Dentiste US · bilingue JP/EN</span>
+      <div class="med-dentist-info">
+        📍 Quartier central Tokyo (Minato/Roppongi)<br>
+        🌐 Dr. Drennan · diplômé Tufts University Boston<br>
+        ⚠️ Pas d'assurance japonaise · paiement privé uniquement
+      </div>
+      <div class="med-dentist-actions">
+        <a class="med-dentist-btn med-btn-maps" href="https://www.google.com/maps/search/Tokyo+Clinic+Dental+Office+TCDO" target="_blank">🗺️ Maps</a>
+        <a class="med-dentist-btn med-btn-web" href="https://www.tcdo.jp/" target="_blank">🌐 Site</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Urgences générales -->
+  <div class="med-section">
+    <h3>🏥 Urgences & contacts</h3>
+    <div class="med-dentist">
+      <div class="med-dentist-info">
+        🚑 <strong>Ambulance / Pompiers</strong> : <a href="tel:119" style="color:var(--red);font-weight:700;">119</a><br>
+        🚔 <strong>Police</strong> : <a href="tel:110" style="color:var(--red);font-weight:700;">110</a><br>
+        🌐 <strong>AMDA (info médicale EN)</strong> : <a href="tel:+81362339266" style="color:var(--ink-2);text-decoration:none;">03-6233-9266</a><br>
+        🏥 <strong>Tokyo Adventist Hospital</strong> (EN) : <a href="tel:+81339927802" style="color:var(--ink-2);text-decoration:none;">03-3392-6151</a><br>
+        🇫🇷 <strong>Ambassade de France Tokyo</strong> : <a href="tel:+81354200800" style="color:var(--ink-2);text-decoration:none;">03-5420-0800</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phrases médicales -->
+  <div class="med-section">
+    <h3>🗣️ Phrases médicales essentielles</h3>
+    <div class="med-phrase-card" id="med-phrases-list"></div>
+  </div>
+
+  <div style="height:20px;"></div>
+</div>
+
+<!-- PAGE TAILLES -->
+<div class="page" id="page-sizes">
+  <div class="size-tabs">
+    <button class="size-tab on" id="stab-clothes" onclick="setSizeTab('clothes')">👕 Vêtements</button>
+    <button class="size-tab" id="stab-shoes" onclick="setSizeTab('shoes')">👟 Pointures</button>
+    <button class="size-tab" id="stab-bra" onclick="setSizeTab('bra')">👙 Lingerie</button>
+  </div>
+
+  <!-- Convertisseur rapide -->
+  <div class="size-finder" id="size-finder">
+    <h3 id="size-finder-title">Convertir ma taille</h3>
+    <div class="size-input-row">
+      <label id="size-input-label">Taille FR/EU :</label>
+      <input type="number" id="size-input" placeholder="38" oninput="convertSize()">
+    </div>
+    <div class="size-result-box" id="size-result-box">
+      <div class="size-result-line" id="size-result-text"></div>
+    </div>
+  </div>
+
+  <div class="size-table-wrap">
+    <table class="size-table" id="size-table"></table>
+  </div>
+  <div class="size-note" id="size-note"></div>
+  <div style="height:20px;"></div>
+</div>
+
 <!-- PAGE TRADUCTEUR VOCAL -->
 <div class="page" id="page-vocal">
   <div class="vocal-area">
@@ -1719,6 +1887,8 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="mb " onclick="showPageFromMore('photo')"><span>📷</span><span>Photo</span></button>
     <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
     <button class="mb " onclick="showPageFromMore('utils')"><span>🗾</span><span>Pratique</span></button>
+    <button class="mb " onclick="showPageFromMore('medical')"><span>🏥</span><span>Urgences</span></button>
+    <button class="mb " onclick="showPageFromMore('sizes')"><span>📐</span><span>Tailles JP</span></button>
     <button class="mb " onclick="showPageFromMore('settings')"><span>⚙️</span><span>Réglages</span></button>
     <button class="mb mb-home" onclick="goHome()"><span>⌂</span><span>Accueil</span></button>
   </div>
@@ -1746,7 +1916,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal', medical:'🏥 Urgences médicales', sizes:'📐 Convertisseur tailles'
 };
 
 function setThemeColor(color) {
@@ -1810,6 +1980,8 @@ function showPage(id) {
   if (inputBar) inputBar.style.display = (id === 'ai' && getApiKey()) ? 'flex' : 'none';
   if (id === 'ai') initAiPage();
   if (id === 'settings') try { loadPrefsUI(); } catch(e) {}
+  if (id === 'sizes')    try { initSizesPage(); } catch(e) {}
+  if (id === 'medical')  try { buildMedPhrases(); } catch(e) {}
   if (id === 'meteo') { var c = document.getElementById('meteo-cities'); if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo(); }
 }
 function showPageFromMore(id) { closeMore(); showPage(id); }
@@ -4014,6 +4186,174 @@ function stopVoice() {
 }
 
 
+
+
+// ═══════════════════════════════════════════
+// PHRASES MÉDICALES
+// ═══════════════════════════════════════════
+var MED_PHRASES = [
+  { fr: "J'ai mal aux dents", jp: '歯が痛いです', kana: 'Ha ga itai desu' },
+  { fr: "J'ai une dent cassée", jp: '歯が折れました', kana: 'Ha ga oremashita' },
+  { fr: "J'ai mal à la tête", jp: '頭が痛いです', kana: 'Atama ga itai desu' },
+  { fr: "J'ai mal au ventre", jp: 'お腹が痛いです', kana: 'Onaka ga itai desu' },
+  { fr: "J'ai de la fièvre", jp: '熱があります', kana: 'Netsu ga arimasu' },
+  { fr: "Je suis allergique à la pénicilline", jp: 'ペニシリンアレルギーがあります', kana: 'Penishirin arerugi ga arimasu' },
+  { fr: "Appelez une ambulance", jp: '救急車を呼んでください', kana: 'Kyuukyuusha wo yonde kudasai' },
+  { fr: "Je prends ce médicament", jp: 'この薬を飲んでいます', kana: 'Kono kusuri wo nonde imasu' },
+  { fr: "Où est l'hôpital le plus proche ?", jp: '一番近い病院はどこですか？', kana: 'Ichiban chikai byouin wa doko desu ka?' },
+  { fr: "J'ai besoin d'un dentiste", jp: '歯医者に行く必要があります', kana: 'Haisha ni iku hitsuyou ga arimasu' },
+];
+
+function buildMedPhrases() {
+  var container = document.getElementById('med-phrases-list');
+  if (!container) return;
+  container.innerHTML = '';
+  MED_PHRASES.forEach(function(p) {
+    var div = document.createElement('div');
+    div.className = 'med-phrase-row';
+    div.onclick = (function(jp){ return function(){ speakJapanese(jp); }; })(p.jp);
+    div.innerHTML = '<div style="flex:1">'
+      + '<div class="med-phrase-fr">' + p.fr + '</div>'
+      + '<div class="med-phrase-jp">' + p.jp + '</div>'
+      + '<div class="phrase-kana">' + p.kana + '</div>'
+      + '</div><span class="phrase-speak">🔊</span>';
+    container.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════
+// CONVERTISSEUR DE TAILLES FR/EU → JP
+// ═══════════════════════════════════════════
+var SIZE_DATA = {
+  clothes: {
+    title: 'Vêtements femme & homme FR → JP',
+    headers: ['FR/EU', 'UK', 'US', 'JP (cm)', 'JP (label)'],
+    rows: [
+      ['32', '4', '0', '155/80', 'XS'],
+      ['34', '6', '2', '158/83', 'XS'],
+      ['36', '8', '4', '160/84', 'S'],
+      ['38', '10', '6', '162/88', 'M'],
+      ['40', '12', '8', '165/92', 'M-L'],
+      ['42', '14', '10', '167/96', 'L'],
+      ['44', '16', '12', '170/100', 'XL'],
+      ['46', '18', '14', '172/104', 'XXL'],
+    ],
+    note: "⚠️ Au Japon les tailles sont plus petites. Une FR 38 correspond souvent à un M japonais. Essayez toujours avant d'acheter.",
+    inputLabel: 'Taille FR/EU :',
+    inputPlaceholder: '38',
+    convert: function(v) {
+      var map = { 32:'XS (155/80)', 34:'XS (158/83)', 36:'S (160/84)', 38:'M (162/88)', 40:'M-L (165/92)', 42:'L (167/96)', 44:'XL (170/100)', 46:'XXL' };
+      return map[String(v)] ? 'Taille JP : <strong>' + map[String(v)] + '</strong>' : null;
+    }
+  },
+  shoes: {
+    title: 'Pointures FR/EU → JP',
+    headers: ['FR/EU', 'UK', 'US (F)', 'US (H)', 'JP (cm)'],
+    rows: [
+      ['35', '2.5', '5', '3.5', '22.0'],
+      ['36', '3.5', '6', '4.5', '23.0'],
+      ['37', '4', '6.5', '5', '23.5'],
+      ['38', '5', '7.5', '6', '24.0'],
+      ['39', '5.5', '8', '6.5', '24.5'],
+      ['40', '6.5', '9', '7', '25.0'],
+      ['41', '7', '9.5', '7.5', '25.5'],
+      ['42', '8', '10', '8', '26.0'],
+      ['43', '9', '11', '9', '27.0'],
+      ['44', '9.5', '11.5', '9.5', '27.5'],
+      ['45', '10.5', '12.5', '10.5', '28.5'],
+    ],
+    note: '💡 Au Japon, la pointure est exprimée en cm (longueur du pied). Mesurez votre pied pour plus de précision.',
+    inputLabel: 'Pointure FR/EU :',
+    inputPlaceholder: '42',
+    convert: function(v) {
+      var map = { 35:'22.0 cm', 36:'23.0 cm', 37:'23.5 cm', 38:'24.0 cm', 39:'24.5 cm', 40:'25.0 cm', 41:'25.5 cm', 42:'26.0 cm', 43:'27.0 cm', 44:'27.5 cm', 45:'28.5 cm' };
+      return map[String(v)] ? 'Pointure JP : <strong>' + map[String(v)] + '</strong>' : null;
+    }
+  },
+  bra: {
+    title: 'Lingerie / Soutien-gorge FR → JP',
+    headers: ['Bonnet FR', 'Bonnet JP', 'Tour de poitrine FR', 'Bonnet JP bis'],
+    rows: [
+      ['A', 'A', '80', 'A75 / B70'],
+      ['B', 'B', '85', 'B75 / C70'],
+      ['C', 'C', '90', 'B80 / C75'],
+      ['D', 'D', '95', 'C80 / D75'],
+      ['E', 'E', '100', 'D80 / E75'],
+    ],
+    note: "⚠️ Le système japonais combine le bonnet et le tour de poitrine différemment du système européen. Exemple FR 90C ≈ JP C75. Essayez en cabine.",
+    inputLabel: 'Tour de poitrine (cm) :',
+    inputPlaceholder: '90',
+    convert: function(v) {
+      var n = parseInt(v);
+      if (isNaN(n)) return null;
+      var jpSize = n - 15;
+      return 'Tour de poitrine JP approx. : <strong>' + jpSize + '</strong> (ex: pour un 90C FR → cherchez C' + jpSize + ' au Japon)';
+    }
+  }
+};
+
+var currentSizeTab = 'clothes';
+
+function setSizeTab(tab) {
+  currentSizeTab = tab;
+  ['clothes','shoes','bra'].forEach(function(t) {
+    var el = document.getElementById('stab-' + t);
+    if (el) el.classList.toggle('on', t === tab);
+  });
+  renderSizeTable(tab);
+  // Reset convertisseur
+  var inp = document.getElementById('size-input');
+  var res = document.getElementById('size-result-box');
+  if (inp) inp.value = '';
+  if (res) res.classList.remove('show');
+}
+
+function renderSizeTable(tab) {
+  var data = SIZE_DATA[tab];
+  if (!data) return;
+  var table = document.getElementById('size-table');
+  var note  = document.getElementById('size-note');
+  var label = document.getElementById('size-input-label');
+  var inp   = document.getElementById('size-input');
+  var title = document.getElementById('size-finder-title');
+  if (title) title.textContent = 'Convertir rapidement';
+  if (label) label.textContent = data.inputLabel;
+  if (inp)   inp.placeholder = data.inputPlaceholder;
+  if (note)  note.textContent = data.note;
+  if (!table) return;
+  var html = '<thead><tr>' + data.headers.map(function(h){ return '<th>' + h + '</th>'; }).join('') + '</tr></thead><tbody>';
+  data.rows.forEach(function(row) {
+    html += '<tr>' + row.map(function(cell){ return '<td>' + cell + '</td>'; }).join('') + '</tr>';
+  });
+  html += '</tbody>';
+  table.innerHTML = html;
+}
+
+function convertSize() {
+  var val = document.getElementById('size-input').value;
+  var res = document.getElementById('size-result-box');
+  var txt = document.getElementById('size-result-text');
+  if (!val || !res || !txt) return;
+  var data = SIZE_DATA[currentSizeTab];
+  if (!data) return;
+  var result = data.convert(parseInt(val));
+  if (result) {
+    txt.innerHTML = result;
+    res.classList.add('show');
+    // Surligner la ligne correspondante
+    var rows = document.querySelectorAll('#size-table tbody tr');
+    rows.forEach(function(row) {
+      row.classList.toggle('highlight', row.cells[0] && row.cells[0].textContent === String(parseInt(val)));
+    });
+  } else {
+    res.classList.remove('show');
+  }
+}
+
+function initSizesPage() {
+  renderSizeTable('clothes');
+  buildMedPhrases();
+}
 
 // ═══════════════════════════════════════════
 // WIDGET COUPE DU MONDE — Bleus
