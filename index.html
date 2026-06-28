@@ -1620,6 +1620,23 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 <!-- PAGE URGENCES MÉDICALES -->
 <div class="page" id="page-medical">
 
+  <!-- Carte alerte médicale AVC -->
+  <div style="margin:14px 16px 0;background:#FFF0F0;border:2px solid #C8102E;border-radius:var(--radius);padding:14px;">
+    <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">🚨 Alerte médicale · Montrez aux secours</div>
+    <div style="font-size:20px;font-weight:800;color:#1A1A1A;line-height:1.6;margin-bottom:8px;">
+      脳卒中の既往歴があります。<br>
+      フランス人患者です。<br>
+      緊急に医師が必要です。
+    </div>
+    <div style="font-size:12px;color:var(--ink-2);line-height:1.6;border-top:1px solid rgba(200,16,46,0.2);padding-top:8px;">
+      <em>"J'ai un antécédent d'AVC. Je suis patient français. J'ai besoin d'un médecin d'urgence."</em>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <a href="tel:119" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;text-align:center;text-decoration:none;">🚑 119</a>
+      <a href="tel:+81362339266" style="flex:1;background:#E3F2FD;color:#1565C0;border:none;border-radius:8px;padding:11px;font-size:12px;font-weight:700;text-align:center;text-decoration:none;">AMDA EN<br>03-6233-9266</a>
+    </div>
+  </div>
+
   <!-- Dentistes anglophones -->
   <div class="med-section" style="margin-top:14px;">
     <h3>🦷 Dentistes anglophones · Tokyo</h3>
@@ -4192,6 +4209,10 @@ function stopVoice() {
 // PHRASES MÉDICALES
 // ═══════════════════════════════════════════
 var MED_PHRASES = [
+  { fr: "J'ai fait un AVC (accident vasculaire cérébral)", jp: '脳卒中を起こしました', kana: 'Nousocchuu wo okoshimashita' },
+  { fr: "Antécédent d'AVC — j'ai besoin d'aide d'urgence", jp: '脳卒中の既往歴があります。緊急に助けが必要です', kana: 'Nousocchuu no kioureki ga arimasu. Kinkyuu ni tasuke ga hitsuyou desu' },
+  { fr: "J'ai des difficultés à parler", jp: '言葉がうまく話せません', kana: 'Kotoba ga umaku hanasemasen' },
+  { fr: "J'ai un bras/une jambe engourdie", jp: '腕と足がしびれています', kana: 'Ude to ashi ga shibire te imasu' },
   { fr: "J'ai mal aux dents", jp: '歯が痛いです', kana: 'Ha ga itai desu' },
   { fr: "J'ai une dent cassée", jp: '歯が折れました', kana: 'Ha ga oremashita' },
   { fr: "J'ai mal à la tête", jp: '頭が痛いです', kana: 'Atama ga itai desu' },
