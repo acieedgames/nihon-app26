@@ -2730,7 +2730,6 @@ function renderDocs(date) {
 }
 
 function addDoc(date) {
-  // Crée un input file invisible et le déclenche
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'application/pdf,image/*';
@@ -2741,25 +2740,59 @@ function addDoc(date) {
     const file = input.files[0];
     if (!file) { document.body.removeChild(input); return; }
 
-    // Vérifier taille (max 4MB pour localStorage)
-    if (file.size > 4 * 1024 * 1024) {
-      showToast('⚠️ Fichier trop volumineux (max 4MB)');
-      document.body.removeChild(input);
+    // PDF : limite 3.5MB, pas de compression possible
+    if (file.type === 'application/pdf') {
+      if (file.size > 3.5 * 1024 * 1024) {
+        showToast('⚠️ PDF trop lourd (max 3.5MB) — compressez-le d\'abord');
+        document.body.removeChild(input);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const docs = getDocs(date);
+        docs.push({ name: file.name, type: file.type, data: e.target.result });
+        try {
+          saveDocs(date, docs);
+          renderDocs(date);
+          var kb = Math.round(file.size / 1024);
+          showToast('📎 PDF ajouté · ' + kb + ' KB');
+        } catch(err) {
+          showToast('⚠️ Stockage plein — supprimez un document');
+        }
+        document.body.removeChild(input);
+      };
+      reader.readAsDataURL(file);
       return;
     }
 
+    // Image : compression canvas automatique (max 1280px, JPEG 0.82)
     const reader = new FileReader();
     reader.onload = function(e) {
-      const docs = getDocs(date);
-      docs.push({ name: file.name, type: file.type, data: e.target.result });
-      try {
-        saveDocs(date, docs);
-        renderDocs(date);
-        showToast('📎 Document ajouté : ' + file.name);
-      } catch(err) {
-        showToast('⚠️ Stockage plein — supprimez un document');
-      }
-      document.body.removeChild(input);
+      const img = new Image();
+      img.onload = function() {
+        var MAX = 1280;
+        var w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          var r = Math.min(MAX/w, MAX/h);
+          w = Math.round(w*r); h = Math.round(h*r);
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        var compressed = canvas.toDataURL('image/jpeg', 0.82);
+        var kb = Math.round(compressed.length * 0.75 / 1024);
+        const docs = getDocs(date);
+        docs.push({ name: file.name, type: 'image/jpeg', data: compressed });
+        try {
+          saveDocs(date, docs);
+          renderDocs(date);
+          showToast('📎 Image ajoutée · ' + kb + ' KB');
+        } catch(err) {
+          showToast('⚠️ Stockage plein — supprimez un document');
+        }
+        document.body.removeChild(input);
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   };
