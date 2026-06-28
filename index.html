@@ -690,6 +690,52 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .vocal-history-fr  { font-size:12px; color:var(--ink-3); margin-bottom:3px; }
 .vocal-history-jp  { font-size:18px; font-weight:700; color:var(--ink); }
 
+
+/* ── WIDGET FOOT ── */
+.foot-widget {
+  margin:12px 16px 0; background:#0F1923;
+  border:1px solid rgba(255,255,255,0.08); border-radius:var(--radius);
+  overflow:hidden;
+}
+.foot-widget-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.07);
+}
+.foot-widget-title { font-size:12px; font-weight:700; color:#fff; display:flex; align-items:center; gap:7px; }
+.foot-widget-sub   { font-size:10px; color:rgba(255,255,255,0.35); }
+.foot-widget-refresh { font-size:18px; cursor:pointer; color:rgba(255,255,255,0.3); background:none; border:none; }
+.foot-match {
+  padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.05);
+  display:flex; align-items:center; gap:10px;
+}
+.foot-match:last-child { border-bottom:none; }
+.foot-match-round { font-size:9px; font-weight:700; color:rgba(255,255,255,0.3); text-transform:uppercase; letter-spacing:0.5px; min-width:32px; }
+.foot-match-teams { flex:1; }
+.foot-match-name  { font-size:13px; font-weight:700; color:#fff; }
+.foot-match-name .fr { color:#4FC3F7; }
+.foot-match-score { font-size:18px; font-weight:900; color:#fff; min-width:44px; text-align:center; }
+.foot-match-score.win  { color:#4CAF50; }
+.foot-match-score.loss { color:#F44336; }
+.foot-match-score.draw { color:#FFC107; }
+.foot-match-times { text-align:right; }
+.foot-match-time-fr { font-size:11px; font-weight:600; color:#fff; }
+.foot-match-time-jp { font-size:10px; color:#4FC3F7; }
+.foot-next-badge {
+  background:#E53935; color:#fff; font-size:9px; font-weight:700;
+  padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;
+}
+.foot-widget-footer {
+  padding:8px 14px; display:flex; align-items:center; justify-content:space-between;
+  border-top:1px solid rgba(255,255,255,0.07);
+}
+.foot-m6-btn {
+  display:flex; align-items:center; gap:5px;
+  background:rgba(255,140,0,0.15); border:1px solid rgba(255,140,0,0.3);
+  color:#FF8C00; border-radius:8px; padding:6px 12px;
+  font-size:12px; font-weight:700; cursor:pointer; text-decoration:none;
+}
+.foot-vpn-hint { font-size:10px; color:rgba(255,255,255,0.25); }
+
 /* ── TRADUCTEUR PHOTO ── */
 #page-photo { display:none; flex-direction:column; padding:0 !important; }
 #page-photo.on { display:flex; }
@@ -875,6 +921,18 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
         <span class="h-clock-time" id="home-paris-time">--:--</span>
         <span class="h-clock-date" id="home-paris-date"></span>
       </div>
+    </div>
+  </div>
+  <!-- Widget Coupe du Monde -->
+  <div class="foot-widget" id="foot-widget">
+    <div class="foot-widget-hdr">
+      <div class="foot-widget-title">🏆 Bleus · CdM 2026 <span class="foot-widget-sub" id="foot-widget-sub">chargement…</span></div>
+      <button class="foot-widget-refresh" onclick="loadFranceMatches()" title="Actualiser">↻</button>
+    </div>
+    <div id="foot-matches-list"></div>
+    <div class="foot-widget-footer">
+      <a class="foot-m6-btn" href="https://www.6play.fr/m6" target="_blank">📺 M6 Replay</a>
+      <span class="foot-vpn-hint">🔒 VPN France requis depuis JP</span>
     </div>
   </div>
   <button class="inoue-switcher-btn" onclick="showProfilePicker()">🌸 Passer sur l'espace Inoue</button>
@@ -1232,7 +1290,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v2.7</strong>
+        <strong>Nihon v2.8</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -3955,6 +4013,119 @@ function stopVoice() {
 }
 
 
+
+// ═══════════════════════════════════════════
+// WIDGET COUPE DU MONDE — Bleus
+// ═══════════════════════════════════════════
+var _footCache = null;
+var _footCacheTs = 0;
+
+async function loadFranceMatches() {
+  var list = document.getElementById('foot-matches-list');
+  var sub  = document.getElementById('foot-widget-sub');
+  if (!list) return;
+
+  // Cache 30 min
+  if (_footCache && (Date.now() - _footCacheTs) < 30*60*1000) {
+    renderFranceMatches(_footCache);
+    return;
+  }
+
+  if (sub) sub.textContent = 'chargement…';
+  try {
+    var r = await fetch('https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json');
+    var data = await r.json();
+    var france = (data.matches || []).filter(function(m) {
+      return (m.team1 || '').toLowerCase().includes('france') ||
+             (m.team2 || '').toLowerCase().includes('france');
+    });
+    _footCache = france;
+    _footCacheTs = Date.now();
+    renderFranceMatches(france);
+  } catch(e) {
+    if (list) list.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.4);">⚠️ Données indisponibles (hors ligne ?)</div>';
+    if (sub) sub.textContent = 'erreur';
+  }
+}
+
+function renderFranceMatches(matches) {
+  var list = document.getElementById('foot-matches-list');
+  var sub  = document.getElementById('foot-widget-sub');
+  if (!list) return;
+
+  var now = new Date();
+  list.innerHTML = '';
+
+  // Afficher les 3 derniers + les prochains
+  var recent = matches.filter(function(m){ return m.score && m.score.ft; });
+  var upcoming = matches.filter(function(m){ return !m.score || !m.score.ft; });
+  var toShow = recent.slice(-2).concat(upcoming.slice(0, 3));
+
+  if (toShow.length === 0) {
+    list.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:rgba(255,255,255,0.4);">Aucun match trouvé</div>';
+    return;
+  }
+
+  toShow.forEach(function(m, i) {
+    var isNext = !m.score && i === recent.slice(-2).length; // premier à venir
+    var isFrance1 = (m.team1 || '').toLowerCase().includes('france');
+    var team1 = m.team1 || '?';
+    var team2 = m.team2 || '?';
+
+    // Calculer horaire Paris + Tokyo depuis UTC
+    var timeStr = m.time || '20:00'; // ex: "17:00 UTC-4"
+    var utcMatch = timeStr.match(/(\d+):(\d+)\s*UTC([+-]\d+)?/);
+    var jpTime = '—', frTime = '—';
+    if (utcMatch) {
+      var h = parseInt(utcMatch[1]);
+      var mn = parseInt(utcMatch[2]);
+      var offset = utcMatch[3] ? parseInt(utcMatch[3]) : 0;
+      var utcH = h - offset; // heure UTC
+      var frH  = (utcH + 2 + 24) % 24;  // Paris CEST = UTC+2
+      var jpH  = (utcH + 9 + 24) % 24;  // Tokyo = UTC+9
+      var pad  = function(n){ return n < 10 ? '0'+n : ''+n; };
+      frTime = pad(frH) + 'h' + pad(mn) + ' (Paris)';
+      jpTime = pad(jpH) + 'h' + pad(mn) + ' (Tokyo)';
+    }
+
+    // Score
+    var scoreHtml = '—';
+    var scoreClass = '';
+    if (m.score && m.score.ft) {
+      var s1 = m.score.ft[0], s2 = m.score.ft[1];
+      var frScore = isFrance1 ? s1 : s2;
+      var oppScore = isFrance1 ? s2 : s1;
+      scoreHtml = frScore + '-' + oppScore;
+      scoreClass = frScore > oppScore ? 'win' : frScore < oppScore ? 'loss' : 'draw';
+    }
+
+    // Label round
+    var round = m.round || '';
+    var roundShort = round.replace('Matchday ', 'J').replace('Round of ', '1/').replace('Quarter-final', 'QF').replace('Semi-final', 'SF').replace('Final', 'F');
+
+    var div = document.createElement('div');
+    div.className = 'foot-match';
+
+    div.innerHTML =
+      '<div class="foot-match-round">' + roundShort + '</div>' +
+      '<div class="foot-match-teams">' +
+        '<div class="foot-match-name">' +
+          (isFrance1 ? '<span class="fr">France</span> vs ' + team2 : team1 + ' vs <span class="fr">France</span>') +
+          (isNext ? '<span class="foot-next-badge">NEXT</span>' : '') +
+        '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + (m.date || '') + '</div>' +
+      '</div>' +
+      (m.score && m.score.ft
+        ? '<div class="foot-match-score ' + scoreClass + '">' + scoreHtml + '</div>'
+        : '<div class="foot-match-times"><div class="foot-match-time-fr">' + frTime + '</div><div class="foot-match-time-jp">' + jpTime + '</div></div>'
+      );
+
+    list.appendChild(div);
+  });
+
+  if (sub) sub.textContent = 'openfootball · ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+}
+
 // ═══════════════════════════════════════════
 // TRADUCTEUR VOCAL BIDIRECTIONNEL FR↔JP
 // ═══════════════════════════════════════════
@@ -4571,6 +4742,7 @@ try { updateTimes(); } catch(e) {}
 try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
 try { buildPlacesFilters(); } catch(e) {}
+try { loadFranceMatches(); } catch(e) {}
 try { buildJournal(); } catch(e) { console.error('journal', e); }
 try { loadPrefsUI(); } catch(e) {}
 try { getCurrentGeo(); } catch(e) {} // charge le cache geo silencieusement
