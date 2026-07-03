@@ -793,6 +793,8 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .sync-btn-export { background:var(--red); color:#fff; }
 .sync-btn-import { background:var(--surface); color:var(--ink); border:1.5px solid var(--border); }
 .sync-btn-close  { background:var(--bg); color:var(--ink-3); }
+.sync-btn-cloud  { background:#1565C0; color:#fff; }
+.sync-btn-cloud:disabled { background:var(--border); color:var(--ink-3); cursor:default; }
 .sync-stats {
   background:var(--bg); border:1px solid var(--border);
   border-radius:10px; padding:12px 14px; margin-bottom:16px;
@@ -803,6 +805,12 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   background:#E8F5E9; border:1px solid #A5D6A7;
   border-radius:10px; padding:10px 14px; margin-bottom:16px;
   font-size:12px; color:#2E7D32; line-height:1.6;
+}
+.sync-cloud-status {
+  font-size:12px; color:var(--ink-3); margin-bottom:10px; text-align:center;
+}
+.sync-divider {
+  border:none; border-top:1px solid var(--border); margin:16px 0;
 }
 
 /* ── WIDGET FOOT ── */
@@ -1402,11 +1410,19 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
   <div class="settings-section">
     <h3>📦 Partage & Synchronisation</h3>
+    <div class="setting-row">
+      <span class="icon">☁️</span>
+      <div class="label">
+        <strong>Sync Cloud</strong>
+        <span id="github-pat-status">Non configurée</span>
+      </div>
+      <span class="action" onclick="setGithubPat()">Configurer</span>
+    </div>
     <div class="setting-row" style="cursor:pointer;" onclick="openSyncPanel()">
       <span class="icon">📤</span>
       <div class="label">
         <strong>Partager avec Inoue</strong>
-        <span>Exporter/importer notes, docs, agenda, journal</span>
+        <span>Sync cloud auto, ou export/import manuel</span>
       </div>
       <span class="action">Ouvrir</span>
     </div>
@@ -1974,12 +1990,19 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
     <div class="sync-stats" id="sync-stats">Calcul en cours…</div>
 
+    <div class="sync-cloud-status" id="sync-cloud-status">☁️ Sync cloud : non configurée</div>
+    <button class="sync-btn sync-btn-cloud" id="sync-cloud-btn" onclick="syncCloudNow()">
+      ☁️ Synchroniser maintenant
+    </button>
+
+    <hr class="sync-divider">
+
     <div class="sync-warning">
       ✅ <strong>Import intelligent :</strong> les notes plus récentes sur CE téléphone seront conservées. Les docs sont fusionnés (pas de perte). Tu peux importer en toute sécurité.
     </div>
 
     <button class="sync-btn sync-btn-export" onclick="exportData()">
-      📤 Exporter & Partager
+      📤 Exporter & Partager (backup manuel)
     </button>
     <button class="sync-btn sync-btn-import" onclick="triggerImport()">
       📥 Importer un fichier
@@ -2394,6 +2417,8 @@ function loadPrefsUI() {
   if (pkEl) pkEl.textContent = localStorage.getItem('places_key') ? '✅ Configurée' : 'Non configurée';
   // Geo
   updateGeoUI();
+  // Sync cloud status
+  try { updateGithubStatusUI(); } catch(e) {}
 }
 
 function setPlacesKey() {
@@ -4506,6 +4531,7 @@ function initSizesPage() {
 function syncSet(key, value) {
   var wrapped = JSON.stringify({ v: value, ts: Date.now() });
   localStorage.setItem(key, wrapped);
+  try { scheduleCloudPush(); } catch(e) {}
 }
 
 function syncGet(key) {
@@ -4538,6 +4564,7 @@ function openSyncPanel() {
   if (panel) {
     panel.classList.add('open');
     computeSyncStats();
+    updateGithubStatusUI();
   }
 }
 
@@ -4597,7 +4624,9 @@ function computeSyncStats() {
   }
 }
 
-function exportData() {
+// Construit l'objet export standard (structure nihon_export) depuis localStorage.
+// Réutilisé par exportData() (fichier) et la sync cloud.
+function buildExportPayload() {
   var keys = getSyncKeys();
   var data = {
     nihon_export: true,
@@ -4606,15 +4635,232 @@ function exportData() {
     exported_by: localStorage.getItem('nihon_profile') || 'patrick',
     payload: {}
   };
-
   keys.forEach(function(k) {
     var raw = localStorage.getItem(k);
     if (!raw) return;
-    // Stocker le wrapper complet {v, ts}
-    var wrapped = syncGet(k);
-    data.payload[k] = JSON.stringify(wrapped);
+    data.payload[k] = JSON.stringify(syncGet(k));
+  });
+  return data;
+}
+
+// Applique un payload distant (structure nihon_export) en local, en fusionnant
+// par timestamp (ts le plus récent gagne ; docs_* sont fusionnés par union des noms).
+// Factorisé pour être utilisé à la fois par l'import fichier et la sync cloud.
+function applyMergePayload(data, silent) {
+  if (!data || !data.nihon_export || !data.payload) {
+    if (!silent) showToast('⚠️ Données invalides — pas un export Nihon');
+    return 0;
+  }
+  var keys = Object.keys(data.payload);
+  var merged = 0;
+
+  keys.forEach(function(k) {
+    var incoming;
+    try { incoming = JSON.parse(data.payload[k]); } catch(x) { return; }
+    var local = syncGet(k);
+    var inTs = (incoming && typeof incoming.ts === 'number') ? incoming.ts : 0;
+
+    // Cas spécial docs : fusion (union des documents par nom, pas de perte)
+    if (k.startsWith('docs_')) {
+      var localDocs = local.v || [];
+      if (!Array.isArray(localDocs)) {
+        try { localDocs = JSON.parse(localDocs); } catch(x) { localDocs = []; }
+      }
+      var inDocs = incoming.v || incoming;
+      if (!Array.isArray(inDocs)) {
+        try { inDocs = JSON.parse(inDocs); } catch(x) { inDocs = []; }
+      }
+      var localNames = localDocs.map(function(d){ return d.name; });
+      inDocs.forEach(function(d) {
+        if (localNames.indexOf(d.name) === -1) {
+          localDocs.push(d);
+          merged++;
+        }
+      });
+      syncSet(k, localDocs);
+      return;
+    }
+
+    // Autres clés : timestamp le plus récent gagne
+    if (local.v === null || inTs > local.ts) {
+      localStorage.setItem(k, data.payload[k]);
+      merged++;
+    }
   });
 
+  if (merged > 0) {
+    try { buildAgenda(); } catch(ex) {}
+    try { buildJournal(); } catch(ex) {}
+  }
+  return merged;
+}
+
+// ═══════════════════════════════════════════
+// SYNC CLOUD — GitHub (repo privé acieedgames/nihon-sync-data)
+// ═══════════════════════════════════════════
+var GITHUB_OWNER = 'acieedgames';
+var GITHUB_REPO  = 'nihon-sync-data';
+var GITHUB_FILE  = 'sync.json';
+var githubSyncing = false;
+var githubPushTimer = null;
+
+function getGithubPat() { return localStorage.getItem('github_pat') || ''; }
+
+function setGithubPat() {
+  var key = prompt('Token GitHub (fine-grained, commence par github_pat_) :');
+  if (key && key.indexOf('github_pat_') === 0) {
+    localStorage.setItem('github_pat', key);
+    showToast('✅ Token GitHub enregistré');
+    updateGithubStatusUI();
+    syncCloudNow(true);
+  } else if (key) {
+    showToast('⚠️ Token invalide — doit commencer par github_pat_');
+  }
+}
+
+function updateGithubStatusUI() {
+  var configured = !!getGithubPat();
+  var settingsEl = document.getElementById('github-pat-status');
+  if (settingsEl) settingsEl.textContent = configured ? '✅ Configurée' : 'Non configurée';
+  var panelEl = document.getElementById('sync-cloud-status');
+  if (panelEl && !githubSyncing) {
+    panelEl.textContent = configured ? '☁️ Sync cloud : prêt' : '☁️ Sync cloud : token requis';
+  }
+  var btn = document.getElementById('sync-cloud-btn');
+  if (btn) btn.disabled = !configured;
+}
+
+// Encodage/décodage UTF-8 sûr (accents FR, japonais) pour l'API GitHub,
+// qui attend/renvoie du contenu en base64.
+function utf8ToBase64(str) {
+  var bytes = new TextEncoder().encode(str);
+  var bin = '';
+  for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function base64ToUtf8(b64) {
+  var bin = atob(b64.replace(/\n/g, ''));
+  var bytes = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function githubApiUrl() {
+  return 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
+}
+
+// Point d'entrée : pull → merge → push. silent=true = pas de toast (auto-sync).
+function syncCloudNow(silent) {
+  var pat = getGithubPat();
+  if (!pat) {
+    if (!silent) showToast('⚠️ Configure d\'abord ton token GitHub');
+    return;
+  }
+  if (githubSyncing) return;
+  githubSyncing = true;
+
+  var btn = document.getElementById('sync-cloud-btn');
+  var statusEl = document.getElementById('sync-cloud-status');
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.textContent = '☁️ Synchronisation en cours…';
+
+  githubPullAndMerge(pat, 0, silent);
+}
+
+function githubSyncDone(ok, silent, message) {
+  githubSyncing = false;
+  var btn = document.getElementById('sync-cloud-btn');
+  var statusEl = document.getElementById('sync-cloud-status');
+  if (btn) btn.disabled = !getGithubPat();
+  if (statusEl) statusEl.textContent = message;
+  if (!ok && !silent) showToast('⚠️ ' + message);
+}
+
+function githubPullAndMerge(pat, attempt, silent) {
+  fetch(githubApiUrl(), {
+    headers: {
+      'Authorization': 'Bearer ' + pat,
+      'Accept': 'application/vnd.github+json'
+    }
+  }).then(function(res) {
+    if (res.status === 404) {
+      // Premier sync : le fichier n'existe pas encore côté GitHub → on le crée
+      return githubPush(pat, buildExportPayload(), null, silent, 0, attempt);
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error('Token invalide ou permissions insuffisantes');
+    }
+    if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
+
+    return res.json().then(function(json) {
+      var remoteData;
+      try { remoteData = JSON.parse(base64ToUtf8(json.content)); }
+      catch(e) { throw new Error('Fichier distant illisible'); }
+
+      var merged = applyMergePayload(remoteData, true);
+      var localPayload = buildExportPayload();
+      return githubPush(pat, localPayload, json.sha, silent, merged, attempt);
+    });
+  }).catch(function(err) {
+    githubSyncDone(false, silent, 'Sync échouée : ' + err.message);
+  });
+}
+
+function githubPush(pat, dataObj, sha, silent, mergedCount, attempt) {
+  var content = utf8ToBase64(JSON.stringify(dataObj));
+  var body = {
+    message: 'Sync depuis ' + (dataObj.exported_by || 'app') + ' — ' + new Date().toISOString(),
+    content: content
+  };
+  if (sha) body.sha = sha;
+
+  return fetch(githubApiUrl(), {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'Bearer ' + pat,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  }).then(function(res) {
+    if (res.status === 409 && (attempt || 0) < 3) {
+      // Conflit : push concurrent entre-temps → re-pull, re-merge, retente
+      return githubPullAndMerge(pat, (attempt || 0) + 1, silent);
+    }
+    if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
+
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+    githubSyncDone(true, silent, '☁️ Synchronisé à ' + timeStr);
+    computeSyncStats();
+    if (!silent) {
+      showToast(mergedCount > 0
+        ? '✅ Sync OK — ' + mergedCount + ' modification(s) reçue(s)'
+        : '✅ Sync OK — déjà à jour');
+    }
+  }).catch(function(err) {
+    githubSyncDone(false, silent, 'Sync échouée : ' + err.message);
+  });
+}
+
+// Push différé après une édition locale (debounce 5s), silencieux
+function scheduleCloudPush() {
+  if (!getGithubPat()) return;
+  if (githubPushTimer) clearTimeout(githubPushTimer);
+  githubPushTimer = setTimeout(function() {
+    syncCloudNow(true);
+  }, 5000);
+}
+
+// Sync auto au retour au premier plan de l'app (changement d'onglet/appli)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && getGithubPat()) {
+    syncCloudNow(true);
+  }
+});
+
+function exportData() {
+  var data = buildExportPayload();
   var json = JSON.stringify(data);
   var blob = new Blob([json], { type: 'application/json' });
   var url  = URL.createObjectURL(blob);
@@ -4685,45 +4931,9 @@ function importData(e) {
         + 'Continuer ?';
       if (!confirm(msg)) return;
 
-      // Merge par timestamp
-      var merged = 0;
-      keys.forEach(function(k) {
-        var incoming;
-        try { incoming = JSON.parse(data.payload[k]); } catch(x) { return; }
-        var local = syncGet(k);
-        var inTs = (incoming && typeof incoming.ts === 'number') ? incoming.ts : 0;
+      // Merge par timestamp (logique factorisée, partagée avec la sync cloud)
+      var merged = applyMergePayload(data, true);
 
-        // Cas spécial docs : fusion (union des documents)
-        if (k.startsWith('docs_')) {
-          var localDocs = local.v || [];
-          if (!Array.isArray(localDocs)) {
-            try { localDocs = JSON.parse(localDocs); } catch(x) { localDocs = []; }
-          }
-          var inDocs = incoming.v || incoming;
-          if (!Array.isArray(inDocs)) {
-            try { inDocs = JSON.parse(inDocs); } catch(x) { inDocs = []; }
-          }
-          // Ajouter les docs entrants qui ne sont pas déjà présents (par nom)
-          var localNames = localDocs.map(function(d){ return d.name; });
-          inDocs.forEach(function(d) {
-            if (localNames.indexOf(d.name) === -1) {
-              localDocs.push(d);
-              merged++;
-            }
-          });
-          syncSet(k, localDocs);
-          return;
-        }
-
-        // Autres clés : timestamp gagne
-        if (local.v === null || inTs > local.ts) {
-          localStorage.setItem(k, data.payload[k]);
-          merged++;
-        }
-      });
-
-      try { buildAgenda(); } catch(ex) {}
-      try { buildJournal(); } catch(ex) {}
       closeSyncPanel();
       showToast('✅ Merge terminé — ' + merged + ' modification(s) appliquée(s)');
 
