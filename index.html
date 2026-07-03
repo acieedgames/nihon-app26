@@ -4793,13 +4793,31 @@ function githubPullAndMerge(pat, attempt, silent) {
     if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
 
     return res.json().then(function(json) {
-      var remoteData;
-      try { remoteData = JSON.parse(base64ToUtf8(json.content)); }
-      catch(e) { throw new Error('Fichier distant illisible'); }
+      // L'API Contents ne renvoie le contenu embarqué que pour les fichiers
+      // < 1 Mo. Au-delà elle le tronque (content vide/absent) : il faut alors
+      // passer par l'API Git Blobs, qui supporte jusqu'à 100 Mo.
+      var contentPromise;
+      if (json.content && !json.truncated) {
+        contentPromise = Promise.resolve(json.content);
+      } else {
+        contentPromise = fetch(
+          'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/git/blobs/' + json.sha,
+          { headers: { 'Authorization': 'Bearer ' + pat, 'Accept': 'application/vnd.github+json' } }
+        ).then(function(blobRes) {
+          if (!blobRes.ok) throw new Error('Erreur blob (' + blobRes.status + ')');
+          return blobRes.json().then(function(blob) { return blob.content; });
+        });
+      }
 
-      var merged = applyMergePayload(remoteData, true);
-      var localPayload = buildExportPayload();
-      return githubPush(pat, localPayload, json.sha, silent, merged, attempt);
+      return contentPromise.then(function(b64content) {
+        var remoteData;
+        try { remoteData = JSON.parse(base64ToUtf8(b64content)); }
+        catch(e) { throw new Error('Fichier distant illisible'); }
+
+        var merged = applyMergePayload(remoteData, true);
+        var localPayload = buildExportPayload();
+        return githubPush(pat, localPayload, json.sha, silent, merged, attempt);
+      });
     });
   }).catch(function(err) {
     githubSyncDone(false, silent, 'Sync échouée : ' + err.message);
