@@ -1591,10 +1591,6 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
 <!-- PAGE NAV -->
 <div class="page" id="page-nav">
-  <div style="margin:12px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Votre itinéraire · 10–28 juillet</div>
-
-  <div id="trip-timeline"></div>
-
   <div style="margin:14px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Cartes & Navigation</div>
   <div class="app-grid">
     <div class="app-tile" onclick="openNavApp('gmaps-tokyo')">
@@ -3482,19 +3478,6 @@ function calcHeatIndex() {
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
-const TRIP = [
-  { date: '10 juil.', city: 'Arrivée Tokyo 🗼', icon: '✈️', note: 'Narita/Haneda → Hirai Ayaka House', color: '#1565C0' },
-  { date: '10–15 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Shinjuku, Shibuya, Asakusa…', color: '#C8102E' },
-  { date: '16 juil.', city: 'Tokyo → Kyoto ⛩️', icon: '🚄', note: 'Shinkansen · 2h15 · Good Nature Hotel', color: '#6A1B9A' },
-  { date: '16–18 juil.', city: 'Kyoto ⛩️', icon: '⛩️', note: 'Fushimi Inari, Arashiyama, Gion…', color: '#6A1B9A' },
-  { date: '19 juil.', city: 'Kyoto → Tokyo 🗼', icon: '🚄', note: 'Shinkansen retour · Takanawa', color: '#C8102E' },
-  { date: '19–22 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Akihabara, Harajuku, Odaiba…', color: '#C8102E' },
-  { date: '23 juil.', city: 'Tokyo → Takayama 🏔️', icon: '🚄', note: 'Train · Ryokan Wanosato', color: '#2E7D32' },
-  { date: '23–24 juil.', city: 'Takayama 🏔️', icon: '🏯', note: 'Vieille ville, onsen, artisanat…', color: '#2E7D32' },
-  { date: '25 juil.', city: 'Takayama → Tokyo 🗼', icon: '🚄', note: 'Retour · 2 derniers jours', color: '#C8102E' },
-  { date: '28 juil.', city: 'Départ 🛫', icon: '✈️', note: 'Bon retour Patrick & Inoue !', color: '#888' },
-];
-
 const NAV_LINKS = {
   'gmaps-tokyo':    'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
   'gmaps-kyoto':    'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
@@ -3507,27 +3490,6 @@ const NAV_LINKS = {
 function openNavApp(key) {
   const url = NAV_LINKS[key];
   if (url) window.open(url, '_blank');
-}
-
-function buildTimeline() {
-  const container = document.getElementById('trip-timeline');
-  if (!container) return;
-  container.innerHTML = TRIP.map(function(s, i) {
-    const connector = i < TRIP.length - 1
-      ? '<div style="width:2px;flex:1;min-height:24px;background:var(--border);margin:4px 0;"></div>'
-      : '';
-    const pb = i < TRIP.length - 1 ? '0' : '4px';
-    return '<div style="display:flex;gap:14px;padding:0 16px;margin-bottom:4px;">'
-      + '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">'
-      + '<div style="width:36px;height:36px;border-radius:50%;background:' + s.color + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + s.icon + '</div>'
-      + connector
-      + '</div>'
-      + '<div style="padding-top:6px;padding-bottom:' + pb + ';">'
-      + '<div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">' + s.date + '</div>'
-      + '<div style="font-size:15px;font-weight:700;color:var(--ink);margin:2px 0;">' + s.city + '</div>'
-      + '<div style="font-size:12px;color:var(--ink-2);">' + s.note + '</div>'
-      + '</div></div>';
-  }).join('');
 }
 
 
@@ -5685,7 +5647,6 @@ if (_savedProfile) {
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
-try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
 try { buildPlacesFilters(); } catch(e) {}
 setTimeout(function() { try { loadFranceMatches(); } catch(e) {} }, 1200);
