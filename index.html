@@ -770,6 +770,64 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .size-result-line strong { color:var(--red); font-size:16px; }
 
 
+
+/* ── ALBUM APERÇU ── */
+#page-album { display:none; flex-direction:column; padding:0 !important; }
+#page-album.on { display:flex; }
+.album-toolbar {
+  display:flex; align-items:center; gap:10px;
+  padding:12px 16px; background:var(--surface);
+  border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.album-toolbar-title { flex:1; font-size:14px; font-weight:700; color:var(--ink); }
+.album-toolbar-btn {
+  padding:8px 14px; border-radius:8px; border:none;
+  font-size:12px; font-weight:700; cursor:pointer;
+}
+.album-preview-area { flex:1; overflow-y:auto; padding:16px; background:#F5F0EB; }
+.album-page {
+  background:#fff; border-radius:4px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.1);
+  margin-bottom:24px; overflow:hidden;
+}
+.album-cover {
+  background:#1A1A2E; color:#fff;
+  padding:48px 32px; text-align:center;
+}
+.album-cover-kanji { font-size:64px; font-weight:900; color:rgba(255,255,255,0.15); }
+.album-cover-title { font-size:28px; font-weight:800; margin:8px 0 4px; }
+.album-cover-sub   { font-size:14px; opacity:0.5; }
+.album-cover-dates { font-size:13px; opacity:0.4; margin-top:16px; }
+.album-day-header {
+  padding:20px 24px 12px;
+  border-bottom:3px solid #1A1A2E;
+  display:flex; align-items:baseline; gap:12px;
+}
+.album-day-num  { font-size:36px; font-weight:900; color:#1A1A2E; line-height:1; }
+.album-day-info { flex:1; }
+.album-day-date { font-size:13px; color:#888; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.album-day-city { font-size:18px; font-weight:700; color:#1A1A2E; }
+.album-day-title { font-size:13px; color:#888; font-style:italic; }
+.album-photos {
+  display:grid; gap:3px; padding:16px 24px 0;
+}
+.album-photos.one   { grid-template-columns:1fr; }
+.album-photos.two   { grid-template-columns:1fr 1fr; }
+.album-photos.three { grid-template-columns:2fr 1fr; }
+.album-photo { width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:3px; }
+.album-photo.tall { aspect-ratio:3/4; }
+.album-text {
+  padding:20px 24px 24px;
+  font-size:14px; line-height:1.9; color:#333;
+  font-family:Georgia, serif;
+  white-space:pre-wrap;
+}
+.album-no-entry {
+  padding:24px; font-size:13px; color:#aaa;
+  font-style:italic; text-align:center;
+}
+.album-empty-day { opacity:0.4; }
+
 /* ── SYNC EXPORT/IMPORT ── */
 .sync-panel {
   position:fixed; inset:0; z-index:200;
@@ -793,8 +851,6 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 .sync-btn-export { background:var(--red); color:#fff; }
 .sync-btn-import { background:var(--surface); color:var(--ink); border:1.5px solid var(--border); }
 .sync-btn-close  { background:var(--bg); color:var(--ink-3); }
-.sync-btn-cloud  { background:#1565C0; color:#fff; }
-.sync-btn-cloud:disabled { background:var(--border); color:var(--ink-3); cursor:default; }
 .sync-stats {
   background:var(--bg); border:1px solid var(--border);
   border-radius:10px; padding:12px 14px; margin-bottom:16px;
@@ -805,12 +861,6 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   background:#E8F5E9; border:1px solid #A5D6A7;
   border-radius:10px; padding:10px 14px; margin-bottom:16px;
   font-size:12px; color:#2E7D32; line-height:1.6;
-}
-.sync-cloud-status {
-  font-size:12px; color:var(--ink-3); margin-bottom:10px; text-align:center;
-}
-.sync-divider {
-  border:none; border-top:1px solid var(--border); margin:16px 0;
 }
 
 /* ── WIDGET FOOT ── */
@@ -1410,19 +1460,11 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
   <div class="settings-section">
     <h3>📦 Partage & Synchronisation</h3>
-    <div class="setting-row">
-      <span class="icon">☁️</span>
-      <div class="label">
-        <strong>Sync Cloud</strong>
-        <span id="github-pat-status">Non configurée</span>
-      </div>
-      <span class="action" onclick="setGithubPat()">Configurer</span>
-    </div>
     <div class="setting-row" style="cursor:pointer;" onclick="openSyncPanel()">
       <span class="icon">📤</span>
       <div class="label">
         <strong>Partager avec Inoue</strong>
-        <span>Sync cloud auto, ou export/import manuel</span>
+        <span>Exporter/importer notes, docs, agenda, journal</span>
       </div>
       <span class="action">Ouvrir</span>
     </div>
@@ -1433,7 +1475,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v3.2</strong>
+        <strong>Nihon v3.3</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1591,6 +1633,10 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
 <!-- PAGE NAV -->
 <div class="page" id="page-nav">
+  <div style="margin:12px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Votre itinéraire · 10–28 juillet</div>
+
+  <div id="trip-timeline"></div>
+
   <div style="margin:14px 16px 8px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Cartes & Navigation</div>
   <div class="app-grid">
     <div class="app-tile" onclick="openNavApp('gmaps-tokyo')">
@@ -1650,6 +1696,10 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 <!-- PAGE JOURNAL -->
 <div class="page" id="page-journal">
   <div style="margin:14px 16px 4px;font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:0.8px;">Journal de voyage · Inoue</div>
+  <div style="display:flex;gap:8px;margin:0 16px 4px;">
+    <button onclick="previewAlbum()" style="flex:1;padding:10px;background:var(--inoue-pale);border:1px solid var(--inoue-border);border-radius:10px;font-size:12px;font-weight:700;color:var(--inoue-primary);cursor:pointer;">📖 Aperçu album</button>
+    <button onclick="exportAlbumHTML()" style="flex:1;padding:10px;background:var(--inoue-primary);border:none;border-radius:10px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;">⬇️ Exporter HTML</button>
+  </div>
   <button class="journal-free-btn" onclick="openFreeJournal()" style="color:var(--inoue-primary);border-color:var(--inoue-border);">
     <span>✨</span> Nouvelle entrée libre
   </button>
@@ -1781,6 +1831,17 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   </div>
   <div class="size-note" id="size-note"></div>
   <div style="height:20px;"></div>
+</div>
+
+
+<!-- PAGE ALBUM APERÇU -->
+<div class="page" id="page-album">
+  <div class="album-toolbar">
+    <button class="album-toolbar-btn" onclick="showPage('journal')" style="background:var(--bg);color:var(--ink-2);">← Retour</button>
+    <span class="album-toolbar-title">📖 Album de voyage</span>
+    <button class="album-toolbar-btn" onclick="exportAlbumHTML()" style="background:var(--inoue-primary);color:#fff;">⬇️ Exporter</button>
+  </div>
+  <div class="album-preview-area" id="album-preview-area"></div>
 </div>
 
 <!-- PAGE TRADUCTEUR VOCAL -->
@@ -1986,19 +2047,12 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 
     <div class="sync-stats" id="sync-stats">Calcul en cours…</div>
 
-    <div class="sync-cloud-status" id="sync-cloud-status">☁️ Sync cloud : non configurée</div>
-    <button class="sync-btn sync-btn-cloud" id="sync-cloud-btn" onclick="syncCloudNow()">
-      ☁️ Synchroniser maintenant
-    </button>
-
-    <hr class="sync-divider">
-
     <div class="sync-warning">
       ✅ <strong>Import intelligent :</strong> les notes plus récentes sur CE téléphone seront conservées. Les docs sont fusionnés (pas de perte). Tu peux importer en toute sécurité.
     </div>
 
     <button class="sync-btn sync-btn-export" onclick="exportData()">
-      📤 Exporter & Partager (backup manuel)
+      📤 Exporter & Partager
     </button>
     <button class="sync-btn sync-btn-import" onclick="triggerImport()">
       📥 Importer un fichier
@@ -2029,7 +2083,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal', medical:'🏥 Urgences médicales', sizes:'📐 Convertisseur tailles'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal', medical:'🏥 Urgences médicales', sizes:'📐 Convertisseur tailles', album:'📖 Album de voyage'
 };
 
 function setThemeColor(color) {
@@ -2413,8 +2467,6 @@ function loadPrefsUI() {
   if (pkEl) pkEl.textContent = localStorage.getItem('places_key') ? '✅ Configurée' : 'Non configurée';
   // Geo
   updateGeoUI();
-  // Sync cloud status
-  try { updateGithubStatusUI(); } catch(e) {}
 }
 
 function setPlacesKey() {
@@ -3478,6 +3530,19 @@ function calcHeatIndex() {
 // ═══════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════
+const TRIP = [
+  { date: '10 juil.', city: 'Arrivée Tokyo 🗼', icon: '✈️', note: 'Narita/Haneda → Hirai Ayaka House', color: '#1565C0' },
+  { date: '10–15 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Shinjuku, Shibuya, Asakusa…', color: '#C8102E' },
+  { date: '16 juil.', city: 'Tokyo → Kyoto ⛩️', icon: '🚄', note: 'Shinkansen · 2h15 · Good Nature Hotel', color: '#6A1B9A' },
+  { date: '16–18 juil.', city: 'Kyoto ⛩️', icon: '⛩️', note: 'Fushimi Inari, Arashiyama, Gion…', color: '#6A1B9A' },
+  { date: '19 juil.', city: 'Kyoto → Tokyo 🗼', icon: '🚄', note: 'Shinkansen retour · Takanawa', color: '#C8102E' },
+  { date: '19–22 juil.', city: 'Tokyo 🗼', icon: '🌆', note: 'Akihabara, Harajuku, Odaiba…', color: '#C8102E' },
+  { date: '23 juil.', city: 'Tokyo → Takayama 🏔️', icon: '🚄', note: 'Train · Ryokan Wanosato', color: '#2E7D32' },
+  { date: '23–24 juil.', city: 'Takayama 🏔️', icon: '🏯', note: 'Vieille ville, onsen, artisanat…', color: '#2E7D32' },
+  { date: '25 juil.', city: 'Takayama → Tokyo 🗼', icon: '🚄', note: 'Retour · 2 derniers jours', color: '#C8102E' },
+  { date: '28 juil.', city: 'Départ 🛫', icon: '✈️', note: 'Bon retour Patrick & Inoue !', color: '#888' },
+];
+
 const NAV_LINKS = {
   'gmaps-tokyo':    'https://www.google.com/maps/search/things+to+do+in+Tokyo/@35.6762,139.6503,13z',
   'gmaps-kyoto':    'https://www.google.com/maps/search/things+to+do+in+Kyoto/@35.0116,135.7681,13z',
@@ -3490,6 +3555,27 @@ const NAV_LINKS = {
 function openNavApp(key) {
   const url = NAV_LINKS[key];
   if (url) window.open(url, '_blank');
+}
+
+function buildTimeline() {
+  const container = document.getElementById('trip-timeline');
+  if (!container) return;
+  container.innerHTML = TRIP.map(function(s, i) {
+    const connector = i < TRIP.length - 1
+      ? '<div style="width:2px;flex:1;min-height:24px;background:var(--border);margin:4px 0;"></div>'
+      : '';
+    const pb = i < TRIP.length - 1 ? '0' : '4px';
+    return '<div style="display:flex;gap:14px;padding:0 16px;margin-bottom:4px;">'
+      + '<div style="display:flex;flex-direction:column;align-items:center;gap:0;">'
+      + '<div style="width:36px;height:36px;border-radius:50%;background:' + s.color + ';display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">' + s.icon + '</div>'
+      + connector
+      + '</div>'
+      + '<div style="padding-top:6px;padding-bottom:' + pb + ';">'
+      + '<div style="font-size:10px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">' + s.date + '</div>'
+      + '<div style="font-size:15px;font-weight:700;color:var(--ink);margin:2px 0;">' + s.city + '</div>'
+      + '<div style="font-size:12px;color:var(--ink-2);">' + s.note + '</div>'
+      + '</div></div>';
+  }).join('');
 }
 
 
@@ -4487,13 +4573,137 @@ function initSizesPage() {
 
 
 
+
+// ═══════════════════════════════════════════
+// ALBUM DE VOYAGE — Génération HTML
+// ═══════════════════════════════════════════
+
+function buildAlbumHTML(forExport) {
+  // Collect entries
+  var days = AGENDA_DAYS.map(function(day, idx) {
+    var entry  = getJournalEntry(day.date);
+    var custom = getCustomTitle(day.date);
+    var city   = custom ? custom.city  : day.city;
+    var title  = custom ? custom.title : day.title;
+    var photos = entry && entry.photos ? entry.photos.filter(function(p){ return p.thumb; }) : [];
+    var text   = entry && entry.generated ? entry.generated : '';
+    return { day: day, city: city, title: title, photos: photos, text: text, num: idx + 1 };
+  }).filter(function(d){ return d.text || d.photos.length; }); // Garder seulement les jours avec contenu
+
+  // CSS inline pour l'export autonome
+  var css = forExport ? [
+    'body{margin:0;padding:24px;background:#F5F0EB;font-family:-apple-system,sans-serif;}',
+    '.album-page{background:#fff;border-radius:4px;box-shadow:0 2px 12px rgba(0,0,0,.1);margin:0 auto 32px;max-width:680px;overflow:hidden;}',
+    '.album-cover{background:#1A1A2E;color:#fff;padding:64px 40px;text-align:center;}',
+    '.album-cover-kanji{font-size:80px;font-weight:900;color:rgba(255,255,255,.12);display:block;}',
+    '.album-cover-title{font-size:32px;font-weight:800;margin:12px 0 6px;}',
+    '.album-cover-sub{font-size:16px;opacity:.5;}',
+    '.album-cover-dates{font-size:13px;opacity:.35;margin-top:20px;}',
+    '.album-day-header{padding:24px 32px 14px;border-bottom:3px solid #1A1A2E;display:flex;align-items:baseline;gap:14px;}',
+    '.album-day-num{font-size:42px;font-weight:900;color:#1A1A2E;line-height:1;}',
+    '.album-day-date{font-size:12px;color:#999;font-weight:600;text-transform:uppercase;letter-spacing:.5px;}',
+    '.album-day-city{font-size:20px;font-weight:700;color:#1A1A2E;}',
+    '.album-day-title{font-size:13px;color:#aaa;font-style:italic;}',
+    '.album-photos{display:grid;gap:4px;padding:20px 32px 0;}',
+    '.one{grid-template-columns:1fr;}',
+    '.two{grid-template-columns:1fr 1fr;}',
+    '.three{grid-template-columns:2fr 1fr;}',
+    '.album-photo{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px;display:block;}',
+    '.album-text{padding:22px 32px 32px;font-size:15px;line-height:2;color:#333;font-family:Georgia,serif;white-space:pre-wrap;}',
+    '@media print{body{background:#fff;padding:0;}.album-page{box-shadow:none;margin:0;border-radius:0;page-break-after:always;}}',
+  ].join('') : '';
+
+  var html = '';
+
+  // Couverture
+  html += '<div class="album-page">'
+    + '<div class="album-cover">'
+    + '<span class="album-cover-kanji">日本</span>'
+    + '<div class="album-cover-title">Journal de voyage</div>'
+    + '<div class="album-cover-sub">Inoue · Japon 2026</div>'
+    + '<div class="album-cover-dates">10 juillet — 28 juillet 2026</div>'
+    + '</div>'
+    + '</div>';
+
+  if (days.length === 0) {
+    html += '<div style="text-align:center;padding:40px;color:#aaa;font-style:italic;">Aucune entrée de journal pour le moment.</div>';
+    return { html: html, css: css, count: 0 };
+  }
+
+  // Pages par jour
+  days.forEach(function(d) {
+    var photosHtml = '';
+    if (d.photos.length > 0) {
+      var gridClass = d.photos.length === 1 ? 'one' : d.photos.length === 2 ? 'two' : 'three';
+      photosHtml = '<div class="album-photos ' + gridClass + '">'
+        + d.photos.slice(0, 3).map(function(p) {
+            return '<img class="album-photo" src="' + p.thumb + '" alt="">';
+          }).join('')
+        + '</div>';
+    }
+
+    html += '<div class="album-page">'
+      + '<div class="album-day-header">'
+      + '<div class="album-day-num">J' + d.num + '</div>'
+      + '<div>'
+      + '<div class="album-day-date">' + d.day.label + '</div>'
+      + '<div class="album-day-city">' + d.city + '</div>'
+      + '<div class="album-day-title">' + d.title + '</div>'
+      + '</div>'
+      + '</div>'
+      + photosHtml
+      + (d.text ? '<div class="album-text">' + d.text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>' : '')
+      + '</div>';
+  });
+
+  return { html: html, css: css, count: days.length };
+}
+
+function previewAlbum() {
+  var result = buildAlbumHTML(false);
+  var area = document.getElementById('album-preview-area');
+  if (area) area.innerHTML = result.html;
+  showPage('album');
+  if (result.count === 0) showToast('Aucune entrée de journal — écris quelques jours dabord !');
+}
+
+function exportAlbumHTML() {
+  var result = buildAlbumHTML(true);
+  if (result.count === 0) {
+    showToast('Aucune entrée de journal à exporter');
+    return;
+  }
+
+  var fullHTML = '<!DOCTYPE html><html lang="fr"><head>'
+    + '<meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    + '<title>Journal de voyage · Inoue · Japon 2026</title>'
+    + '<style>' + result.css + '</style>'
+    + '</head><body>'
+    + result.html
+    + '<div style="text-align:center;padding:32px;font-size:12px;color:#ccc;">'
+    + 'Album généré par Nihon · ' + new Date().toLocaleDateString('fr-FR') + '</div>'
+    + '</body></html>';
+
+  var blob = new Blob([fullHTML], { type: 'text/html;charset=utf-8' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'album-japon-inoue-2026.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('📖 Album exporté — ' + result.count + ' jours · ouvre dans Chrome pour imprimer en PDF');
+}
+
 // ═══════════════════════════════════════════
 // SYNC HELPERS — timestamp wrapper
 // ═══════════════════════════════════════════
 function syncSet(key, value) {
   var wrapped = JSON.stringify({ v: value, ts: Date.now() });
   localStorage.setItem(key, wrapped);
-  try { scheduleCloudPush(); } catch(e) {}
 }
 
 function syncGet(key) {
@@ -4526,7 +4736,6 @@ function openSyncPanel() {
   if (panel) {
     panel.classList.add('open');
     computeSyncStats();
-    updateGithubStatusUI();
   }
 }
 
@@ -4586,9 +4795,7 @@ function computeSyncStats() {
   }
 }
 
-// Construit l'objet export standard (structure nihon_export) depuis localStorage.
-// Réutilisé par exportData() (fichier) et la sync cloud.
-function buildExportPayload() {
+function exportData() {
   var keys = getSyncKeys();
   var data = {
     nihon_export: true,
@@ -4597,250 +4804,15 @@ function buildExportPayload() {
     exported_by: localStorage.getItem('nihon_profile') || 'patrick',
     payload: {}
   };
+
   keys.forEach(function(k) {
     var raw = localStorage.getItem(k);
     if (!raw) return;
-    data.payload[k] = JSON.stringify(syncGet(k));
-  });
-  return data;
-}
-
-// Applique un payload distant (structure nihon_export) en local, en fusionnant
-// par timestamp (ts le plus récent gagne ; docs_* sont fusionnés par union des noms).
-// Factorisé pour être utilisé à la fois par l'import fichier et la sync cloud.
-function applyMergePayload(data, silent) {
-  if (!data || !data.nihon_export || !data.payload) {
-    if (!silent) showToast('⚠️ Données invalides — pas un export Nihon');
-    return 0;
-  }
-  var keys = Object.keys(data.payload);
-  var merged = 0;
-
-  keys.forEach(function(k) {
-    var incoming;
-    try { incoming = JSON.parse(data.payload[k]); } catch(x) { return; }
-    var local = syncGet(k);
-    var inTs = (incoming && typeof incoming.ts === 'number') ? incoming.ts : 0;
-
-    // Cas spécial docs : fusion (union des documents par nom, pas de perte)
-    if (k.startsWith('docs_')) {
-      var localDocs = local.v || [];
-      if (!Array.isArray(localDocs)) {
-        try { localDocs = JSON.parse(localDocs); } catch(x) { localDocs = []; }
-      }
-      var inDocs = incoming.v || incoming;
-      if (!Array.isArray(inDocs)) {
-        try { inDocs = JSON.parse(inDocs); } catch(x) { inDocs = []; }
-      }
-      var localNames = localDocs.map(function(d){ return d.name; });
-      inDocs.forEach(function(d) {
-        if (localNames.indexOf(d.name) === -1) {
-          localDocs.push(d);
-          merged++;
-        }
-      });
-      syncSet(k, localDocs);
-      return;
-    }
-
-    // Autres clés : timestamp le plus récent gagne
-    if (local.v === null || inTs > local.ts) {
-      localStorage.setItem(k, data.payload[k]);
-      merged++;
-    }
+    // Stocker le wrapper complet {v, ts}
+    var wrapped = syncGet(k);
+    data.payload[k] = JSON.stringify(wrapped);
   });
 
-  if (merged > 0) {
-    try { buildAgenda(); } catch(ex) {}
-    try { buildJournal(); } catch(ex) {}
-  }
-  return merged;
-}
-
-// ═══════════════════════════════════════════
-// SYNC CLOUD — GitHub (repo privé acieedgames/nihon-sync-data)
-// ═══════════════════════════════════════════
-var GITHUB_OWNER = 'acieedgames';
-var GITHUB_REPO  = 'nihon-sync-data';
-var GITHUB_FILE  = 'sync.json';
-var githubSyncing = false;
-var githubPushTimer = null;
-
-function getGithubPat() { return localStorage.getItem('github_pat') || ''; }
-
-function setGithubPat() {
-  var key = prompt('Token GitHub (fine-grained, commence par github_pat_) :');
-  if (key && key.indexOf('github_pat_') === 0) {
-    localStorage.setItem('github_pat', key);
-    showToast('✅ Token GitHub enregistré');
-    updateGithubStatusUI();
-    syncCloudNow(true);
-  } else if (key) {
-    showToast('⚠️ Token invalide — doit commencer par github_pat_');
-  }
-}
-
-function updateGithubStatusUI() {
-  var configured = !!getGithubPat();
-  var settingsEl = document.getElementById('github-pat-status');
-  if (settingsEl) settingsEl.textContent = configured ? '✅ Configurée' : 'Non configurée';
-  var panelEl = document.getElementById('sync-cloud-status');
-  if (panelEl && !githubSyncing) {
-    panelEl.textContent = configured ? '☁️ Sync cloud : prêt' : '☁️ Sync cloud : token requis';
-  }
-  var btn = document.getElementById('sync-cloud-btn');
-  if (btn) btn.disabled = !configured;
-}
-
-// Encodage/décodage UTF-8 sûr (accents FR, japonais) pour l'API GitHub,
-// qui attend/renvoie du contenu en base64.
-function utf8ToBase64(str) {
-  var bytes = new TextEncoder().encode(str);
-  var bin = '';
-  for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-function base64ToUtf8(b64) {
-  var bin = atob(b64.replace(/\n/g, ''));
-  var bytes = new Uint8Array(bin.length);
-  for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new TextDecoder().decode(bytes);
-}
-
-function githubApiUrl() {
-  return 'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/contents/' + GITHUB_FILE;
-}
-
-// Point d'entrée : pull → merge → push. silent=true = pas de toast (auto-sync).
-function syncCloudNow(silent) {
-  var pat = getGithubPat();
-  if (!pat) {
-    if (!silent) showToast('⚠️ Configure d\'abord ton token GitHub');
-    return;
-  }
-  if (githubSyncing) return;
-  githubSyncing = true;
-
-  var btn = document.getElementById('sync-cloud-btn');
-  var statusEl = document.getElementById('sync-cloud-status');
-  if (btn) btn.disabled = true;
-  if (statusEl) statusEl.textContent = '☁️ Synchronisation en cours…';
-
-  githubPullAndMerge(pat, 0, silent);
-}
-
-function githubSyncDone(ok, silent, message) {
-  githubSyncing = false;
-  var btn = document.getElementById('sync-cloud-btn');
-  var statusEl = document.getElementById('sync-cloud-status');
-  if (btn) btn.disabled = !getGithubPat();
-  if (statusEl) statusEl.textContent = message;
-  if (!ok && !silent) showToast('⚠️ ' + message);
-}
-
-function githubPullAndMerge(pat, attempt, silent) {
-  fetch(githubApiUrl(), {
-    headers: {
-      'Authorization': 'Bearer ' + pat,
-      'Accept': 'application/vnd.github+json'
-    }
-  }).then(function(res) {
-    if (res.status === 404) {
-      // Premier sync : le fichier n'existe pas encore côté GitHub → on le crée
-      return githubPush(pat, buildExportPayload(), null, silent, 0, attempt);
-    }
-    if (res.status === 401 || res.status === 403) {
-      throw new Error('Token invalide ou permissions insuffisantes');
-    }
-    if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
-
-    return res.json().then(function(json) {
-      // L'API Contents ne renvoie le contenu embarqué que pour les fichiers
-      // < 1 Mo. Au-delà elle le tronque (content vide/absent) : il faut alors
-      // passer par l'API Git Blobs, qui supporte jusqu'à 100 Mo.
-      var contentPromise;
-      if (json.content && !json.truncated) {
-        contentPromise = Promise.resolve(json.content);
-      } else {
-        contentPromise = fetch(
-          'https://api.github.com/repos/' + GITHUB_OWNER + '/' + GITHUB_REPO + '/git/blobs/' + json.sha,
-          { headers: { 'Authorization': 'Bearer ' + pat, 'Accept': 'application/vnd.github+json' } }
-        ).then(function(blobRes) {
-          if (!blobRes.ok) throw new Error('Erreur blob (' + blobRes.status + ')');
-          return blobRes.json().then(function(blob) { return blob.content; });
-        });
-      }
-
-      return contentPromise.then(function(b64content) {
-        var remoteData;
-        try { remoteData = JSON.parse(base64ToUtf8(b64content)); }
-        catch(e) { throw new Error('Fichier distant illisible'); }
-
-        var merged = applyMergePayload(remoteData, true);
-        var localPayload = buildExportPayload();
-        return githubPush(pat, localPayload, json.sha, silent, merged, attempt);
-      });
-    });
-  }).catch(function(err) {
-    githubSyncDone(false, silent, 'Sync échouée : ' + err.message);
-  });
-}
-
-function githubPush(pat, dataObj, sha, silent, mergedCount, attempt) {
-  var content = utf8ToBase64(JSON.stringify(dataObj));
-  var body = {
-    message: 'Sync depuis ' + (dataObj.exported_by || 'app') + ' — ' + new Date().toISOString(),
-    content: content
-  };
-  if (sha) body.sha = sha;
-
-  return fetch(githubApiUrl(), {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'Bearer ' + pat,
-      'Accept': 'application/vnd.github+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
-  }).then(function(res) {
-    if (res.status === 409 && (attempt || 0) < 3) {
-      // Conflit : push concurrent entre-temps → re-pull, re-merge, retente
-      return githubPullAndMerge(pat, (attempt || 0) + 1, silent);
-    }
-    if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
-
-    var now = new Date();
-    var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    githubSyncDone(true, silent, '☁️ Synchronisé à ' + timeStr);
-    computeSyncStats();
-    if (!silent) {
-      showToast(mergedCount > 0
-        ? '✅ Sync OK — ' + mergedCount + ' modification(s) reçue(s)'
-        : '✅ Sync OK — déjà à jour');
-    }
-  }).catch(function(err) {
-    githubSyncDone(false, silent, 'Sync échouée : ' + err.message);
-  });
-}
-
-// Push différé après une édition locale (debounce 5s), silencieux
-function scheduleCloudPush() {
-  if (!getGithubPat()) return;
-  if (githubPushTimer) clearTimeout(githubPushTimer);
-  githubPushTimer = setTimeout(function() {
-    syncCloudNow(true);
-  }, 5000);
-}
-
-// Sync auto au retour au premier plan de l'app (changement d'onglet/appli)
-document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && getGithubPat()) {
-    syncCloudNow(true);
-  }
-});
-
-function exportData() {
-  var data = buildExportPayload();
   var json = JSON.stringify(data);
   var blob = new Blob([json], { type: 'application/json' });
   var url  = URL.createObjectURL(blob);
@@ -4911,9 +4883,45 @@ function importData(e) {
         + 'Continuer ?';
       if (!confirm(msg)) return;
 
-      // Merge par timestamp (logique factorisée, partagée avec la sync cloud)
-      var merged = applyMergePayload(data, true);
+      // Merge par timestamp
+      var merged = 0;
+      keys.forEach(function(k) {
+        var incoming;
+        try { incoming = JSON.parse(data.payload[k]); } catch(x) { return; }
+        var local = syncGet(k);
+        var inTs = (incoming && typeof incoming.ts === 'number') ? incoming.ts : 0;
 
+        // Cas spécial docs : fusion (union des documents)
+        if (k.startsWith('docs_')) {
+          var localDocs = local.v || [];
+          if (!Array.isArray(localDocs)) {
+            try { localDocs = JSON.parse(localDocs); } catch(x) { localDocs = []; }
+          }
+          var inDocs = incoming.v || incoming;
+          if (!Array.isArray(inDocs)) {
+            try { inDocs = JSON.parse(inDocs); } catch(x) { inDocs = []; }
+          }
+          // Ajouter les docs entrants qui ne sont pas déjà présents (par nom)
+          var localNames = localDocs.map(function(d){ return d.name; });
+          inDocs.forEach(function(d) {
+            if (localNames.indexOf(d.name) === -1) {
+              localDocs.push(d);
+              merged++;
+            }
+          });
+          syncSet(k, localDocs);
+          return;
+        }
+
+        // Autres clés : timestamp gagne
+        if (local.v === null || inTs > local.ts) {
+          localStorage.setItem(k, data.payload[k]);
+          merged++;
+        }
+      });
+
+      try { buildAgenda(); } catch(ex) {}
+      try { buildJournal(); } catch(ex) {}
       closeSyncPanel();
       showToast('✅ Merge terminé — ' + merged + ' modification(s) appliquée(s)');
 
@@ -5647,6 +5655,7 @@ if (_savedProfile) {
 try { fetchRate(); } catch(e) {}
 try { buildPhrases(); } catch(e) {}
 try { updateTimes(); } catch(e) {}
+try { buildTimeline(); } catch(e) {}
 try { buildAgenda(); } catch(e) { console.error('agenda', e); }
 try { buildPlacesFilters(); } catch(e) {}
 setTimeout(function() { try { loadFranceMatches(); } catch(e) {} }, 1200);
