@@ -4799,11 +4799,21 @@ function githubPush(pat, dataObj, sha, silent, mergedCount, attempt) {
     },
     body: JSON.stringify(body)
   }).then(function(res) {
-    if (res.status === 409 && (attempt || 0) < 3) {
-      // Conflit : push concurrent entre-temps → re-pull, re-merge, retente
-      return githubPullAndMerge(pat, (attempt || 0) + 1, silent);
+    if (res.status === 409 && (attempt || 0) < 5) {
+      // Conflit : sha périmé (push concurrent, ou cache API en léger retard).
+      // On patiente un peu (délai croissant) avant de re-lire et re-tenter.
+      var delay = 400 * ((attempt || 0) + 1);
+      return new Promise(function(resolve) {
+        setTimeout(function() {
+          resolve(githubPullAndMerge(pat, (attempt || 0) + 1, silent));
+        }, delay);
+      });
     }
-    if (!res.ok) throw new Error('Erreur réseau (' + res.status + ')');
+    if (!res.ok) {
+      throw new Error(res.status === 409
+        ? 'Conflit persistant — retape sur Synchroniser'
+        : 'Erreur réseau (' + res.status + ')');
+    }
 
     var now = new Date();
     var timeStr = now.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
