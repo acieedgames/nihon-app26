@@ -4629,13 +4629,19 @@ function applyMergePayload(data, silent) {
         try { inDocs = JSON.parse(inDocs); } catch(x) { inDocs = []; }
       }
       var localNames = localDocs.map(function(d){ return d.name; });
+      var addedHere = 0;
       inDocs.forEach(function(d) {
         if (localNames.indexOf(d.name) === -1) {
           localDocs.push(d);
-          merged++;
+          addedHere++;
         }
       });
-      syncSet(k, localDocs);
+      // On ne réécrit (et donc on ne redéclenche pas scheduleCloudPush)
+      // que si un document a réellement été ajouté — sinon boucle infinie.
+      if (addedHere > 0) {
+        syncSet(k, localDocs);
+        merged += addedHere;
+      }
       return;
     }
 
