@@ -828,6 +828,73 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
 }
 .album-empty-day { opacity:0.4; }
 
+
+/* ── NOTES ── */
+.notes-toolbar {
+  display:flex; gap:8px; padding:12px 16px 0; align-items:center;
+}
+.notes-add-btn {
+  flex:1; padding:11px; background:var(--red); color:#fff;
+  border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer;
+}
+.notes-count { font-size:11px; color:var(--ink-3); flex-shrink:0; }
+.note-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); margin:10px 16px 0; overflow:hidden;
+}
+.note-card-hdr {
+  display:flex; align-items:center; gap:10px; padding:12px 14px;
+  cursor:pointer; user-select:none;
+}
+.note-card-hdr:active { background:var(--red-pale); }
+.note-card-title { flex:1; font-size:14px; font-weight:700; color:var(--ink); }
+.note-card-date  { font-size:10px; color:var(--ink-3); flex-shrink:0; }
+.note-card-chev  { color:var(--ink-3); font-size:14px; transition:transform 0.2s; }
+.note-card.open .note-card-chev { transform:rotate(90deg); }
+.note-card-body  { display:none; border-top:1px solid var(--border); padding:14px; }
+.note-card.open .note-card-body { display:block; }
+.note-content {
+  font-size:13px; color:var(--ink-2); line-height:1.8;
+  white-space:pre-wrap; word-break:break-word;
+}
+.note-content a { color:var(--red); text-decoration:none; }
+.note-content a:active { opacity:0.7; }
+.note-actions { display:flex; gap:8px; margin-top:12px; }
+.note-action-btn {
+  padding:7px 14px; border-radius:8px; border:none;
+  font-size:12px; font-weight:600; cursor:pointer;
+}
+.note-btn-edit   { background:var(--bg); color:var(--ink-2); border:1px solid var(--border); }
+.note-btn-delete { background:#FFF0F0; color:#C8102E; border:1px solid rgba(200,16,46,0.2); }
+.note-edit-area  { display:none; margin-top:10px; }
+.note-card.editing .note-edit-area  { display:block; }
+.note-card.editing .note-content    { display:none; }
+.note-card.editing .note-actions    { display:none; }
+.note-title-input {
+  width:100%; border:1px solid var(--border); border-radius:8px;
+  padding:8px 12px; font-size:14px; font-weight:700; color:var(--ink);
+  background:var(--bg); margin-bottom:8px; box-sizing:border-box;
+}
+.note-text-input {
+  width:100%; border:1px solid var(--border); border-radius:8px;
+  padding:10px 12px; font-size:13px; color:var(--ink);
+  background:var(--bg); resize:none; min-height:100px;
+  font-family:inherit; box-sizing:border-box; line-height:1.7;
+}
+.note-save-btn {
+  width:100%; margin-top:8px; background:var(--red); color:#fff;
+  border:none; border-radius:8px; padding:10px; font-size:13px;
+  font-weight:700; cursor:pointer;
+}
+.note-cancel-btn {
+  width:100%; margin-top:6px; background:none; border:1px solid var(--border);
+  border-radius:8px; padding:8px; font-size:12px; color:var(--ink-3); cursor:pointer;
+}
+.notes-empty {
+  text-align:center; padding:48px 24px;
+  font-size:14px; color:var(--ink-3); line-height:1.8;
+}
+
 /* ── SYNC EXPORT/IMPORT ── */
 .sync-panel {
   position:fixed; inset:0; z-index:200;
@@ -1105,7 +1172,8 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="hbtn" onclick="go('vocal')"><span class="hi">🗣️</span><div><span class="hl">Traducteur vocal</span><span class="hs">FR → JP · Parler · Répéter</span></div></button>
     <button class="hbtn hbtn-ai" onclick="go('ai')"><span class="hi">🤖</span><div><span class="hl">Assistant IA</span><span class="hs">Groq · Questions voyage</span></div></button>
     <button class="hbtn" onclick="go('photo')"><span class="hi">📷</span><div><span class="hl">Traducteur photo</span><span class="hs">Menu · Kanji · Emballage</span></div></button>
-    <button class="hbtn hbtn-wide" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
+    <button class="hbtn" onclick="go('notes')"><span class="hi">📝</span><div><span class="hl">Notes</span><span class="hs">Liens · Infos · Adresses</span></div></button>
+    <button class="hbtn" onclick="go('utils')"><span class="hi">🗾</span><div><span class="hl">Pratique Japon</span><span class="hs">Phrases · Urgences · Konbini</span></div></button>
   </div>
   <!-- Widget Coupe du Monde -->
   <div class="foot-widget" id="foot-widget" style="margin:12px 0 0;">
@@ -1476,7 +1544,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <div class="setting-row">
       <span class="icon">ℹ️</span>
       <div class="label">
-        <strong>Nihon v3.4</strong>
+        <strong>Nihon v3.5</strong>
         <span>PWA · Agent IA Groq · Géolocalisation</span>
       </div>
     </div>
@@ -1845,6 +1913,17 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
   <div class="album-preview-area" id="album-preview-area"></div>
 </div>
 
+
+<!-- PAGE NOTES -->
+<div class="page" id="page-notes">
+  <div class="notes-toolbar">
+    <button class="notes-add-btn" onclick="addNote()">＋ Nouvelle note</button>
+    <span class="notes-count" id="notes-count"></span>
+  </div>
+  <div id="notes-container"></div>
+  <div style="height:20px;"></div>
+</div>
+
 <!-- PAGE TRADUCTEUR VOCAL -->
 <div class="page" id="page-vocal">
   <div class="vocal-area">
@@ -2025,6 +2104,7 @@ body.inoue-mode .h-kanji { color: var(--inoue-primary); }
     <button class="mb " onclick="showPageFromMore('vocal')"><span>🗣️</span><span>Vocal FR→JP</span></button>
     <button class="mb " onclick="showPageFromMore('photo')"><span>📷</span><span>Photo</span></button>
     <button class="mb " onclick="showPageFromMore('apps')"><span>📲</span><span>Apps</span></button>
+    <button class="mb " onclick="showPageFromMore('notes')"><span>📝</span><span>Notes</span></button>
     <button class="mb " onclick="showPageFromMore('utils')"><span>🗾</span><span>Pratique</span></button>
     <button class="mb " onclick="showPageFromMore('medical')"><span>🏥</span><span>Urgences</span></button>
     <button class="mb " onclick="showPageFromMore('sizes')"><span>📐</span><span>Tailles JP</span></button>
@@ -2084,7 +2164,7 @@ const TITLES = {
   apps:'📲 Apps & Scanner', meteo:'🌡️ Météo & Chaleur',
   nav:'🗺️ Navigation', hotels:'🏨 Hébergements',
   agenda:'📅 Agenda', utils:'🗾 Pratique Japon',
-  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal', medical:'🏥 Urgences médicales', sizes:'📐 Convertisseur tailles', album:'📖 Album de voyage'
+  settings:'⚙️ Réglages', ai:'🤖 Assistant IA', places:'📍 Restos & Shopping', photo:'📷 Traducteur photo', journal:'📖 Mon journal', 'inoue-shop':'🛍️ Mon shopping', vocal:'🗣️ Traducteur vocal', medical:'🏥 Urgences médicales', sizes:'📐 Convertisseur tailles', album:'📖 Album de voyage', notes:'📝 Notes'
 };
 
 function setThemeColor(color) {
@@ -2150,6 +2230,7 @@ function showPage(id) {
   if (id === 'settings') try { loadPrefsUI(); } catch(e) {}
   if (id === 'sizes')    try { initSizesPage(); } catch(e) {}
   if (id === 'medical')  try { buildMedPhrases(); } catch(e) {}
+  if (id === 'notes')    try { buildNotes(); } catch(e) {}
   if (id === 'meteo') { var c = document.getElementById('meteo-cities'); if (c && !c.querySelector('[style*="border-bottom"]')) fetchMeteo(); }
 }
 function showPageFromMore(id) { closeMore(); showPage(id); }
@@ -4575,6 +4656,130 @@ function initSizesPage() {
 
 
 
+
+// ═══════════════════════════════════════════
+// NOTES
+// ═══════════════════════════════════════════
+function getNotes() {
+  try { return JSON.parse(localStorage.getItem('nihon_notes') || '[]'); }
+  catch(e) { return []; }
+}
+function saveNotes(notes) {
+  localStorage.setItem('nihon_notes', JSON.stringify(notes));
+}
+
+function renderNoteContent(text) {
+  // Détection automatique liens, tél, adresses
+  var escaped = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // URLs
+  escaped = escaped.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank">$1</a>');
+  // Téléphone japonais/français
+  escaped = escaped.replace(/([\+]?[\d][\d\s\-\.]{8,15}[\d])/g, '<a href="tel:$1">$1</a>');
+  return escaped;
+}
+
+function buildNotes() {
+  var container = document.getElementById('notes-container');
+  var countEl   = document.getElementById('notes-count');
+  if (!container) return;
+  var notes = getNotes();
+  if (countEl) countEl.textContent = notes.length + ' note' + (notes.length > 1 ? 's' : '');
+
+  if (notes.length === 0) {
+    container.innerHTML = '<div class="notes-empty">📝 Aucune note<br><small>Colle ici des liens, adresses,<br>infos utiles pour le voyage</small></div>';
+    return;
+  }
+
+  container.innerHTML = '';
+  notes.forEach(function(note, i) {
+    var card = document.createElement('div');
+    card.className = 'note-card';
+    card.id = 'note-' + i;
+
+    var date = note.ts ? new Date(note.ts).toLocaleDateString('fr-FR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+
+    card.innerHTML =
+      '<div class="note-card-hdr" onclick="toggleNote(' + i + ')">'
+      + '<span class="note-card-title">' + (note.title || 'Note sans titre').replace(/</g,'&lt;') + '</span>'
+      + '<span class="note-card-date">' + date + '</span>'
+      + '<span class="note-card-chev">›</span>'
+      + '</div>'
+      + '<div class="note-card-body">'
+      + '<div class="note-content">' + renderNoteContent(note.text || '') + '</div>'
+      + '<div class="note-actions">'
+      + '<button class="note-action-btn note-btn-edit" onclick="editNote(' + i + ')">✏️ Modifier</button>'
+      + '<button class="note-action-btn note-btn-delete" onclick="deleteNote(' + i + ')">🗑️ Supprimer</button>'
+      + '</div>'
+      + '<div class="note-edit-area">'
+      + '<input class="note-title-input" id="ntitle-' + i + '" value="' + (note.title||'').replace(/"/g,'&quot;') + '" placeholder="Titre de la note">'
+      + '<textarea class="note-text-input" id="ntext-' + i + '" placeholder="Colle ton texte, lien, adresse…">' + (note.text||'').replace(/</g,'&lt;') + '</textarea>'
+      + '<button class="note-save-btn" onclick="saveNote(' + i + ')">💾 Enregistrer</button>'
+      + '<button class="note-cancel-btn" onclick="cancelNoteEdit(' + i + ')">Annuler</button>'
+      + '</div>'
+      + '</div>';
+
+    container.appendChild(card);
+  });
+}
+
+function toggleNote(i) {
+  var card = document.getElementById('note-' + i);
+  if (card) card.classList.toggle('open');
+}
+
+function addNote() {
+  var notes = getNotes();
+  notes.unshift({ title: '', text: '', ts: Date.now() });
+  saveNotes(notes);
+  buildNotes();
+  // Ouvrir et éditer directement la première note
+  setTimeout(function() {
+    var card = document.getElementById('note-0');
+    if (card) {
+      card.classList.add('open', 'editing');
+      var inp = document.getElementById('ntitle-0');
+      if (inp) inp.focus();
+    }
+  }, 50);
+}
+
+function editNote(i) {
+  var card = document.getElementById('note-' + i);
+  if (card) { card.classList.add('editing', 'open'); }
+  var ta = document.getElementById('ntext-' + i);
+  if (ta) ta.focus();
+}
+
+function saveNote(i) {
+  var notes = getNotes();
+  var title = document.getElementById('ntitle-' + i);
+  var text  = document.getElementById('ntext-' + i);
+  if (!notes[i]) return;
+  notes[i].title = title ? title.value.trim() : '';
+  notes[i].text  = text  ? text.value  : '';
+  notes[i].ts    = Date.now();
+  if (!notes[i].title && !notes[i].text) {
+    notes.splice(i, 1); // supprimer si vide
+  }
+  saveNotes(notes);
+  buildNotes();
+  showToast('✓ Note enregistrée');
+}
+
+function cancelNoteEdit(i) {
+  var card = document.getElementById('note-' + i);
+  if (card) card.classList.remove('editing');
+}
+
+function deleteNote(i) {
+  if (!confirm('Supprimer cette note ?')) return;
+  var notes = getNotes();
+  notes.splice(i, 1);
+  saveNotes(notes);
+  buildNotes();
+  showToast('🗑️ Note supprimée');
+}
+
 // ═══════════════════════════════════════════
 // ALBUM DE VOYAGE — Génération HTML
 // ═══════════════════════════════════════════
@@ -4757,7 +4962,8 @@ function getSyncKeys() {
       k.startsWith('agenda_')  ||
       k.startsWith('docs_')    ||
       k.startsWith('title_')   ||
-      k.startsWith('inoue_journal_')
+      k.startsWith('inoue_journal_') ||
+      k === 'nihon_notes'
     ) {
       keys.push(k);
     }
