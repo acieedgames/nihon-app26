@@ -2633,18 +2633,18 @@ function buildAiContext() {
     'Takayama (23-24 juil.) : Ryokan Wanosato, Ichinomiyamachi 1682, tél 0577-53-2321',
   ].join('\n');
 
-  return 'Tu es un assistant de voyage personnel pour Patrick Bloch et sa fille Inoue (17 ans).'
-    + ' Ils voyagent au Japon du 10 au 28 juillet 2026.'
-    + ' Aujourd\'hui nous sommes le ' + todayStr + '.'
-    + (currentDay ? ' Ils sont actuellement à ' + currentCity + '.' : '')
-    + '\n\nITINÉRAIRE COMPLET :\n' + agendaSummary
-    + '\n\nHÉBERGEMENTS :\n' + hotels
-    + '\n\nDEVISE : 1 EUR ≈ ' + (rateEURJPY ? rateEURJPY.toFixed(0) : '163') + ' JPY.'
+  return 'Tu es un assistant de voyage pour Patrick et Inoue, au Japon. Aujourdhui : ' + todayStr + (currentDay ? ', à ' + currentCity + '.' : '.')
+    + ' Devise : 1€ = ' + (rateEURJPY ? rateEURJPY.toFixed(0) : '163') + '¥.'
     + buildAiContextGeo()
-    + '\n\nRéponds en français, de façon concise et pratique. Tu connais bien le Japon.'
-    + ' Donne des conseils terrain concrets : accès, horaires, prix, conseils culturels.'
-    + ' Pour les adresses japonaises, inclus toujours la version en japonais si pertinent.'
-    + ' Quand l\'utilisateur parle de restaurant ou shopping, utilise sa position et ses préférences.';
+    + '\n\nContexte voyage (usage interne uniquement — ne pas répéter dans les réponses) :\n'
+    + 'Hébergements : ' + hotels
+    + '\n\nRÈGLES DE RÉPONSE STRICTES :'
+    + '\n- Réponds TOUJOURS en français'
+    + '\n- Réponses COURTES et DIRECTES — 3-5 lignes maximum sauf si on te demande un détail'
+    + '\n- NE JAMAIS répéter le contexte ou l itinéraire dans ta réponse'
+    + '\n- NE JAMAIS commencer par "Bien sûr" "Absolument" "Voici" ou reformuler la question'
+    + '\n- Vas droit au but : conseils concrets, prix, horaires, adresses japonaises si utile'
+    + '\n- Si tu donnes une adresse, inclus la version japonaise';
 }
 
 function buildSuggestions() {
@@ -2697,12 +2697,38 @@ function initAiPage() {
 
 function appendAiMessage(role, text) {
   var msgs = document.getElementById('ai-messages');
+  var wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;align-items:' + (role === 'user' ? 'flex-end' : 'flex-start') + ';gap:4px;';
+
   var div = document.createElement('div');
   div.className = 'ai-msg ' + role;
   div.textContent = text;
-  msgs.appendChild(div);
+  wrap.appendChild(div);
+
+  // Bouton "Sauver en note" uniquement sur les réponses assistant non-loading
+  if (role === 'assistant' && text && text.length > 10) {
+    var btn = document.createElement('button');
+    btn.textContent = '📝 Sauver en note';
+    btn.style.cssText = 'background:none;border:1px solid var(--border);border-radius:12px;padding:4px 10px;font-size:11px;color:var(--ink-3);cursor:pointer;align-self:flex-start;';
+    btn.onclick = (function(t){ return function() { saveAiResponseAsNote(t); }; })(text);
+    wrap.appendChild(btn);
+  }
+
+  msgs.appendChild(wrap);
   msgs.scrollTop = msgs.scrollHeight;
   return div;
+}
+
+function saveAiResponseAsNote(text) {
+  var notes = getNotes();
+  var today = new Date().toLocaleDateString('fr-FR', { day:'numeric', month:'short' });
+  notes.unshift({
+    title: 'Assistant · ' + today,
+    text: text,
+    ts: Date.now()
+  });
+  saveNotes(notes);
+  showToast('📝 Sauvé dans les notes !');
 }
 
 function showAiTyping() {
