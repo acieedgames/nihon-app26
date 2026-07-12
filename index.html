@@ -2760,7 +2760,7 @@ async function sendAiMessage() {
         'Authorization': 'Bearer ' + key,
       },
       body: JSON.stringify({
-        model: 'qwen/qwen3.6-27b',
+        model: 'llama-3.3-70b-versatile',
         messages: messages,
         max_tokens: 300,
         temperature: 0.5,
@@ -2773,6 +2773,8 @@ async function sendAiMessage() {
     }
     var data = await response.json();
     var reply = data.choices[0].message.content;
+    // Supprimer les balises <think>...</think> si présentes
+    reply = reply.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
     aiHistory.push({ role: 'assistant', content: reply });
     typingEl.remove();
     appendAiMessage('assistant', reply);
