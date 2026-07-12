@@ -2638,13 +2638,10 @@ function buildAiContext() {
     + buildAiContextGeo()
     + '\n\nContexte voyage (usage interne uniquement — ne pas répéter dans les réponses) :\n'
     + 'Hébergements : ' + hotels
-    + '\n\nRÈGLES DE RÉPONSE STRICTES :'
-    + '\n- Réponds TOUJOURS en français'
-    + '\n- Réponses COURTES et DIRECTES — 3-5 lignes maximum sauf si on te demande un détail'
-    + '\n- NE JAMAIS répéter le contexte ou l itinéraire dans ta réponse'
-    + '\n- NE JAMAIS commencer par "Bien sûr" "Absolument" "Voici" ou reformuler la question'
-    + '\n- Vas droit au but : conseils concrets, prix, horaires, adresses japonaises si utile'
-    + '\n- Si tu donnes une adresse, inclus la version japonaise';
+    + '\n\nRÈGLE ABSOLUE : réponds en 3 phrases MAXIMUM. Jamais plus. Pas de liste. Pas de titre. Pas de contexte. Direct.'
+    + '\nSi on te demande une adresse : donne-la en japonais + romaji. 1 phrase.'
+    + '\nSi on te demande quoi faire : 3 suggestions max, 1 ligne chacune.'
+    + '\nLangue : français uniquement.';
 }
 
 function buildSuggestions() {
@@ -2765,8 +2762,8 @@ async function sendAiMessage() {
       body: JSON.stringify({
         model: 'qwen/qwen3.6-27b',
         messages: messages,
-        max_tokens: 1024,
-        temperature: 0.7,
+        max_tokens: 300,
+        temperature: 0.5,
       })
     });
     if (!response.ok) {
