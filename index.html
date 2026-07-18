@@ -2760,7 +2760,7 @@ async function sendAiMessage() {
         'Authorization': 'Bearer ' + key,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: messages,
         max_tokens: 300,
         temperature: 0.5,
@@ -3943,7 +3943,7 @@ function addJournalPhotos(date, freeChoice) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
             body: JSON.stringify({
-              model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+              model: 'openai/gpt-oss-120b',
               messages: [{
                 role: 'user',
                 content: [
@@ -4411,7 +4411,7 @@ async function analyzePhoto() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        model: 'openai/gpt-oss-120b',
         messages: [{
           role: 'user',
           content: [
@@ -5406,7 +5406,7 @@ async function translateAndSpeak(text) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
+        model: 'openai/gpt-oss-20b',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt   }
