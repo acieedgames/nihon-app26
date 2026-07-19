@@ -5396,11 +5396,11 @@ async function translateAndSpeak(text) {
 
   var isFRJP = vocalMode === 'frjp';
   var systemPrompt = isFRJP
-    ? 'Traducteur FR->JP. Sortie: UNIQUEMENT un objet JSON valide sur une seule ligne, sans balises, sans explication, sans raisonnement. Format exact: {"jp":"texte japonais ici","roman":"romaji ici"}'
-    : 'Traducteur JP->FR. Sortie: UNIQUEMENT un objet JSON valide sur une seule ligne, sans balises, sans explication, sans raisonnement. Format exact: {"fr":"traduction francaise ici"}';
+    ? 'Tu traduis du francais vers le japonais poli. Reponds EXACTEMENT dans ce format, rien avant, rien apres:\nJP: <traduction japonaise>\nROMAJI: <romanisation>'
+    : 'Tu traduis du japonais vers le francais. Reponds EXACTEMENT dans ce format, rien avant, rien apres:\nFR: <traduction francaise>';
   var userPrompt = isFRJP
-    ? 'Traduis en japonais poli : ' + text
-    : 'Traduis en francais : ' + text;
+    ? 'Phrase a traduire en japonais: ' + text
+    : 'Phrase a traduire en francais: ' + text;
 
   try {
     var resp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -5421,16 +5421,23 @@ async function translateAndSpeak(text) {
     var data = await resp.json();
     var raw  = data.choices[0].message.content.trim();
 
-    // Retirer d'éventuelles balises de raisonnement
+    // Nettoyer d'éventuelles balises de raisonnement ou markdown
     raw = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-    raw = raw.replace(/```json|```/g, '').trim();
+    raw = raw.replace(/```[a-z]*|```/gi, '').trim();
 
-    // Extraire JSON robustement (le dernier bloc { } trouvé, au cas où il y a du texte parasite avant)
-    var jsonMatches = raw.match(/\{[^{}]*\}/g);
-    if (!jsonMatches || jsonMatches.length === 0) {
-      throw new Error('Réponse invalide — réessaie');
+    // Parsing par ligne préfixée — beaucoup plus robuste que JSON face aux modèles reasoning
+    var parsed = {};
+    if (isFRJP) {
+      var jpMatch = raw.match(/JP:\s*(.+)/i);
+      var romMatch = raw.match(/ROMAJI:\s*(.+)/i);
+      if (!jpMatch) throw new Error('Traduction introuvable — réessaie');
+      parsed.jp = jpMatch[1].trim();
+      parsed.roman = romMatch ? romMatch[1].trim() : '';
+    } else {
+      var frMatch = raw.match(/FR:\s*(.+)/i);
+      if (!frMatch) throw new Error('Traduction introuvable — réessaie');
+      parsed.fr = frMatch[1].trim();
     }
-    var parsed = JSON.parse(jsonMatches[jsonMatches.length - 1]);
 
     // Mise à jour UI selon le mode
     var box    = document.getElementById('vocal-result-box');
