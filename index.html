@@ -5396,8 +5396,8 @@ async function translateAndSpeak(text) {
 
   var isFRJP = vocalMode === 'frjp';
   var systemPrompt = isFRJP
-    ? 'Tu es un traducteur FR->JP. Reponds UNIQUEMENT avec JSON : {"jp":"texte japonais","roman":"romanisation hepburn"}. Rien dautre.'
-    : 'Tu es un traducteur JP->FR. Reponds UNIQUEMENT avec JSON : {"fr":"traduction francaise"}. Rien dautre.';
+    ? 'Traducteur FR->JP. Sortie: UNIQUEMENT un objet JSON valide sur une seule ligne, sans balises, sans explication, sans raisonnement. Format exact: {"jp":"texte japonais ici","roman":"romaji ici"}'
+    : 'Traducteur JP->FR. Sortie: UNIQUEMENT un objet JSON valide sur une seule ligne, sans balises, sans explication, sans raisonnement. Format exact: {"fr":"traduction francaise ici"}';
   var userPrompt = isFRJP
     ? 'Traduis en japonais poli : ' + text
     : 'Traduis en francais : ' + text;
@@ -5412,17 +5412,25 @@ async function translateAndSpeak(text) {
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userPrompt   }
         ],
-        max_tokens: 100, temperature: 0.1,
+        max_tokens: 200,
+        temperature: 0.1,
+        reasoning_effort: 'low',
       })
     });
 
     var data = await resp.json();
     var raw  = data.choices[0].message.content.trim();
 
-    // Extraire JSON robustement
-    var jsonMatch = raw.match(/\{[^{}]+\}/);
-    if (!jsonMatch) throw new Error('JSON invalide');
-    var parsed = JSON.parse(jsonMatch[0]);
+    // Retirer d'éventuelles balises de raisonnement
+    raw = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    raw = raw.replace(/```json|```/g, '').trim();
+
+    // Extraire JSON robustement (le dernier bloc { } trouvé, au cas où il y a du texte parasite avant)
+    var jsonMatches = raw.match(/\{[^{}]*\}/g);
+    if (!jsonMatches || jsonMatches.length === 0) {
+      throw new Error('Réponse invalide — réessaie');
+    }
+    var parsed = JSON.parse(jsonMatches[jsonMatches.length - 1]);
 
     // Mise à jour UI selon le mode
     var box    = document.getElementById('vocal-result-box');
